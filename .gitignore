@@ -1,0 +1,9 @@
+# HP firmware and everything built from it: never in git
+nonpareil/
+build/
+*.rom
+*.MClst
+*.obj
+
+__pycache__/
+*.pyc
