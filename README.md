@@ -142,6 +142,11 @@ this reason.
   its source (`proc_nut.c`, `digit_ops.c`, `voyager_lcd.c`), and the
   chip map, keyboard and LCD layout are read from its `.ncd` files.
 - J-F Garnier for the challenge.
+- Amphitryon (MoHPC forum), author of the NutEm/PC firmware
+  interpreter: he pointed us to the challenge, added a "16C+" model to
+  NutEm/PC so the patch can be checked on a second, independent
+  interpreter, and pointed to the words 0x13FD-0x13FF in the 16C ROM
+  (0x13FF is now the 16C+ checksum word in that chip).
 - Written with AI help (Claude, Anthropic).
 
 HP-16C and HP-15C are products of HP; their firmware is not part of
