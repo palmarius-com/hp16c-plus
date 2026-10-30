@@ -31,7 +31,8 @@ sealed class MainWindow : Window
 
     public MainWindow()
     {
-        Title = "Palmarius Voyager simulator (HP-10C, 11C, 12C, 15C, 16C, 16C+)";
+        Title = "Palmarius Voyager simulator (HP-10C, 11C, 12C, 15C, 16C, 16C+) Version " +
+                typeof(MainWindow).Assembly.GetName().Version?.ToString(3);
         Width = 1240;
         Height = 660;
         Background = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x18));
