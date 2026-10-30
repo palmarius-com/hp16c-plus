@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 
 namespace HpSim;
@@ -21,6 +22,11 @@ sealed class App : Application
     {
         Styles.Add(new FluentTheme());
         RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+        using var icon = typeof(App).Assembly.GetManifestResourceStream("App.ico")!;
+        Styles.Add(new Style(x => x.Is<Window>())
+        {
+            Setters = { new Setter(Window.IconProperty, new WindowIcon(icon)) }, // every window
+        });
     }
 
     public override void OnFrameworkInitializationCompleted()
