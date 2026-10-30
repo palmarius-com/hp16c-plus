@@ -35,6 +35,7 @@ sealed partial class MainWindow
                     var failures = new List<string>();
                     var sum = await RunTests("", await File.ReadAllLinesAsync(arg), CancellationToken.None,
                         r => { if (!r.Ok) lock (failures) failures.Add($"line {r.Line}: {r.Text} {r.Detail}"); });
+                    if (failures.Count > 0) await File.WriteAllLinesAsync(arg + ".failures", failures);
                     return "ok " + sum + (failures.Count > 0 ? " | " + string.Join(" | ", failures.Take(5)) : "");
                 case "chips":
                     if (_session is null) return "error no calculator running";
@@ -85,6 +86,11 @@ sealed partial class MainWindow
                     return "ok";
                 case "up":
                     _calc.ReleaseFromKeyboard();
+                    return "ok";
+                case "chord":
+                    if (_runner is null) return "error no calculator running";
+                    var pair = arg.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    await _calc.PlayChord(int.Parse(pair[0]), int.Parse(pair[1]));
                     return "ok";
                 case "poll":
                     if (_runner is null) return "error no calculator running";

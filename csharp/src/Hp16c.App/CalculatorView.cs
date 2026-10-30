@@ -144,16 +144,26 @@ sealed class CalculatorView : Control
     {
         var r = KeyRect(k);
         bool down = k.Code == _pressed;
-        var cap = k.Code switch { 42 => Gold, 43 => Blue, _ => down ? KeyPressed : KeyCap };
+        bool shift = k.Main is "f" or "g"; // by legend: 43 is P/R on the 10C
+        var cap = k.Main switch { "f" => Gold, "g" => Blue, _ => down ? KeyPressed : KeyCap };
         if (k.F.Length > 0) Text(ctx, k.F, r.Center.X, r.Top - 12, k.F.Length > 7 ? 10 : 12, Gold);
         ctx.DrawRectangle(Brushes.Black, null, r.Inflate(2), 6, 6);
         ctx.DrawRectangle(cap, null, r, 5, 5);
         double faceH = (k.Rows == 2 ? r.Height - 18 : 30);
         var face = new Rect(r.X + 3, r.Y + (down ? 4 : 2), r.Width - 6, faceH);
-        if (k.Code is not (42 or 43)) ctx.DrawRectangle(down ? KeyCap : KeyTop, null, face, 4, 4);
-        var mainInk = k.Code is 42 or 43 ? Brushes.Black : White;
-        double size = k.Main.Length > 4 ? 13 : k.Main.Length > 3 ? 15 : 19;
-        Text(ctx, k.Main, face.Center.X, face.Center.Y, size, mainInk, bold: true);
+        if (!shift) ctx.DrawRectangle(down ? KeyCap : KeyTop, null, face, 4, 4);
+        var mainInk = shift ? Brushes.Black : White;
+        if (k.Rows == 2)
+        {
+            double step = (faceH - 12) / k.Main.Length; // ENTER reads downwards
+            for (int i = 0; i < k.Main.Length; i++)
+                Text(ctx, k.Main[i].ToString(), face.Center.X, face.Top + 6 + step * (i + 0.5), 17, mainInk, bold: true);
+        }
+        else
+        {
+            double size = k.Main.Length > 4 ? 13 : k.Main.Length > 3 ? 15 : 19;
+            Text(ctx, k.Main, face.Center.X, face.Center.Y, size, mainInk, bold: true);
+        }
         if (k.G.Length > 0) Text(ctx, k.G, r.Center.X, r.Bottom - 8, 11.5, Blue);
     }
 
@@ -242,12 +252,75 @@ sealed class CalculatorView : Control
         return -1;
     }
 
+    const int OnKey = 41;
+    const long MenuChordHold = 1500; // about 0.4 s at real speed
+    ContextMenu? _chordMenu;
+
+    // Chords as the handbook writes them. ON goes first on these:
+    static readonly (string Second, string Text)[] OnChords =
+    [
+        ("×", "Self-test"), ("+", "Continuous self-test"), ("÷", "Keyboard test"),
+    ];
+
+    // These start with the key, then ON. The simulator keeps one key down and
+    // a key alone does not wake it, so they play as ON, then the key.
+    static readonly (string First, string Text)[] KeyChords =
+    [
+        ("−", "Memory reset (clears everything)"), ("·", "Swap decimal point and comma"),
+    ];
+
+    /// <summary>Right click: the chords that start with this key.</summary>
+    bool ShowChords(int code)
+    {
+        var menu = new ContextMenu();
+        _chordMenu = menu;
+        void Add(string header, int first, int second)
+        {
+            var item = new MenuItem { Header = header };
+            item.Click += async (_, _) => await PlayChord(first, second);
+            menu.Items.Add(item);
+        }
+        if (code == OnKey)
+            foreach (var (second, text) in OnChords)
+                if (_skin.Keys.FirstOrDefault(k => k.Main == second) is { } key)
+                    Add($"ON + {second}: {text}", OnKey, key.Code);
+        var main = _skin.Keys.FirstOrDefault(k => k.Code == code)?.Main;
+        foreach (var (first, text) in KeyChords)
+            if (main == first) Add($"{first} + ON: {text}", OnKey, code);
+        if (main == "yˣ") Add("yˣ + ON, together: frozen calculator (10C handbook)", code, OnKey);
+        if (menu.Items.Count == 0) return false;
+        menu.Open(this);
+        return true;
+    }
+
+    /// <summary>Play two keys together. A chord that starts with ON starts from
+    /// off, as on the real calculator.</summary>
+    public async Task PlayChord(int first, int second)
+    {
+        if (_runner is not { } run || Locked) return;
+        Locked = true;
+        await Task.Run(() =>
+        {
+            if (first == OnKey && run.Read(v => v.DisplayEnable))
+            {
+                run.Tap(OnKey);
+                var limit = DateTime.UtcNow.AddSeconds(5);
+                while (!run.Finished && DateTime.UtcNow < limit) Thread.Sleep(1);
+            }
+            run.Chord(first, second, MenuChordHold);
+        });
+        Locked = false;
+    }
+
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
         Focus();
+        _chordMenu?.Close(); // one menu at a time
+        _chordMenu = null;
         int code = HitTest(e.GetPosition(this));
         if (code < 0 || _runner is null || Locked) return;
+        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed && ShowChords(code)) return;
         _pressed = code;
         e.Pointer.Capture(this);
         _runner.Press(code);

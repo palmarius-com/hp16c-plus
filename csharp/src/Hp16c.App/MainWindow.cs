@@ -224,7 +224,7 @@ sealed partial class MainWindow : Window
         "Digits 0-9, A-F (16C), Enter, + - * /, Backspace (BSP or the key with the arrow),\n" +
         "period = decimal point, F1 = f, F2 = g, Esc = ON.\n\n" +
         "Hold a key with the mouse to hold it on the calculator (e.g. STATUS on the 16C).\n" +
-        "ON + key chords: press and hold ON with the mouse, then press the other key on the keyboard.";
+        "Keys pressed together: right-click the key that goes first (ON, −, ·, yˣ) and choose one.";
 
     const string About =
         "Palmarius Voyager simulator (github.com/palmarius-com/hp16c-plus), GPLv3.\n\n" +

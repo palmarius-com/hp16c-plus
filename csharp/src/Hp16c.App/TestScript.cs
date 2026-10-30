@@ -48,6 +48,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
     public sealed record Result(int Line, string Text, bool Ok, string Detail);
 
     const int On = 41, FirstKey = 35;
+    const long ChordHold = 20000;
     bool _held;
 
     void Settle(CancellationToken stop)
@@ -56,19 +57,9 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         while (!run.Finished && DateTime.UtcNow < limit && !stop.IsCancellationRequested) Thread.Sleep(1);
     }
 
-    void RunCycles(long n, CancellationToken stop)
-    {
-        var limit = DateTime.UtcNow.AddSeconds(60);
-        while (!run.KeysApplied && DateTime.UtcNow < limit) Thread.Sleep(1);
-        long end = run.Read(v => v.Cpu.Cycles) + n;
-        while (run.Read(v => v.Cpu.Cycles) < end && run.Read(v => v.Cpu.Awake) &&
-               DateTime.UtcNow < limit && !stop.IsCancellationRequested) Thread.Sleep(1);
-    }
-
     void Tap(int code, CancellationToken stop)
     {
-        run.Press(code);
-        run.Release();
+        run.Tap(code);
         Settle(stop);
     }
 
@@ -78,15 +69,6 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         _held = false;
         run.Release();
         Settle(stop);
-    }
-
-    void Chord(int second, CancellationToken stop)
-    {
-        run.Press(On);
-        RunCycles(20000, stop);
-        run.Press(second);
-        RunCycles(20000, stop);
-        run.Release();
     }
 
     /// <summary>Switch on from batteries in, clear Pr Error.</summary>
@@ -124,7 +106,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         if (first == "reset" && rest.Length == 0)
         {
             if (run.Read(v => v.DisplayEnable)) Tap(On, stop);
-            Chord(names.Resolve("-")![0], stop);
+            run.Chord(On, names.Resolve("-")![0], ChordHold, stop);
             Settle(stop);
             Tap(FirstKey, stop);
             return null;
@@ -132,8 +114,8 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         if (first == "chord")
         {
             if (names.Resolve(rest) is not { } chord) return $"unknown key '{rest}'";
-            Chord(chord[^1], stop);
-            RunCycles(3_000_000, stop);
+            run.Chord(On, chord[^1], ChordHold, stop);
+            run.WaitCycles(3_000_000, stop);
             return null;
         }
         bool hold = first == "hold";
@@ -148,7 +130,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         if (hold)
         {
             run.Press(codes[^1]);
-            RunCycles(30000, stop);
+            run.WaitCycles(30000, stop);
             _held = true;
         }
         return null;

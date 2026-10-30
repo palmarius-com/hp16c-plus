@@ -19,7 +19,7 @@ through the same code as the mouse and keyboard.
 | `start ID` | start `10c`...`16c` or one of your calculators; no dialogs, changes are dropped | the model |
 | `patch FILE` | apply a patch to the running calculator | number of patches |
 | `unpatch` | remove all patches | |
-| `testrun FILE` | run a test file (docs/TESTS.md) on a fresh copy | counts, first failures |
+| `testrun FILE` | run a test file (docs/TESTS.md) on a fresh copy; all failures go to `FILE.failures` | counts, first failures |
 | `chips V` | chip layout: `own`, `large` or `preset`; restarts the calculator | the status line |
 | `label [TEXT]` | set the faceplate label (`auto` = automatic); no text: read it | the label |
 | `message` | the status line at the bottom of the window | the text |
@@ -32,6 +32,7 @@ through the same code as the mouse and keyboard.
 | `menu` | entries of the Calculator menu (`;` separated) | the list |
 | `rominfo` | ROM, patches, chip layout, checksums | the text |
 | `down CODE` | press a key (HP keycode, e.g. 41 = ON, 36 = ENTER) | |
+| `chord FIRST SECOND` | two keys together, as in the right-click menu | |
 | `up` | release all keys | |
 | `poll` | calculator state | finished, keys taken, awake, display on (0/1), cycles |
 | `display` | LCD as text | the text |

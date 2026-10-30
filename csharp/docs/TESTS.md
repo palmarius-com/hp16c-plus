@@ -17,6 +17,11 @@ green `ok` line means it matched; an orange `FAIL` line shows what the
 display said instead. The next line goes on from there, so tests can build
 on each other.
 
+While tests run, both sides of the window follow along: the newest result
+stays at the bottom on the right, the line it came from at the bottom on the
+left. At the end the window says `Finished:` with the counts, or `Stopped:`
+if you pressed Stop.
+
 ## Key names
 
 Write the keys as they are printed on the calculator, separated by spaces:
@@ -25,7 +30,9 @@ Write the keys as they are printed on the calculator, separated by spaces:
 - Gold and blue functions: just their name, the app presses `f` or `g` for
   you: `WSIZE`, `FLOAT`, `LSTx`. You can also write `f WSIZE`.
 - Numbers can stay together: `12AB` is 1, 2, A, B.
-- A legend with spaces gets an underscore: `lin_est_x`.
+- A legend with spaces gets an underscore: `lin_est_x`, `LAST_X`.
+- Under a gold bracket, write only the word above the key: `PRGM`, `REG`,
+  `PREFIX`, not `CLEAR`.
 - Upper or lower case does not matter, unless two keys differ only by that
   (on the 16C, `F` is the hex digit, `f` the gold key).
 
@@ -64,6 +71,22 @@ ON  =>  (blank)
 chord *  =>  -8,8,8,8,8,8,8,8,8,8,  [C G]
 ```
 
+## Programs
+
+Tests run at full speed, and a line waits until the calculator is idle again.
+So a value shown by PSE is gone before a test can read it, and a program that
+only stops on a key never lets the next line start: after 60 seconds the test
+moves on. Check what a program leaves in the display when it stops.
+
+## Example files
+
 Save your tests with Save..., and share the file; it holds no firmware.
-`docs/examples/16cplus-test-sheet.txt` is a complete example: 77 tests for
-the 16C+.
+
+Two example files come with the program, in the `examples` folder of the
+download and in `docs/examples` of the source. Load them with Open...:
+
+- `hp10c-handbook.txt`: 535 tests from the examples of the HP-10C Owner's
+  Handbook, about a minute on the HP-10C. All pass on the original ROM.
+  Where our notes and the firmware disagreed, the firmware decided.
+- `16cplus-test-sheet.txt`: 77 tests for the 16C+. They need the 16C+; on an
+  original HP-16C most of them fail, as they should.

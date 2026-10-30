@@ -36,10 +36,13 @@ per calculator. "ROM ready" in green means the calculator can start.
 - The calculator starts switched off. Press ON (or Esc).
 - After a fresh start the display shows `Pr Error` (as a real one does
   after new batteries). Any key clears it.
-- Keys pressed together: a few functions use ON plus a second key, always
-  starting with the calculator off. Hold ON with the mouse, press the
-  second key on the PC keyboard, release both. ON + `*` is the self-test,
-  ON + `-` the memory reset.
+- Keys pressed together: right-click the key that goes first and choose.
+  ON: self-test, continuous self-test, keyboard test. `−`: memory reset,
+  which clears everything. `·`: swap decimal point and comma. `yˣ`: yˣ + ON
+  for a frozen calculator, from the HP-10C handbook. The simulator switches
+  the calculator off first where needed. By hand it also works: calculator
+  off, hold ON with the mouse, press the other key on the PC keyboard,
+  release both.
 - Calculator > Real speed runs the calculator as slowly as the real
   one (handy for programs that pause). Without it, the simulator runs
   as fast as your PC allows.
@@ -78,7 +81,8 @@ anyway, or cancel.
 The look of the keys is called a skin.
 
 - Skin > Automatic: the legends come from the calculator's chip file,
-  so every model gets its own faceplate. The 16C has a hand-made one.
+  so every model gets its own faceplate, with the gold CLEAR, BOND and
+  DEPRECIATION brackets as printed. The 16C has a hand-made one.
 - Skin > Save current skin as a template: writes a `.json` file. Open
   it in any text editor, change the legends or the colours, save it,
   then Skin > Load skin file. Colours are written like `#E0A83C`.
@@ -159,7 +163,11 @@ fresh copy of the current calculator:
 1 2 ENTER 3 0 +  =>  42 h
 ```
 
-Help > How to write a test explains it.
+The window follows the run on both sides and says `Finished:` with the
+counts at the end. Two ready-made files are in the `examples` folder of the
+download; load them with Open...: `hp10c-handbook.txt` (535 tests from the
+HP-10C Owner's Handbook, for the HP-10C) and `16cplus-test-sheet.txt` (77
+tests for the 16C+). Help > How to write a test explains it.
 
 ## 6. The HP-16C+
 

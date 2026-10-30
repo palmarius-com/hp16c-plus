@@ -16,12 +16,15 @@ sealed class TestWindow : Window
         "# Help > How to write a test has the details.\n" +
         "1 2 ENTER 3 0 +  =>  42 h\n";
 
+    const double LineHeight = 18; // the same for numbers and text, or they drift apart
+
     readonly Func<Func<string, IReadOnlyList<string>, CancellationToken, Action<TestScript.Result>, Task<string>>> _ready;
     readonly TextBox _script = new()
     {
         AcceptsReturn = true,
         FontFamily = new FontFamily("Cascadia Mono,Consolas,Menlo,monospace"),
         FontSize = 13,
+        LineHeight = LineHeight,
         TextWrapping = TextWrapping.NoWrap,
         Text = Sample,
         BorderThickness = new Thickness(0),
@@ -32,6 +35,7 @@ sealed class TestWindow : Window
     {
         FontFamily = new FontFamily("Cascadia Mono,Consolas,Menlo,monospace"),
         FontSize = 13,
+        LineHeight = LineHeight,
         Foreground = Brushes.Gray,
         TextAlignment = TextAlignment.Right,
         Margin = new Thickness(6, 0, 0, 0),
@@ -40,6 +44,7 @@ sealed class TestWindow : Window
     readonly StackPanel _results = new() { Spacing = 2, Margin = new Thickness(8) };
     readonly TextBlock _summary = new() { Margin = new Thickness(0, 6), VerticalAlignment = VerticalAlignment.Center };
     readonly Button _run = new() { Content = "Run", IsDefault = false };
+    readonly ScrollViewer _left = new(), _right = new();
     CancellationTokenSource? _stop;
 
     public TestWindow(string calculator,
@@ -63,14 +68,15 @@ sealed class TestWindow : Window
         };
         DockPanel.SetDock(bar, Dock.Top);
         var split = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*") };
-        var right = new ScrollViewer { Content = _results };
-        Grid.SetColumn(right, 1);
+        _right.Content = _results;
+        Grid.SetColumn(_right, 1);
         var editor = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
         Grid.SetColumn(_script, 1);
         editor.Children.Add(_numbers);
         editor.Children.Add(_script);
-        split.Children.Add(new ScrollViewer { Content = editor }); // numbers and text scroll together
-        split.Children.Add(right);
+        _left.Content = editor; // numbers and text scroll together
+        split.Children.Add(_left);
+        split.Children.Add(_right);
         _script.TextChanged += (_, _) => ShowNumbers();
         ShowNumbers();
         Content = new DockPanel { Children = { bar, split } };
@@ -90,14 +96,34 @@ sealed class TestWindow : Window
         _stop = new CancellationTokenSource();
         var lines = (_script.Text ?? "").Replace("\r", "").Split('\n');
         void Show(TestScript.Result r) => Dispatcher.UIThread.Post(() =>
+        {
             _results.Children.Add(new SelectableTextBlock
             {
                 Text = $"{(r.Ok ? "ok  " : "FAIL")} line {r.Line}: {r.Text}" + (r.Ok ? "" : $"  -> {r.Detail}"),
                 Foreground = r.Ok ? Brushes.LightGreen : Brushes.Orange,
                 FontFamily = _script.FontFamily, FontSize = 12, TextWrapping = TextWrapping.Wrap,
-            }));
-        _summary.Text = await _ready()("", lines, _stop.Token, Show);
+            });
+            // after layout, so the new result counts for the end of the list
+            Dispatcher.UIThread.Post(() => FollowTest(r.Line), DispatcherPriority.Background);
+        });
+        var sum = await _ready()("", lines, _stop.Token, Show);
+        var end = $"{(_stop.IsCancellationRequested ? "Stopped" : "Finished")}: {sum}";
+        _summary.Text = end;
+        _results.Children.Add(new TextBlock
+        {
+            Text = end, FontWeight = FontWeight.Bold, Margin = new Thickness(0, 6, 0, 0),
+            FontFamily = _script.FontFamily, FontSize = 12,
+        });
+        Dispatcher.UIThread.Post(_right.ScrollToEnd, DispatcherPriority.Background);
         _run.IsEnabled = true;
+    }
+
+    /// <summary>The last result at the bottom on the right, its line at the
+    /// bottom on the left; the rest moves up on both sides.</summary>
+    void FollowTest(int line)
+    {
+        _right.ScrollToEnd();
+        _left.Offset = new Vector(_left.Offset.X, Math.Max(0, LineHeight * line - _left.Viewport.Height));
     }
 
     async Task OpenFile()

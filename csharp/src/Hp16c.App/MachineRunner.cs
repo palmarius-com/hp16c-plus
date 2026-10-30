@@ -126,6 +126,40 @@ sealed class MachineRunner : IDisposable
         KeySeen?.Invoke(-1);
     }
 
+    /// <summary>Press and release as one step. At full speed a gap between the
+    /// two is seconds of calculator time, and the firmware cancels a key held
+    /// that long.</summary>
+    public void Tap(int userKeycode)
+    {
+        lock (_gate)
+        {
+            _keys.Enqueue(userKeycode);
+            _keys.Enqueue(-1);
+        }
+        KeySeen?.Invoke(userKeycode);
+        KeySeen?.Invoke(-1);
+    }
+
+    /// <summary>Wait until the calculator ran n more words, or went to sleep.</summary>
+    public void WaitCycles(long n, CancellationToken stop = default)
+    {
+        var limit = DateTime.UtcNow.AddSeconds(60);
+        while (!KeysApplied && DateTime.UtcNow < limit) Thread.Sleep(1);
+        long end = Read(v => v.Cpu.Cycles) + n;
+        while (Read(v => v.Cpu.Cycles) < end && Read(v => v.Cpu.Awake) &&
+               DateTime.UtcNow < limit && !stop.IsCancellationRequested) Thread.Sleep(1);
+    }
+
+    /// <summary>Two keys together: first down, second down, release.</summary>
+    public void Chord(int first, int second, long hold, CancellationToken stop = default)
+    {
+        Press(first);
+        WaitCycles(hold, stop);
+        Press(second);
+        WaitCycles(hold, stop);
+        Release();
+    }
+
     /// <summary>Read the machine under the CPU lock.</summary>
     public T Read<T>(Func<Voyager, T> read)
     {

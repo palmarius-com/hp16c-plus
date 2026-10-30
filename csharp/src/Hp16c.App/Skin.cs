@@ -46,9 +46,26 @@ sealed class Skin
         {
             string P(int i) => i < l.Length ? Pretty(l[i]) : "";
             var main = P(0);
-            skin.Keys.Add(new Key(code, main, P(1), P(2), main == "ENTER" ? 2 : 1));
+            skin.Keys.Add(new Key(code, main, Printed(P(1)), P(2), main == "ENTER" ? 2 : 1));
         }
+        skin.Brackets = name switch
+        {
+            "HP-10C" => [new(2, 2, 4, "CLEAR")],
+            "HP-11C" or "HP-15C" => [new(2, 1, 4, "CLEAR")],
+            "HP-12C" => [new(1, 0, 1, "BOND"), new(1, 2, 4, "DEPRECIATION"), new(2, 1, 5, "CLEAR")],
+            _ => [],
+        };
         return skin;
+    }
+
+    /// <summary>Gold legend as printed: chip files spell out the bracket above it
+    /// (CL PRGM, BOND YTM, DEPR SL), and the 10C prints LAST X.</summary>
+    static string Printed(string f)
+    {
+        if (f == "LASTx") return "LAST X";
+        foreach (var bracket in new[] { "CLR ", "CL ", "BOND ", "DEPR " })
+            if (f.StartsWith(bracket, StringComparison.Ordinal)) return f[bracket.Length..];
+        return f;
     }
 
     static readonly Dictionary<string, string> Glyphs = new()
@@ -73,7 +90,7 @@ sealed class Skin
     public static string Pretty(string s)
     {
         if (Glyphs.TryGetValue(s, out var g)) return g;
-        return s.Replace("<=", "≤").Replace(">=", "≥").Replace("!=", "≠").Replace("<>", "≷")
+        return s.Replace("<=", "≤").Replace(">=", "≥").Replace("!=", "≠").Replace("/=", "≠").Replace("<>", "≷")
                 .Replace("->", "→").Replace("^-1", "⁻¹").Replace("-1", "⁻¹").Replace("sigma", "Σ")
                 .Replace("Sigma", "Σ").Replace("divide", "÷").Replace("sqrt", "√");
     }
