@@ -136,8 +136,56 @@ sealed class CalculatorView : Control
             label.Length > 4 ? 7 * k : 8.5 * k, Brushes.White);
         double margin = (h - sq - gap - ft.Height) / 2;
         var square = new Rect(x + (w - sq) / 2, y + margin, sq, sq);
-        ctx.DrawRectangle(null, new Pen(PalmBlue, line), square.Deflate(line / 2), 8 * k - line / 2, 8 * k - line / 2);
+        ctx.DrawRectangle(BadgeMetal, new Pen(PalmBlue, line), square.Deflate(line / 2), 8 * k - line / 2, 8 * k - line / 2);
+        DrawGlint(ctx, new Point(square.X + sq / 3, square.Y + sq / 4), sq);
         ctx.DrawText(ft, new Point(x + (w - ft.Width) / 2, square.Bottom + gap));
+    }
+
+    const double BadgeBrightness = 0.75; // or it outshines the display
+
+    static Color Dimmed(byte r, byte g, byte b) => Color.FromRgb(
+        (byte)(r * BadgeBrightness), (byte)(g * BadgeBrightness), (byte)(b * BadgeBrightness));
+
+    // As the application icon (tools/make_icon.py): gold, a light band, silver.
+    static readonly IBrush BadgeMetal = new LinearGradientBrush
+    {
+        StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+        EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+        GradientStops =
+        {
+            new GradientStop(Dimmed(230, 176, 52), 0.34),
+            new GradientStop(Dimmed(252, 246, 228), 0.5),
+            new GradientStop(Dimmed(192, 201, 212), 0.66),
+        },
+    };
+
+    static readonly IBrush GlintStar = new SolidColorBrush(Color.FromArgb(0xC8, 255, 255, 255));
+    static readonly IBrush GlintGlow = new RadialGradientBrush
+    {
+        GradientStops =
+        {
+            new GradientStop(Color.FromArgb(0x70, 255, 255, 255), 0),
+            new GradientStop(Color.FromArgb(0, 255, 255, 255), 1),
+        },
+    };
+
+    static void DrawGlint(DrawingContext ctx, Point c, double side)
+    {
+        double arm = side * 0.2, waist = side * 0.016, glow = side * 0.14;
+        ctx.DrawEllipse(GlintGlow, null, c, glow, glow);
+        var star = new StreamGeometry();
+        using (var g = star.Open())
+        {
+            g.BeginFigure(new Point(c.X - arm, c.Y), true);
+            foreach (var (dx, dy) in new[]
+                     {
+                         (-waist, -waist), (0.0, -arm), (waist, -waist), (arm, 0.0),
+                         (waist, waist), (0.0, arm), (-waist, waist),
+                     })
+                g.LineTo(new Point(c.X + dx, c.Y + dy));
+            g.EndFigure(true);
+        }
+        ctx.DrawGeometry(GlintStar, null, star);
     }
 
     void DrawKey(DrawingContext ctx, Skin.Key k)
