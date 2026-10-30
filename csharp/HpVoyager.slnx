@@ -4,6 +4,7 @@
     <Project Path="src/Nut.Core/Nut.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/App.Flow/App.Flow.csproj" />
     <Project Path="tests/Nut.Replay/Nut.Replay.csproj" />
   </Folder>
 </Solution>

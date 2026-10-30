@@ -53,7 +53,13 @@ sealed class MachineRunner : IDisposable
         {
             if (ev >= 0)
             {
-                if (_pressedAt >= 0 || cpu.KbState != NutCpu.Kb.Idle) return;
+                // A press with a key still down is a chord (ON + key): only the
+                // minimum hold applies. Otherwise wait for the scanner.
+                if (_pressedAt >= 0)
+                {
+                    if (cpu.Awake && cpu.Cycles - _pressedAt < MinHoldCycles) return;
+                }
+                else if (cpu.KbState != NutCpu.Kb.Idle) return;
                 _keys.TryDequeue(out _);
                 if (Calc.Keys.TryGetValue(ev, out var hw) && cpu.Press(hw)) _pressedAt = cpu.Cycles;
                 else if (_keys.TryPeek(out var next) && next < 0) _keys.TryDequeue(out _);
@@ -105,6 +111,26 @@ sealed class MachineRunner : IDisposable
     public void Press(int userKeycode) => _keys.Enqueue(userKeycode);
 
     public void Release() => _keys.Enqueue(-1);
+
+    /// <summary>Read the machine under the CPU lock.</summary>
+    public T Read<T>(Func<Voyager, T> read)
+    {
+        lock (_gate) return read(Calc);
+    }
+
+    /// <summary>The CPU thread has taken every queued key event.</summary>
+    public bool KeysApplied => _keys.IsEmpty;
+
+    /// <summary>All keys handled and the calculator waits for the next one.</summary>
+    public bool Finished
+    {
+        get
+        {
+            lock (_gate)
+                return _keys.IsEmpty && _pressedAt < 0 && !Calc.Cpu.Awake &&
+                       Calc.Cpu.KbState == NutCpu.Kb.Idle;
+        }
+    }
 
     public void PowerOn()
     {
