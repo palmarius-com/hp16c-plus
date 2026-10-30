@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,19 +14,29 @@ namespace Nut.Core;
 /// </summary>
 public sealed class MachineState
 {
-    public string Format { get; set; } = "voyager-state 1";
+    public const string CurrentFormat = "voyager-state 2";
+    public string Format { get; set; } = CurrentFormat;
+    public string Generator { get; set; } = "Palmarius Voyager simulator";
     public string Calculator { get; set; } = "";
     public string Model { get; set; } = "";
     public string Rom { get; set; } = "";
+    /// <summary>Where the ROM file is, relative to the exe. Information only.</summary>
+    public string? RomFile { get; set; }
     public string RomFingerprint { get; set; } = "";
     public List<string> Patches { get; set; } = [];
+    /// <summary>"own" or "large": decides which RAM the state holds.</summary>
+    public string ChipLayout { get; set; } = "";
     public string SavedAt { get; set; } = "";
     public string Note { get; set; } = "";
     public string DisplayText { get; set; } = "";
     public DisplayChip Display { get; set; } = new();
     public Cpu Processor { get; set; } = new();
     /// <summary>RAM register address (hex) -> 14 digits (hex, most significant first).</summary>
-    public SortedDictionary<string, string> Ram { get; set; } = [];
+    public SortedDictionary<string, string> Ram { get; set; } = new(StringComparer.Ordinal);
+    /// <summary>SHA-256 of this file's content (with this field empty): a loaded
+    /// file must match, so edited or damaged files are refused. A seal against
+    /// mistakes, not security: the method is public.</summary>
+    public string Checksum { get; set; } = "";
 
     public sealed class DisplayChip
     {
@@ -68,14 +80,38 @@ public sealed class MachineState
     static readonly JsonSerializerOptions Json = new()
     {
         WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping, // show + as +
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     };
 
-    public string ToJson() => JsonSerializer.Serialize(this, Json);
+    string ComputeChecksum()
+    {
+        var keep = Checksum;
+        Checksum = "";
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this, Json)));
+        Checksum = keep;
+        return Convert.ToHexStringLower(hash);
+    }
 
-    public static MachineState FromJson(string text) =>
-        JsonSerializer.Deserialize<MachineState>(text, Json) ?? throw new InvalidDataException("empty state file");
+    public string ToJson()
+    {
+        Checksum = ComputeChecksum();
+        return JsonSerializer.Serialize(this, Json);
+    }
+
+    /// <summary>Read a state file; refuses a file that was changed after saving,
+    /// or that has no checksum (older format).</summary>
+    public static MachineState FromJson(string text)
+    {
+        var st = JsonSerializer.Deserialize<MachineState>(text, Json)
+                 ?? throw new InvalidDataException("empty state file");
+        if (st.Format != CurrentFormat || st.Checksum.Length == 0)
+            throw new InvalidDataException($"this file has no checksum (format '{st.Format}'), so it cannot be verified");
+        if (st.ComputeChecksum() != st.Checksum)
+            throw new InvalidDataException("this file was changed after it was saved (checksum does not match)");
+        return st;
+    }
 
     static string Reg(byte[] r) => string.Concat(r.Reverse().Select(d => d.ToString("x")));
 

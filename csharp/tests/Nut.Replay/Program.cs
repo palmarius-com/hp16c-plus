@@ -46,7 +46,32 @@ if (args.Length >= 1 && args[0] == "--state-check")
     Console.WriteLine($"state round trip: json {(same ? "equal" : "DIFFERENT")}, " +
                       $"after more keys '{a1.Display()}' vs '{b1.Display()}', {json.Length} chars");
     return same && a1.Display() == b1.Display() ? 0 : 1;
-    static string Strip(string j) => string.Join("\n", j.Split('\n').Where(l => !l.Contains("savedAt")));
+    static string Strip(string j) => string.Join("\n", j.Split('\n').Where(l => !l.Contains("savedAt") && !l.Contains("checksum")));
+}
+if (args.Length >= 2 && args[0] == "--keys")
+{
+    // every digit key per its legend must enter that digit, on the real firmware
+    int wrongKeys = 0;
+    foreach (var m in ModelCatalog.Models)
+    {
+        var rom = RomImage.Load(Path.Combine(args[1], m.Id, m.Id + ".rom"));
+        var wrong = new List<string>();
+        for (int digit = 0; digit <= 9; digit++)
+        {
+            var v = new Voyager(Voyager.EmbeddedNcd(m.Id), null, rom);
+            v.PowerOn();
+            v.Key(41);
+            int one = v.Legends.First(kv => kv.Value[0] == "1").Key;
+            v.Key(one);                                    // clears Pr Error
+            int code = v.Legends.First(kv => kv.Value[0] == digit.ToString()).Key;
+            v.Key(code);
+            var shown = v.Display().Trim();
+            if (!shown.StartsWith(digit.ToString())) wrong.Add($"legend {digit} (key {code}) shows '{shown}'");
+        }
+        Console.WriteLine($"{m.Name}: {10 - wrong.Count}/10 digit keys ok {string.Join("; ", wrong)}");
+        wrongKeys += wrong.Count;
+    }
+    return wrongKeys;
 }
 if (args.Length >= 2 && args[0] == "--smoke")
 {

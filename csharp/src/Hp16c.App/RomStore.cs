@@ -3,24 +3,39 @@ using Nut.Core;
 namespace HpSim;
 
 /// <summary>
-/// The user's original ROMs, one per model, kept in the application data
-/// folder. HP's firmware never ships with the app: it comes from Nonpareil
-/// (download) or from a file the user has.
+/// Everything the user adds lives in the data folder next to the exe: original
+/// ROMs in data/roms, saved calculators in data/custom/SHORTNAME. HP's firmware
+/// never ships with the app: it comes from Nonpareil (download) or from a file the
+/// user has.
 /// </summary>
 static class RomStore
 {
-    public static string Dir { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "HP16C-Plus");
+    public static string Dir { get; } = AppContext.BaseDirectory;
 
-    static string RomPath(string modelId) => Path.Combine(Dir, "roms", modelId + ".rom");
+    static string RomPath(string modelId) => Path.Combine(Dir, "data", "roms", modelId + ".rom");
+
+    /// <summary>The file an original ROM is loaded from.</summary>
+    public static string? OriginalFile(string modelId)
+    {
+        return File.Exists(RomPath(modelId)) ? RomPath(modelId) : null;
+    }
+
+    /// <summary>Path for a state file: relative to the exe, so it holds no user
+    /// name and reads the same on every machine; else just the file name.</summary>
+    public static string Relative(string file)
+    {
+        var rel = Path.GetRelativePath(Dir, file);
+        return rel.StartsWith("..") || Path.IsPathRooted(rel) ? Path.GetFileName(file) : rel.Replace(Path.DirectorySeparatorChar, '/');
+    }
+
+    public static string MyRomFile(MyCalc c) => CalcFile(c.Id, ".rom");
 
     public static bool Has(string modelId) => Load(modelId) is not null;
 
     public static RomImage? Load(string modelId)
     {
         if (File.Exists(RomPath(modelId))) return RomImage.Load(RomPath(modelId));
-        var old = Path.Combine(Dir, modelId + ".rom"); // first app version kept 16c.rom here
-        return File.Exists(old) ? RomImage.Load(old) : null;
+        return null;
     }
 
     /// <summary>Keep an original ROM. Returns the model it belongs to; throws
@@ -53,6 +68,10 @@ static class RomStore
         public string Name { get; set; } = "";
         public string Model { get; set; } = "";
         public string Label { get; set; } = "";
+        /// <summary>Chip layout chosen by the user; null = what the ROM needs.</summary>
+        public bool? Large { get; set; }
+        /// <summary>Where the saved skin came from; the skin is in NAME.skin.</summary>
+        public string? SkinName { get; set; }
         public string Description { get; set; } = "";
         public string Created { get; set; } = "";
         public string RomFingerprint { get; set; } = "";
@@ -61,7 +80,7 @@ static class RomStore
         [System.Text.Json.Serialization.JsonIgnore] public string Id { get; set; } = "";
     }
 
-    static string MyDir => Path.Combine(Dir, "my");
+    static string MyDir => Path.Combine(Dir, "data", "custom");
 
     static readonly System.Text.Json.JsonSerializerOptions Json = new()
     {
@@ -77,57 +96,78 @@ static class RomStore
         return s.Length == 0 ? "calculator" : s;
     }
 
+    static string CalcFile(string id, string ext) => Path.Combine(MyDir, id, id + ext);
+
     public static List<MyCalc> MyCalcs()
     {
         if (!Directory.Exists(MyDir)) return [];
         var list = new List<MyCalc>();
-        foreach (var f in Directory.GetFiles(MyDir, "*.json").Order())
+        foreach (var dir in Directory.GetDirectories(MyDir).Order())
         {
+            var id = Path.GetFileName(dir);
             try
             {
-                var c = System.Text.Json.JsonSerializer.Deserialize<MyCalc>(File.ReadAllText(f), Json);
-                if (c is null || !File.Exists(Path.ChangeExtension(f, ".rom"))) continue;
-                c.Id = Path.GetFileNameWithoutExtension(f);
+                var c = System.Text.Json.JsonSerializer.Deserialize<MyCalc>(File.ReadAllText(CalcFile(id, ".json")), Json);
+                if (c is null || !File.Exists(CalcFile(id, ".rom"))) continue;
+                c.Id = id;
                 list.Add(c);
             }
-            catch { /* skip a file the user broke by hand */ }
+            catch { /* skip a folder the user broke by hand */ }
         }
         return list;
     }
 
-    public static RomImage LoadMyRom(MyCalc c) => RomImage.Load(Path.Combine(MyDir, c.Id + ".rom"));
+    public static RomImage LoadMyRom(MyCalc c) => RomImage.Load(CalcFile(c.Id, ".rom"));
 
-    public static MyCalc SaveMyCalc(string name, string model, string label, string description, RomImage image)
+    /// <summary>A short name from a long one: letters, digits and + - _ only.</summary>
+    public static string SuggestShortName(string name) =>
+        new(name.Where(c => char.IsLetterOrDigit(c) || c is '+' or '-' or '_').ToArray());
+
+    /// <summary>A calculator with this short name exists already.</summary>
+    public static bool ShortNameTaken(string? shortName) =>
+        Directory.Exists(MyDir) && Directory.GetDirectories(MyDir).Select(Path.GetFileName)
+            .Any(d => string.Equals(d, shortName?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Why a short name cannot be used; null = fine. It becomes a folder
+    /// and file name.</summary>
+    public static string? ShortNameProblem(string? shortName)
     {
-        Directory.CreateDirectory(MyDir);
+        var s = shortName?.Trim() ?? "";
+        if (s.Length == 0) return "Enter a short name.";
+        if (s.Length > 32) return "The short name is too long (32 characters at most).";
+        if (s != SuggestShortName(s)) return "Use only letters, digits and + - _ in the short name.";
+        return null;
+    }
+
+    public static MyCalc SaveMyCalc(string shortName, string name, string model, string label, string description,
+                                    RomImage image, bool? large = null, string? skinJson = null, string? skinName = null)
+    {
+        // Override replaces the whole calculator, also if only the capitals differ
+        if (Directory.Exists(MyDir))
+            foreach (var old in Directory.GetDirectories(MyDir))
+                if (string.Equals(Path.GetFileName(old), shortName, StringComparison.OrdinalIgnoreCase))
+                    Directory.Delete(old, recursive: true);
+        Directory.CreateDirectory(Path.Combine(MyDir, shortName));
         var c = new MyCalc
         {
-            Name = name, Model = model, Label = label, Description = description,
+            Name = name, Model = model, Label = label, Description = description, Large = large,
+            SkinName = skinJson is null ? null : skinName,
             Created = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-            RomFingerprint = image.CanonicalSha256(), Id = Slug(name),
+            RomFingerprint = image.CanonicalSha256(), Id = shortName,
         };
-        File.WriteAllText(Path.Combine(MyDir, c.Id + ".rom"),
+        File.WriteAllText(CalcFile(c.Id, ".rom"),
             image.ToNonpareilText($"{name}: saved calculator ({model} keyboard and display)"));
-        File.WriteAllText(Path.Combine(MyDir, c.Id + ".json"), System.Text.Json.JsonSerializer.Serialize(c, Json));
+        File.WriteAllText(CalcFile(c.Id, ".json"), System.Text.Json.JsonSerializer.Serialize(c, Json));
+        if (skinJson is not null) File.WriteAllText(CalcFile(c.Id, ".skin"), skinJson);
+        else File.Delete(CalcFile(c.Id, ".skin"));
         return c;
     }
 
-    public static void DeleteMyCalc(MyCalc c)
-    {
-        File.Delete(Path.Combine(MyDir, c.Id + ".rom"));
-        File.Delete(Path.Combine(MyDir, c.Id + ".json"));
-    }
+    public static void DeleteMyCalc(MyCalc c) => Directory.Delete(Path.Combine(MyDir, c.Id), recursive: true);
 
-    /// <summary>When run from the repository: the 16C+ patch built by tools/build_plus.py.</summary>
-    public static string? FindRepoPatch()
+    public static string? LoadMySkin(MyCalc c)
     {
-        for (var d = new DirectoryInfo(AppContext.BaseDirectory); d is not null; d = d.Parent)
-            foreach (var rel in new[] { "build/16cplus.patch", "build/16cplus.obj",
-                                        "build/16cplus.patch" })
-            {
-                var p = Path.Combine(d.FullName, rel);
-                if (File.Exists(p)) return p;
-            }
-        return null;
+        var f = CalcFile(c.Id, ".skin");
+        return File.Exists(f) ? File.ReadAllText(f) : null;
     }
 }

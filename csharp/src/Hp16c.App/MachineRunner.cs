@@ -10,6 +10,8 @@ namespace HpSim;
 /// snapshots. Real speed: the Voyager's 215 kHz LC oscillator, 56 clocks
 /// per instruction word.
 /// </summary>
+enum PanelView { WordSize, Bits64, Bits128 }
+
 sealed class MachineRunner : IDisposable
 {
     public const double RealWordsPerSecond = 215_000.0 / 56;
@@ -24,6 +26,7 @@ sealed class MachineRunner : IDisposable
     public Voyager Calc { get; }
     public string Title { get; }
     public volatile bool RealSpeed;
+    public volatile PanelView View = PanelView.WordSize;
 
     public MachineRunner(Voyager calc, string title)
     {
@@ -108,9 +111,20 @@ sealed class MachineRunner : IDisposable
         }
     }
 
-    public void Press(int userKeycode) => _keys.Enqueue(userKeycode);
+    /// <summary>Told about every key: the code, or -1 for release (for showing it).</summary>
+    public Action<int>? KeySeen;
 
-    public void Release() => _keys.Enqueue(-1);
+    public void Press(int userKeycode)
+    {
+        _keys.Enqueue(userKeycode);
+        KeySeen?.Invoke(userKeycode);
+    }
+
+    public void Release()
+    {
+        _keys.Enqueue(-1);
+        KeySeen?.Invoke(-1);
+    }
 
     /// <summary>Read the machine under the CPU lock.</summary>
     public T Read<T>(Func<Voyager, T> read)
@@ -166,10 +180,40 @@ sealed class MachineRunner : IDisposable
 
     static string Reg(byte[] r) => string.Concat(r.Reverse().Select(d => d.ToString("X")));
 
+    const int PanelColumns = 42;
+    const string Below = " (below)";
+
+    static IEnumerable<string> Wrap(string text)
+    {
+        var line = "";
+        foreach (var word in text.Split(' '))
+        {
+            var rest = word;
+            while (rest.Length > PanelColumns)
+            {
+                if (line.Length > 0) { yield return line; line = ""; }
+                yield return rest[..PanelColumns];
+                rest = rest[PanelColumns..];
+            }
+            if (line.Length + 1 + rest.Length > PanelColumns) { yield return line; line = rest; }
+            else line = line.Length == 0 ? rest : line + " " + rest;
+        }
+        if (line.Length > 0) yield return line;
+    }
+
     string StatusText(NutCpu cpu)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"{Title}");
+        var notes = new List<string>();
+        // Every register keeps its line in every view: what does not fit is
+        // cut and marked, and the full text goes to the notes at the bottom.
+        string Fit(string line)
+        {
+            if (line.Length <= PanelColumns) return line;
+            notes.Add(line);
+            return line[..(PanelColumns - Below.Length)] + Below;
+        }
+        sb.AppendLine(Fit(Title));
         sb.AppendLine($"PC {cpu.Pc:X4}  {(cpu.Awake ? "running" : cpu.DisplayEnable ? "light sleep" : "deep sleep")}");
         sb.AppendLine($"cycles {cpu.Cycles:N0}");
         sb.AppendLine();
@@ -188,10 +232,33 @@ sealed class MachineRunner : IDisposable
         sb.AppendLine();
         if (Calc is Hp16c h)
         {
-            sb.AppendLine("16C stack (64 bits)");
-            foreach (var r in new[] { "x", "y", "z", "t", "lastx" })
-                sb.AppendLine($"{r,-5} {h.Reg64(r):X16}");
-            sb.AppendLine($"I     {h.RegI():X17}");
+            int w = h.WordSize();
+            var regs = new[] { "x", "y", "z", "t", "lastx" };
+            bool ext = h.HasExtensionRam;
+            if (View == PanelView.Bits64)
+            {
+                sb.AppendLine($"16C stack (raw 64 bits), W={w}");
+                foreach (var r in regs) sb.AppendLine($"{r,-5} {h.Reg64(r):X16}");
+                sb.AppendLine($"I     {h.RegI():X17}");
+            }
+            else if (View == PanelView.Bits128 && ext)
+            {
+                sb.AppendLine($"16C+ stack (raw 128 bits), W={w}");
+                if (!h.PlusMode) notes.Add("Plus mode is off (word size 64 or less): the upper bits are zero.");
+                foreach (var r in regs) sb.AppendLine($"{r,-5} {h.Reg128(r):X32}");
+                sb.AppendLine($"I     {h.RegI128():X32}");
+            }
+            else
+            {
+                if (View == PanelView.Bits128)
+                    notes.Add("128 bits: this chip layout has no extension RAM, showing the word size.");
+                sb.AppendLine($"16C stack (word size), W={w}");
+                UInt128 mask = w >= 128 ? UInt128.MaxValue : (UInt128.One << w) - 1;
+                string fmt = "X" + (w + 3) / 4;
+                foreach (var r in regs)
+                    sb.AppendLine($"{r,-5} {((ext ? h.Reg128(r) : h.Reg64(r)) & mask).ToString(fmt)}");
+                sb.AppendLine($"I     {(ext ? h.RegI128() : h.RegI()).ToString("X" + Math.Max(17, (w + 3) / 4))}");
+            }
             sb.AppendLine();
         }
         sb.AppendLine("recent PCs (newest first)");
@@ -199,7 +266,14 @@ sealed class MachineRunner : IDisposable
             sb.Append($"{_history[(_historyPos - i + HistorySize) % HistorySize]:X4} ");
         sb.AppendLine();
         if (cpu.UnknownOps.Count > 0)
-            sb.AppendLine($"unknown ops: {string.Join(" ", cpu.UnknownOps.Keys.Select(o => o.ToString("X3")))}");
+            notes.Add($"unknown ops: {string.Join(" ", cpu.UnknownOps.Keys.Select(o => o.ToString("X3")))}");
+        if (notes.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("notes");
+            foreach (var note in notes)
+                foreach (var line in Wrap(note)) sb.AppendLine(line);
+        }
         return sb.ToString();
     }
 

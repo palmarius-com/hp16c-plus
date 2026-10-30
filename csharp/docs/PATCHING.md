@@ -42,8 +42,8 @@ it to their own copy of the original.
 1. Start a calculator (for example the HP-16C).
 2. Save the two lines above as `first.patch` with any text editor.
 3. ROM > Apply a patch..., choose `first.patch`.
-4. ROM > ROM information shows the patch, that the 15C chip layout is
-   used (the 16C has no ROM at `2000`), and that a checksum is off.
+4. ROM > ROM information shows the patch, that the large chip layout
+   is preset (the 16C has no ROM at `2000`), and that a checksum is off.
 5. ROM > Remove all patches undoes it.
 
 Nothing breaks: the words at `2000` are never run, because no original
@@ -57,8 +57,8 @@ code jumps there. That is the next step.
 | 11C, 12C, 16C | 0000-17FF | 2000-37FF (large layout) |
 | 15C | 0000-17FF and 2000-37FF | almost nothing; replace code |
 
-"Large layout" means the simulator uses the 15C's chips for your ROM
-automatically: a second ROM chip at `2000-37FF` (6144 free words) and
+"Large layout" means the simulator presets the 15C's chips for your ROM
+(ROM > Chip layout lets you change that): a second ROM chip at `2000-37FF` (6144 free words) and
 the 15C's extra memory. On a real calculator this is the HP-15C
 hardware (for example the 15C Collector's Edition), which is how the
 16C+ runs.
@@ -134,9 +134,11 @@ the 16C ROM and about 5700 words of new code.
 - Run the self-test (ON + ×) to check the checksums.
 - Only then try a real calculator.
 
-When the patch is done, ROM > Save as my calculator keeps the patched
-calculator with its own Start button (see the user guide), so you and
-your testers do not have to apply the patch by hand every time.
+When the patch is done, Calculator > Save as my calculator keeps the patched
+calculator with its own Start button under "Your calculators" (see the
+user guide), so you and your testers do not have to apply the patch by
+hand every time. The HP-16C+ works the same way: start the 16C, apply
+the patch, save it, and it is your first own calculator.
 
 ## 9. Sharing
 

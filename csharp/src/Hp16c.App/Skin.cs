@@ -56,15 +56,17 @@ sealed class Skin
         ["divide"] = "÷", ["multiply"] = "×", ["minus"] = "−", ["plus"] = "+",
         ["-"] = "−", ["*"] = "×", ["/"] = "÷", ["."] = "·", ["dot"] = "·",
         ["sqrt"] = "√x", ["x^2"] = "x²", ["e^x"] = "eˣ", ["10^x"] = "10ˣ", ["y^x"] = "yˣ",
-        ["pi"] = "π", ["1/x"] = "1/x", ["x<>y"] = "x≷y", ["xexy"] = "x≷y", ["x<->y"] = "x≷y",
-        ["RDN"] = "R↓", ["R/S"] = "R/S", ["RUP"] = "R↑", ["Rdown"] = "R↓", ["Rup"] = "R↑",
-        ["CLx"] = "CLx", ["CLX"] = "CLx", ["LSTx"] = "LSTx", ["LASTx"] = "LSTx",
+        ["pi"] = "π", ["x<>y"] = "x≷y", ["xexy"] = "x≷y", ["x<->y"] = "x≷y",
+        ["RDN"] = "R↓", ["RUP"] = "R↑", ["Rdown"] = "R↓", ["Rup"] = "R↑",
+        ["CLX"] = "CLx",
         ["sigma+"] = "Σ+", ["sigma-"] = "Σ−", ["Sigma+"] = "Σ+", ["Sigma-"] = "Σ−",
         ["12div"] = "12÷", ["12x"] = "12×",
         ["add"] = "+", ["subtract"] = "−", ["decimal"] = "·", ["backspace"] = "←",
         ["Rdn"] = "R↓", ["Rup"] = "R↑", ["Pi"] = "π", ["mean"] = "x̄", ["Delta%"] = "Δ%",
-        ["est,r"] = "ŷ,r", ["std dev"] = "s", ["x!"] = "x!", ["xexy"] = "x≷y",
-        ["Re<>Im"] = "Re≷Im", ["lin est,r"] = "ŷ,r",
+        ["est,r"] = "ŷ,r", ["std dev"] = "s", ["xexy"] = "x≷y",
+        ["Re<>Im"] = "Re≷Im", ["lin est,r"] = "ŷ,r", ["x hat, r"] = "x̂,r", ["y hat, r"] = "ŷ,r",
+        ["lin est x"] = "x̂,r", ["lin est y"] = "ŷ,r", ["weighted avg"] = "x̄w",
+        ["INTEGRATE"] = "∫ᵧˣ", ["DeltaDYS"] = "ΔDYS",
     };
 
     /// <summary>Chip-file spelling to faceplate spelling (x<=y -> x≤y, ->H -> →H, ...).</summary>

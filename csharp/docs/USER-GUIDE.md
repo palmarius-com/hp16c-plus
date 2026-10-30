@@ -1,8 +1,9 @@
 # Palmarius Voyager simulator: user guide
 
 The simulator runs the real firmware of five HP calculators from the
-1980s, the "Voyager" series: the HP-10C, 11C, 12C, 15C and 16C. It also
-runs the HP-16C+, a 16C extended to 128-bit integers.
+1980s, the "Voyager" series: the HP-10C, 11C, 12C, 15C and 16C. Your own
+calculators run next to them: original ROMs with patches, such as the
+HP-16C+, a 16C extended to 128-bit integers.
 
 ## 1. First start: get the ROM
 
@@ -20,7 +21,9 @@ simulator. You get it in one of two ways:
   `15c.rom`), press "Open an original ROM file...".
 
 The simulator checks that the file is an original ROM and keeps a copy
-in its ROM folder (ROM > Open the ROM folder). You only do this once
+in the `data/roms` folder next to the program (ROM > Open the ROM folder),
+so the whole simulator stays in one folder: unzip it somewhere you can write
+to, not under Program Files. You only do this once
 per calculator. "ROM ready" in green means the calculator can start.
 
 ## 2. Using the calculator
@@ -60,10 +63,15 @@ as hex digits, memory listed register by register. "Load state..." puts
 it back, so you can return to exactly that point later, or send it to
 someone else.
 
-A state belongs to one calculator with one ROM: the file records the
-calculator, the ROM's fingerprint and the patches. Loading it into a
-different combination is refused with a message saying what to start
-first.
+The file carries a checksum. Reading it is fine, but a state file that
+was changed after saving is refused, as are files from before version
+0.2.0, which have no checksum.
+
+A state belongs to one calculator: the file records the calculator, the
+ROM's fingerprint, the patches and the chip layout. Another calculator or
+chip layout is refused with a message saying why. If only the ROM differs,
+for example because you changed your patch, the simulator asks: load
+anyway, or cancel.
 
 ## 4. Skins
 
@@ -90,12 +98,19 @@ extend or experiment with the original firmware; the 16C+ is one.
 - ROM > ROM information: what is loaded, and whether the ROM
   checksums are right (the calculator's self-test checks them).
 - ROM > Export full ROM: writes the complete, patched ROM as one
-  file, as Nonpareil text (`.rom`) or for NutEm/PC (`.MClst`).
+  file, as Nonpareil text (`.rom`) or for NutEm/PC (`.MClst`). It contains
+  HP's firmware, so the simulator reminds you to keep it for yourself.
+- ROM > Export patch: writes only the words that differ from the original
+  ROM. That file is yours to share; anyone can apply it to their own
+  original ROM.
 - ROM > Load full ROM file: runs such a file directly. If it is not an
   original ROM, the simulator asks which calculator should run it.
 
 If a patch has code beyond the calculator's own ROM, the simulator
-uses the larger chip layout of the 15C automatically (and says so).
+presets the larger chip layout of the 15C and says so. ROM > Chip layout
+lets you choose: with the calculator's own chips, the words beyond them
+are left out and the status line tells you what will not run. Changing
+the layout restarts the calculator.
 
 Exported ROMs contain HP's firmware: keep them for your own use, do
 not publish them. Share patches instead: a patch holds only your own
@@ -109,36 +124,62 @@ When a patched or modified ROM works the way you want, keep it as a
 calculator of its own:
 
 1. Start the calculator and apply your patches (or load a full ROM).
-2. ROM > Save as my calculator...
-3. Give it a name (for example `HP-16C+`), a short label for the
-   faceplate (`16C+`) and, if you like, a description.
+2. Calculator > Save as my calculator...
+3. Give it a name (for example `HP-16C+`), a short name for its folder
+   (`HP16C+`), a label for the faceplate (`16C+`) and, if you like, a
+   description. The button says what will happen: Save for a new short
+   name, Update for the calculator you are saving again, Override (with a
+   warning) if the name belongs to another of your calculators.
 
 It then appears on the start page under "Your calculators", with its
 own Start button, and starts with the right keyboard, display, label
 and chip layout. No patch files are needed any more. From the command
-line or a shortcut: `VoyagerSim --model HP-16C+` (the name, or the
-short id the app shows after saving, e.g. `hp-16cp`). "Delete" on the
+line or a shortcut: `VoyagerSim --model HP16C+` (the short name, or the
+full name). "Delete" on the
 start page removes it again; the original ROMs stay.
 
-What is stored: a full ROM file and a small description file, both in
-the ROM folder (ROM > Open the ROM folder, subfolder `my`). The ROM
+Patches, the chip layout, the label and a loaded skin stay until you
+switch to another calculator or close the app. If you changed something,
+the simulator then lists what and asks whether to keep it as your own
+calculator (Save, Don't save, Cancel). If nothing changed, it just
+switches. A saved calculator keeps all of these.
+
+What is stored: a folder per calculator, `data/custom/SHORTNAME`, with
+a full ROM file, a small description file and the skin, if it has one.
+ROM > Open the ROM folder gets you there. The ROM
 file contains HP's firmware, so it is for you only: share the patch,
 not the saved calculator.
+
+### Your own tests
+
+Help > Test window runs tests you write yourself, one line per test, on a
+fresh copy of the current calculator:
+
+```
+1 2 ENTER 3 0 +  =>  42 h
+```
+
+Help > How to write a test explains it.
 
 ## 6. The HP-16C+
 
 The 16C+ is the 16C with word sizes up to 128 bits. It needs the 16C
-ROM plus the 16C+ patch:
+ROM plus the 16C+ patch. It is not on the list of original calculators:
+you make it once, and it becomes your first own calculator:
 
 1. Start the HP-16C.
-2. ROM > Apply a patch..., choose `16cplus.patch`. The simulator
-   switches to the 15C chip layout by itself (the 16C+ code lives in the
-   15C's second ROM chip) and the faceplate says 16C+.
-3. ROM > Save as my calculator..., name it `HP-16C+`. From now on it
-   has its own Start button.
+2. ROM > Apply a patch..., choose `16cplus.patch`. The simulator presets
+   the 15C chip layout (the 16C+ code lives in the 15C's second ROM chip)
+   and suggests the label 16C+.
+3. Calculator > Save as my calculator..., name it `HP-16C+`.
 
-Calculator > HP-16C+ does steps 1 and 2 in one go when the patch is
-found in the project's `build/` folder.
+From now on it is on the start page under "Your calculators", with its
+own Start button. You need the patch file only this once.
+
+The app recognises known builds by their fingerprint, so it suggests the
+label 16C+ whatever the patch file is called, but only on the large chip
+layout, where the 16C+ can really run. The label is free text: Skin >
+Faceplate label sets your own; empty goes back to the automatic one.
 
 Quick start: `HEX 8 0 f WSIZE` sets 128 bits; `f WINDOW 0` to `3` and
 `g <` / `g >` show all 32 hex digits.

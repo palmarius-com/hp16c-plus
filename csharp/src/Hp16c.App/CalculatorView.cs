@@ -22,6 +22,9 @@ sealed class CalculatorView : Control
     static readonly IBrush White = Brushes.White;
     static readonly Typeface Sans = new("Arial");
 
+    /// <summary>A test is playing: mouse and keyboard stay out.</summary>
+    public bool Locked { get; set; }
+
     MachineRunner? _runner;
     Skin _skin = Skin.Builtin16c();
     IBrush Body = Brushes.Black, Bezel = Brushes.Gray, Gold = Brushes.Goldenrod, Blue = Brushes.SkyBlue;
@@ -244,7 +247,7 @@ sealed class CalculatorView : Control
         base.OnPointerPressed(e);
         Focus();
         int code = HitTest(e.GetPosition(this));
-        if (code < 0 || _runner is null) return;
+        if (code < 0 || _runner is null || Locked) return;
         _pressed = code;
         e.Pointer.Capture(this);
         _runner.Press(code);
@@ -261,10 +264,17 @@ sealed class CalculatorView : Control
         InvalidateVisual();
     }
 
+    /// <summary>Show a key as pressed (-1 = none) while a test plays it.</summary>
+    public void ShowKey(int code)
+    {
+        _pressed = code;
+        InvalidateVisual();
+    }
+
     /// <summary>Key from the PC keyboard (press now, release on key up).</summary>
     public void PressFromKeyboard(int code)
     {
-        if (_runner is null || _pressed == code) return;
+        if (_runner is null || _pressed == code || Locked) return;
         _pressed = code;
         _runner.Press(code);
         InvalidateVisual();
@@ -272,7 +282,7 @@ sealed class CalculatorView : Control
 
     public void ReleaseFromKeyboard()
     {
-        if (_pressed < 0) return;
+        if (_pressed < 0 || Locked) return;
         _pressed = -1;
         _runner?.Release();
         InvalidateVisual();

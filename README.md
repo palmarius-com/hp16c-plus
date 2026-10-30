@@ -108,7 +108,7 @@ window: download, a test sheet of key sequences, patch, sheet again.
 - **No HP firmware included.** The start page gets each ROM with one
   click from Eric Smith's Nonpareil repository, or from a file you
   have. The app checks that it is an original ROM (by fingerprint) and
-  keeps a copy in your application data folder.
+  keeps a copy in the `data/roms` folder next to the exe.
 - **Patches:** ROM > Apply a patch puts your words on top of the
   original ROM; ROM > Export full ROM writes the patched ROM (Nonpareil
   `.rom` or NutEm/PC `.MClst`), ROM > Load full ROM runs one. Code
@@ -125,7 +125,9 @@ window: download, a test sheet of key sequences, patch, sheet again.
   `tools/make_patch.py` assembles a Nut source file into a patch and
   can fix the chip checksums.
 - The 16C+ needs its patch: `python tools/build_plus.py` writes
-  `build/16cplus.obj`, which the app finds (Calculator > HP-16C+).
+  `build/16cplus.obj`. Start the 16C, ROM > Apply a patch, then Calculator >
+  Save as my calculator: it is your first own calculator, with its own
+  Start button under "Your calculators".
 - `csharp/src/Nut.Core/ChipDefs/` ships Nonpareil's chip definitions
   (keyboard and LCD maps, GPLv3, no firmware).
 - `csharp/nuget.config` maps the Avalonia packages to nuget.org, for

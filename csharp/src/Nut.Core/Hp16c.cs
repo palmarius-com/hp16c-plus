@@ -133,6 +133,44 @@ public class Hp16c : Voyager
         return (hi << 56) | (ulong)Val(lo, NutCpu.W);
     }
 
+    // 16C+: bits 64-119 in RAM 0x11-0x15 (0x17 for I), bits 120-127 in 0x16.
+    static readonly Dictionary<string, int> Ext = new()
+        { ["x"] = 0, ["y"] = 1, ["z"] = 2, ["t"] = 3, ["lastx"] = 4 };
+
+    /// <summary>The chip layout has the RAM the 16C+ extension uses.</summary>
+    public bool HasExtensionRam => Cpu.RamExists[0x10];
+
+    /// <summary>16C+ running above 64 bits (RAM 0x10 digit 2).</summary>
+    public bool PlusMode => HasExtensionRam && Cpu.Ram[0x10][2] == 1;
+
+    /// <summary>Word size in bits, in either mode.</summary>
+    public int WordSize()
+    {
+        if (PlusMode) return (Cpu.Ram[0x10][1] << 4) | Cpu.Ram[0x10][0];
+        var d = Cpu.Ram[0x06];
+        int nibbles = 16 - d[11] == 0 ? 16 : 16 - d[11];
+        int top = d[10] switch { 1 => 1, 3 => 2, 7 => 3, _ => 4 };
+        return (nibbles - 1) * 4 + top;
+    }
+
+    /// <summary>Stack register with the extension bits, 128 bits raw.</summary>
+    public UInt128 Reg128(string name)
+    {
+        int n = Ext[name];
+        var r16 = Cpu.Ram[0x16];
+        UInt128 top = ((UInt128)r16[2 * n + 1] << 4) | r16[2 * n];
+        return (top << 120) | (Val(Cpu.Ram[0x11 + n], NutCpu.W) << 64) | Reg64(name);
+    }
+
+    /// <summary>I with the extension bits, 128 bits raw.</summary>
+    public UInt128 RegI128()
+    {
+        var r16 = Cpu.Ram[0x16];
+        UInt128 top = ((UInt128)r16[11] << 4) | r16[10];
+        UInt128 low = RegI() & ulong.MaxValue;
+        return (top << 120) | (Val(Cpu.Ram[0x17], NutCpu.W) << 64) | low;
+    }
+
     /// <summary>I, 68 bits: RAM 0xFD (low 14 nibbles) + 0xFE digits 5-3.</summary>
     public UInt128 RegI()
     {

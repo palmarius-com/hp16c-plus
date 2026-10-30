@@ -91,6 +91,20 @@ public sealed class RomImage
         return sb.ToString();
     }
 
+    /// <summary>Patch text: the words of this image that differ from an original
+    /// ROM, nothing else. Contains no HP code that was not changed.</summary>
+    public string ToPatchText(RomImage original, string title)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"# {title}\n");
+        sb.Append($"# Made with the Palmarius Voyager simulator. Format: aaaa:www (hex address : 10-bit word).\n");
+        sb.Append($"# For the original ROM with fingerprint {original.CanonicalSha256()}\n");
+        sb.Append($"# Applied to it, this gives fingerprint {CanonicalSha256()}\n");
+        foreach (var (a, w) in Words)
+            if (original.Words.GetValueOrDefault(a, -1) != w) sb.Append($"{a:x4}:{w:x3}\n");
+        return sb.ToString();
+    }
+
     /// <summary>Full image for NutEm/PC: one "AAAA WWW" line per word from 0, gaps as 0.</summary>
     public string ToMClst(int size = 0x3800)
     {

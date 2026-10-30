@@ -32,6 +32,17 @@ public static class ModelCatalog
     /// 15C's RAM. For patches that need more space than the model has.</summary>
     public const string LargeChipMap = "15c-192";
 
+    /// <summary>Fingerprints of known patched ROMs -> faceplate label. Identifies
+    /// a build by what it is, whatever its file was called.</summary>
+    public static readonly Dictionary<string, string> KnownBuilds = new()
+    {
+        ["4f408e65f64a7ba27a66237116187474c3c26517ac99324f5fa36cdd8feb37cd"] = "16C+",
+    };
+
+    /// <summary>Label of a known patched ROM, or null.</summary>
+    public static string? KnownBuild(RomImage rom) =>
+        KnownBuilds.GetValueOrDefault(rom.CanonicalSha256());
+
     public static Model Get(string id) => Models.First(m => m.Id == id);
 
     /// <summary>Which original ROM this is, if any.</summary>
