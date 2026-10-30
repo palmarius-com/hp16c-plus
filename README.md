@@ -97,7 +97,13 @@ Linux (.NET 10). It runs the **HP-10C, 11C, 12C, 15C and 16C** and the
 dotnet run --project csharp/src/Hp16c.App                 # the simulator
 dotnet run --project csharp/src/Hp16c.App -- --model 15c  # start a model directly
 dotnet run --project csharp/tests/Nut.Replay -c Release   # 1559 cases, about 1 s
+dotnet run --project csharp/tests/App.Flow -c Release -- --sheet FILE --patch FILE
 ```
+
+A ready-to-run Windows build (needs the .NET 10 Runtime) is on the
+[releases page](https://github.com/palmarius-com/hp16c-plus/releases/latest).
+`App.Flow` runs the app's ROM store, session and key queue without the
+window: download, a test sheet of key sequences, patch, sheet again.
 
 - **No HP firmware included.** The start page gets each ROM with one
   click from Eric Smith's Nonpareil repository, or from a file you

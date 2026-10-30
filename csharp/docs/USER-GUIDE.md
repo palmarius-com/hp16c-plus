@@ -33,6 +33,10 @@ per calculator. "ROM ready" in green means the calculator can start.
 - The calculator starts switched off. Press ON (or Esc).
 - After a fresh start the display shows `Pr Error` (as a real one does
   after new batteries). Any key clears it.
+- Keys pressed together: a few functions use ON plus a second key, always
+  starting with the calculator off. Hold ON with the mouse, press the
+  second key on the PC keyboard, release both. ON + `*` is the self-test,
+  ON + `-` the memory reset.
 - Calculator > Real speed runs the calculator as slowly as the real
   one (handy for programs that pause). Without it, the simulator runs
   as fast as your PC allows.
