@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<!--
+Copyright 2007, 2008, 2022 Eric Smith <spacewar@gmail.com>
+-->
+<!--
+Thanks to Mike T., Didier Lachieze, Mark H. Shin, and Alejandro Garza for assistance
+with the 10C display map.
+-->
+
+<!DOCTYPE calcdef SYSTEM "http://nonpareil.brouhaha.com/dtd/calcdef-1.0.dtd">
+
+<calcdef version="1.0"
+         arch="Nut"
+         platform="Voyager"
+         model="10C"
+         copyright="Copyright 2007, 2008, 2022 Eric Smith &lt;spacewar@gmail.com&gt;"
+         license="GPLv3 only (no later version)">
+
+  <chip type="nut_cpu">
+    <part_info>
+      <vendor_name>HP</vendor_name>
+      <part_number>1LF5-0301</part_number>
+    </part_info>
+    <inst_clock osc_type="LC" freq="215000"/>
+  </chip>
+
+  <chip type="voyager_r2d2" index="0">
+    <part_info>
+      <vendor_name>HP</vendor_name>
+      <part_number>1LH1-0305</part_number>
+    </part_info>
+    <memory addr_space="inst" banks="0" base_addr="0x0000" size="0x1000">
+    </memory>
+    <memory addr_space="data" base_addr="0x00" size="0x08">
+    </memory>
+    <memory addr_space="data" base_addr="0xe0" size="0x20">
+    </memory>
+
+    <lcd digits="11" segments="10">
+      <!-- For each of 11 digits, we need segments a-g for the actual digit,
+	   segment h for the decimal point, segment i for the tail of the
+	   comma, and segment j for the annunciator. -->
+      <digit digit="0">
+        <segment segment="a" reg="-1" bit="-1"/>
+        <segment segment="b" reg="-1" bit="-1"/>
+        <segment segment="c" reg="-1" bit="-1"/>
+        <segment segment="d" reg="-1" bit="-1"/>
+        <segment segment="e" reg="-1" bit="-1"/>
+        <segment segment="f" reg="-1" bit="-1"/>
+        <segment segment="g" reg="10" bit="46"/> <!-- minus -->
+        <segment segment="h" reg="-1" bit="-1"/>
+        <segment segment="i" reg="-1" bit="-1"/>
+        <segment segment="j" reg="-1" bit="-1"/>
+      </digit>
+      <digit digit="1">
+        <segment segment="a" reg="10" bit="43"/>
+        <segment segment="b" reg="10" bit="41"/>
+        <segment segment="c" reg="10" bit="45"/>
+        <segment segment="d" reg="10" bit="47"/>
+        <segment segment="e" reg="10" bit="44"/>
+        <segment segment="f" reg="10" bit="42"/>
+        <segment segment="g" reg="10" bit="40"/>
+        <segment segment="h" reg="10" bit="49"/>
+        <segment segment="i" reg="10" bit="48"/>
+        <segment segment="j" reg="-1" bit="-1"/> <!-- battery low -->
+      </digit>
+      <digit digit="2">
+        <segment segment="a" reg="10" bit="15"/>
+        <segment segment="b" reg="10" bit="13"/>
+        <segment segment="c" reg="10" bit="17"/>
+        <segment segment="d" reg="10" bit="51"/>
+        <segment segment="e" reg="10" bit="16"/>
+        <segment segment="f" reg="10" bit="14"/>
+        <segment segment="g" reg="10" bit="12"/>
+        <segment segment="h" reg="10" bit="53"/>
+        <segment segment="i" reg="10" bit="52"/>
+        <segment segment="j" reg="10" bit="50"/> <!-- USER, not used -->
+      </digit>
+      <digit digit="3">
+        <segment segment="a" reg="10" bit="9"/>
+        <segment segment="b" reg="10" bit="7"/>
+        <segment segment="c" reg="10" bit="11"/>
+        <segment segment="d" reg="10" bit="55"/>
+        <segment segment="e" reg="10" bit="10"/>
+        <segment segment="f" reg="10" bit="8"/>
+        <segment segment="g" reg="10" bit="6"/>
+        <segment segment="h" reg="10" bit="25"/>
+        <segment segment="i" reg="10" bit="24"/>
+        <segment segment="j" reg="10" bit="54"/> <!-- f -->
+      </digit>
+      <digit digit="4">
+        <segment segment="a" reg="10" bit="29"/>
+        <segment segment="b" reg="10" bit="27"/>
+        <segment segment="c" reg="10" bit="31"/>
+        <segment segment="d" reg="10" bit="19"/>
+        <segment segment="e" reg="10" bit="30"/>
+        <segment segment="f" reg="10" bit="28"/>
+        <segment segment="g" reg="10" bit="26"/>
+        <segment segment="h" reg="10" bit="33"/>
+        <segment segment="i" reg="10" bit="32"/>
+        <segment segment="j" reg="10" bit="18"/> <!-- g, not used -->
+      </digit>
+      <digit digit="5">
+        <segment segment="a" reg="10" bit="37"/>
+        <segment segment="b" reg="10" bit="35"/>
+        <segment segment="c" reg="10" bit="39"/>
+        <segment segment="d" reg="10" bit="21"/>
+        <segment segment="e" reg="10" bit="38"/>
+        <segment segment="f" reg="10" bit="36"/>
+        <segment segment="g" reg="10" bit="34"/>
+        <segment segment="h" reg="10" bit="23"/>
+        <segment segment="i" reg="10" bit="22"/>
+        <segment segment="j" reg="10" bit="20"/> <!-- BEGIN, not used -->
+      </digit>
+      <digit digit="6">
+        <segment segment="a" reg="9" bit="53"/>
+        <segment segment="b" reg="9" bit="51"/>
+        <segment segment="c" reg="9" bit="55"/>
+        <segment segment="d" reg="9" bit="7"/>
+        <segment segment="e" reg="9" bit="54"/>
+        <segment segment="f" reg="9" bit="52"/>
+        <segment segment="g" reg="9" bit="50"/>
+        <segment segment="h" reg="9" bit="49"/>
+        <segment segment="i" reg="9" bit="48"/>
+        <segment segment="j" reg="9" bit="6"/> <!-- G -->
+      </digit>
+      <digit digit="7">
+        <segment segment="a" reg="9" bit="45"/>
+        <segment segment="b" reg="9" bit="43"/>
+        <segment segment="c" reg="9" bit="47"/>
+        <segment segment="d" reg="9" bit="9"/>
+        <segment segment="e" reg="9" bit="46"/>
+        <segment segment="f" reg="9" bit="44"/>
+        <segment segment="g" reg="9" bit="42"/>
+        <segment segment="h" reg="9" bit="41"/>
+        <segment segment="i" reg="9" bit="40"/>
+        <segment segment="j" reg="9" bit="8"/> <!-- RAD -->
+      </digit>
+      <digit digit="8">
+        <segment segment="a" reg="9" bit="37"/>
+        <segment segment="b" reg="9" bit="35"/>
+        <segment segment="c" reg="9" bit="39"/>
+        <segment segment="d" reg="9" bit="11"/>
+        <segment segment="e" reg="9" bit="38"/>
+        <segment segment="f" reg="9" bit="36"/>
+        <segment segment="g" reg="9" bit="34"/>
+        <segment segment="h" reg="9" bit="17"/>
+        <segment segment="i" reg="9" bit="16"/>
+        <segment segment="j" reg="9" bit="10"/> <!-- D.MY, no tused -->
+      </digit>
+      <digit digit="9">
+        <segment segment="a" reg="9" bit="31"/>
+        <segment segment="b" reg="9" bit="29"/>
+        <segment segment="c" reg="9" bit="33"/>
+        <segment segment="d" reg="9" bit="15"/>
+        <segment segment="e" reg="9" bit="32"/>
+        <segment segment="f" reg="9" bit="30"/>
+        <segment segment="g" reg="9" bit="28"/>
+        <segment segment="h" reg="9" bit="13"/>
+        <segment segment="i" reg="9" bit="12"/>
+        <segment segment="j" reg="9" bit="14"/> <!-- C, not used -->
+      </digit>
+      <digit digit="10">
+        <segment segment="a" reg="9" bit="25"/>
+        <segment segment="b" reg="9" bit="23"/>
+        <segment segment="c" reg="9" bit="27"/>
+        <segment segment="d" reg="9" bit="19"/>
+        <segment segment="e" reg="9" bit="26"/>
+        <segment segment="f" reg="9" bit="24"/>
+        <segment segment="g" reg="9" bit="22"/>
+        <segment segment="h" reg="9" bit="21"/>
+        <segment segment="i" reg="9" bit="20"/>
+        <segment segment="j" reg="9" bit="18"/> <!-- PRGM -->
+      </digit>
+    </lcd>
+
+  </chip>
+
+  <keyboard>
+                                               <!-- unshifted  f-shifted  -->
+    <key user_keycode="11" hw_keycode="0x13"/> <!-- sqrt       x^2        -->
+    <key user_keycode="12" hw_keycode="0x33"/> <!-- e^x        LN         -->
+    <key user_keycode="13" hw_keycode="0x73"/> <!-- 10^x       LOG        -->
+    <key user_keycode="14" hw_keycode="0xc3"/> <!-- y^x        ->H.MS     -->
+    <key user_keycode="15" hw_keycode="0x83"/> <!-- 1/x        ->H        -->
+    <key user_keycode="16" hw_keycode="0x82"/> <!-- CHS        pi         -->
+    <key user_keycode="17" hw_keycode="0xc2"/> <!-- 7          FIX        -->
+    <key user_keycode="18" hw_keycode="0x72"/> <!-- 8          SCI        -->
+    <key user_keycode="19" hw_keycode="0x32"/> <!-- 9          ENG        -->
+    <key user_keycode="10" hw_keycode="0x12"/> <!-- divide     x<=y       -->
+
+    <key user_keycode="21" hw_keycode="0x10"/> <!-- %          ->R        -->
+    <key user_keycode="22" hw_keycode="0x30"/> <!-- GTO        ->P        -->
+    <key user_keycode="23" hw_keycode="0x70"/> <!-- SIN        SIN-1      -->
+    <key user_keycode="24" hw_keycode="0xc0"/> <!-- COS        COS-1      -->
+    <key user_keycode="25" hw_keycode="0x80"/> <!-- TAN        TAN-1      -->
+    <key user_keycode="26" hw_keycode="0x87"/> <!-- 4          DEG        -->
+    <key user_keycode="27" hw_keycode="0xc7"/> <!-- 5          RAD        -->
+    <key user_keycode="28" hw_keycode="0x77"/> <!-- 6          GRD        -->
+    <key user_keycode="29" hw_keycode="0x37"/> <!-- multiply   x=0        -->
+    <key user_keycode="20" hw_keycode="0x17"/>
+
+    <key user_keycode="31" hw_keycode="0x11"/> <!-- R/S        PSE        -->
+    <key user_keycode="32" hw_keycode="0x31"/> <!-- SST        BST        -->
+    <key user_keycode="33" hw_keycode="0x71"/> <!-- Rdn        CLR PRGM   -->
+    <key user_keycode="34" hw_keycode="0xc1"/> <!-- x<>y       CLR REG    -->
+    <key user_keycode="35" hw_keycode="0x81"/> <!-- CLx        CLR PREFIX -->
+    <key user_keycode="36" hw_keycode="0x84"/> <!-- ENTER      LASTx      -->
+    <key user_keycode="37" hw_keycode="0xc4"/> <!-- 1          x hat, r   -->
+    <key user_keycode="38" hw_keycode="0x74"/> <!-- 2          y hat, r   -->
+    <key user_keycode="39" hw_keycode="0x34"/> <!-- 3          L.R.       -->
+    <key user_keycode="30" hw_keycode="0x14"/> <!-- subtract   ->RAD      -->
+
+    <key user_keycode="41" hw_keycode="0x18"/> <!-- ON                    -->
+    <key user_keycode="42" hw_keycode="0x38"/> <!-- f                     -->
+    <key user_keycode="43" hw_keycode="0x78"/> <!-- P/R        MEM        -->
+    <key user_keycode="44" hw_keycode="0xc8"/> <!-- STO        INT        -->
+    <key user_keycode="45" hw_keycode="0x88"/> <!-- RCL        FRAC       -->
+    <key user_keycode="47" hw_keycode="0xc5"/> <!-- 0          mean       -->
+    <key user_keycode="48" hw_keycode="0x75"/> <!-- decimal    std dev    -->
+    <key user_keycode="49" hw_keycode="0x35"/> <!-- Sigma+     Sigma-     -->
+    <key user_keycode="40" hw_keycode="0x15"/> <!-- add        ->DEG      -->
+  </keyboard>
+
+  <obj_file addr_space="inst" hash="2649517f011acfbff37b07801ac8436442c2f2158e3400e78a1a2d6480067cb4">
+    10c.rom
+  </obj_file>
+
+</calcdef>

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Hp16c.App/Hp16c.App.csproj" />
+    <Project Path="src/Nut.Core/Nut.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Nut.Replay/Nut.Replay.csproj" />
+  </Folder>
+</Solution>

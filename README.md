@@ -52,6 +52,8 @@ emulators or on a real HP-15C Collector's Edition.
 | `plus/src/16cplus.asm` | The 16C+ source |
 | `re/16c.sym` | Labels and comments for the 16C ROM (no ROM code) |
 | `tools/build_plus.py` | Assemble the 16C+ into `build/16cplus.obj` |
+| `tools/make_patch.py` | Assemble any Nut source into a patch file |
+| `csharp/` | C# emulator and the desktop simulator |
 | `tools/fetch_nonpareil.py` | Download the ROMs and chip files |
 | `tools/make_cases16c.py` | Generate the stored test cases |
 | `tools/depth16c.py` | Measured return stack depth of the new code |
@@ -80,6 +82,48 @@ print(c.run("WINDOW 2"))    # ' FFFFFFFd .h', then '        2 h.'
 ```
 
 `HP16C()` without `plus` is the stock 16C.
+
+## Desktop simulator (C#, Avalonia)
+
+The Palmarius Voyager simulator. The faceplates carry the Palmarius
+mark (three bars and the blue square) where the maker's logo would be.
+
+`csharp/` holds a C# port of the emulator (`Nut.Core`, checked against
+the same stored test cases) and a desktop app for Windows, macOS and
+Linux (.NET 10). It runs the **HP-10C, 11C, 12C, 15C and 16C** and the
+16C+, with a faceplate for each model.
+
+```sh
+dotnet run --project csharp/src/Hp16c.App                 # the simulator
+dotnet run --project csharp/src/Hp16c.App -- --model 15c  # start a model directly
+dotnet run --project csharp/tests/Nut.Replay -c Release   # 1559 cases, about 1 s
+```
+
+- **No HP firmware included.** The start page gets each ROM with one
+  click from Eric Smith's Nonpareil repository, or from a file you
+  have. The app checks that it is an original ROM (by fingerprint) and
+  keeps a copy in your application data folder.
+- **Patches:** ROM > Apply a patch puts your words on top of the
+  original ROM; ROM > Export full ROM writes the patched ROM (Nonpareil
+  `.rom` or NutEm/PC `.MClst`), ROM > Load full ROM runs one. Code
+  beyond a model's own ROM runs on the 15C's larger chip layout
+  automatically; ROM > ROM information shows the chip checksums.
+- **Skins:** generated from each model's chip file (the 16C has a
+  hand-made one), or your own as a JSON file (Skin > Save current skin
+  as a template, edit, Skin > Load skin file).
+- **Status panel:** Nut CPU registers, flags, return stack, the 16C
+  stack and the last program counters.
+- **Guides** (also under Help in the app):
+  [user guide](csharp/docs/USER-GUIDE.md),
+  [how to write a patch](csharp/docs/PATCHING.md).
+  `tools/make_patch.py` assembles a Nut source file into a patch and
+  can fix the chip checksums.
+- The 16C+ needs its patch: `python tools/build_plus.py` writes
+  `build/16cplus.obj`, which the app finds (Calculator > HP-16C+).
+- `csharp/src/Nut.Core/ChipDefs/` ships Nonpareil's chip definitions
+  (keyboard and LCD maps, GPLv3, no firmware).
+- `csharp/nuget.config` maps the Avalonia packages to nuget.org, for
+  machines with NuGet package source mapping switched on.
 
 ## Tests
 
