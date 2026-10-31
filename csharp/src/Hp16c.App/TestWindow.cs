@@ -8,7 +8,7 @@ using Avalonia.Threading;
 namespace HpSim;
 
 /// <summary>Help > Test window: write key sequences with expected displays and
-/// run them on a fresh copy of the current calculator.</summary>
+/// run them on a copy of the current calculator.</summary>
 sealed class TestWindow : Window
 {
     const string Sample =

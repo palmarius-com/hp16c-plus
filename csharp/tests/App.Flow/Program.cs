@@ -186,6 +186,16 @@ if (windowExe is not null)
     Check("deleted calculator left the menu", !machine.Ask("menu").Contains("App Flow Test"));
     Check("its folder is gone", !Directory.Exists(calcDir));
     Check("a 16C+ preset does not exist", machine.Ask("start 16c+").StartsWith("error"));
+    // a ROM or patch line may carry a note after the word; a patch that breaks a chip's checksum can be fixed
+    machine.Ask("start 16c");
+    var noteFile = Path.Combine(root, "build", "app-flow-note.patch");
+    File.WriteAllLines(noteFile, ["13ff:001	adds one, with a note"]);
+    Check("patch line with a note is read", machine.Ask("patch " + noteFile).StartsWith("ok 1 patches") &&
+          machine.Ask("rominfo").Contains("0000-17FF: checksum off (2, needs 1)"));
+    Check("checksum fix changes one word", machine.Ask("fix-checksum").Contains("Word 17FF would change from 3E0 to 3DF") &&
+          machine.Ask("rominfo").Contains("0000-17FF: checksum ok") && machine.Ask("rominfo").Contains("checksum update (1 words)"));
+    Check("nothing left to fix", machine.Ask("fix-checksum") == "ok nothing to fix");
+    machine.Ask("unpatch");
     // the same sheet as a test file, one line per test, run by the Test window's code
     var sheetText = new StringBuilder("# HP-16C+ test sheet: 16C ROM + the 16C+ patch. One line, one test.\n");
     foreach (var part in sheet)

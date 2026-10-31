@@ -32,6 +32,16 @@ public static class ModelCatalog
     /// 15C's RAM. For patches that need more space than the model has.</summary>
     public const string LargeChipMap = "15c-192";
 
+    /// <summary>The same, with the second ROM chip as one 8K block at 1800-37FF.
+    /// For a ROM that has words in 1800-1FFF (e.g. the 16CEx): its checksum covers
+    /// the whole block. The machine runs the same either way; this only decides
+    /// which chip boundaries the checksum report uses.</summary>
+    public const string LargeChipMap8K = "15c-192-8k";
+
+    /// <summary>The large chip map that fits this ROM.</summary>
+    public static string LargeMapFor(RomImage rom) =>
+        rom.Words.Keys.Any(a => a >= 0x1800 && a <= 0x1FFF) ? LargeChipMap8K : LargeChipMap;
+
     /// <summary>Fingerprints of known patched ROMs -> faceplate label. Identifies
     /// a build by what it is, whatever its file was called.</summary>
     public static readonly Dictionary<string, string> KnownBuilds = new()

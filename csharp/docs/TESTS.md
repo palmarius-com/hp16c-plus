@@ -1,9 +1,9 @@
 # How to write a test
 
 Help > Test window lets you write down key sequences and what the display
-must show, and run them with one click. It always starts with a fresh copy
-of the calculator you are running, so your calculator and its memory are
-not touched.
+must show, and run them with one click. It runs on a copy of the calculator you
+are running: the same ROM and patches, its own memory, so your calculator
+and its memory are not touched.
 
 ## One line, one test
 

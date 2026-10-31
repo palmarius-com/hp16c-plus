@@ -27,8 +27,11 @@ public sealed class RomImage
         foreach (var raw in lines)
         {
             var line = raw.Split('#')[0].Trim();
-            if (line.Length == 8 && line[4] == ':')
-                img.Words[Convert.ToInt32(line[..4], 16)] = Convert.ToInt32(line[5..], 16);
+            // aaaa:www, then nothing or a note after white space (01DA:3D0 del)
+            if (line.Length >= 8 && line[4] == ':' && (line.Length == 8 || char.IsWhiteSpace(line[8])) &&
+                int.TryParse(line.AsSpan(0, 4), System.Globalization.NumberStyles.AllowHexSpecifier, null, out var addr) &&
+                int.TryParse(line.AsSpan(5, 3), System.Globalization.NumberStyles.AllowHexSpecifier, null, out var word))
+                img.Words[addr] = word;
         }
         return img;
     }

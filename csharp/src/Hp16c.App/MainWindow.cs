@@ -599,6 +599,21 @@ sealed partial class MainWindow : Window
         }
         _session.Patches.Add((f.Value.Name, patch));
         Run(_session);
+        await OfferChecksum();
+    }
+
+    /// <summary>After a change to the ROM: if a chip no longer adds up to 1, offer to fix
+    /// it. The user decides; the fix is a patch of its own, ROM > Remove all patches
+    /// takes it away.</summary>
+    async Task OfferChecksum()
+    {
+        if (_session?.ChecksumFixFor(_session.Image()) is not { } fix) return;
+        var nl = Environment.NewLine;
+        if (!await Confirm(fix.Why + nl + nl + "Update the checksum? The change is added as a patch called " +
+                           "'checksum update' (ROM > Remove all patches takes it away); the calculator " +
+                           "runs either way.")) return;
+        _session.Patches.Add(("checksum update", fix.Patch));
+        Run(_session);
     }
 
     void RemovePatches()
@@ -617,14 +632,18 @@ sealed partial class MainWindow : Window
         var original = ModelCatalog.Identify(img);
         var model = original ?? await AskModel(f.Value.Name);
         if (model is null || !await ConfirmLeave()) return;
+        StartFullRom(img, f.Value.Name, model, original is not null, _pickedPath);
+        if (original is null) await OfferChecksum();
+    }
+
+    void StartFullRom(RomImage img, string name, ModelCatalog.Model model, bool original, string? path) =>
         Run(new Session
         {
             Model = model,
             Base = img,
-            BaseLabel = original is not null ? $"original {model.Name} ({f.Value.Name})" : $"modified ROM {f.Value.Name}",
-            RomFile = _pickedPath,
+            BaseLabel = original ? $"original {model.Name} ({name})" : $"modified ROM {name}",
+            RomFile = path,
         });
-    }
 
     async Task<ModelCatalog.Model?> AskModel(string file)
     {
@@ -907,11 +926,11 @@ sealed partial class MainWindow : Window
     // ------------------------------------------------------------- state
     void ShowTests()
     {
-        if (_session is null) { Say("Start a calculator first: tests run on a fresh copy of it."); return; }
+        if (_session is null) { Say("Start a calculator first: tests run on a copy of it."); return; }
         new TestWindow(_session.Name ?? _session.Model.Name, () => RunTests).Show(this);
     }
 
-    /// <summary>Run test lines on a fresh copy of the current calculator.</summary>
+    /// <summary>Run test lines on a copy of the current calculator (same ROM and patches, own memory).</summary>
     async Task<string> RunTests(string title, IReadOnlyList<string> lines, CancellationToken stop,
                                 Action<TestScript.Result> show)
     {
@@ -923,7 +942,7 @@ sealed partial class MainWindow : Window
         int pass = 0, fail = 0;
         // the test machine takes over the window; the user's calculator waits untouched
         var own = _runner!;
-        var run = new MachineRunner(s.CreateMachine(img, chips, large), $"Test on a fresh {s.Name ?? s.Model.Name}")
+        var run = new MachineRunner(s.CreateMachine(img, chips, large), $"Test copy of {s.Name ?? s.Model.Name}" + (s.Patches.Count > 0 ? $" + {s.Patches.Count} patch" + (s.Patches.Count > 1 ? "es" : "") : ""))
         {
             View = own.View,
             KeySeen = code => Dispatcher.UIThread.Post(() => _calc.ShowKey(code)),

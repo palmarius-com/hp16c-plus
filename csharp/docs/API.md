@@ -18,8 +18,10 @@ through the same code as the mouse and keyboard.
 | `download ID` | what "Get ROM from Nonpareil" does | where it was saved |
 | `start ID` | start `10c`...`16c` or one of your calculators; no dialogs, changes are dropped | the model |
 | `patch FILE` | apply a patch to the running calculator | number of patches |
+| `load-rom FILE` | what "Load full ROM file" does, without the dialogs: an original ROM is recognised, any other runs on the current calculator's keyboard and display (the 16C if none runs) | the status line |
+| `fix-checksum` | what the checksum popup does on Yes: one word per off chip, as a patch called "checksum update" | the change, or `nothing to fix` |
 | `unpatch` | remove all patches | |
-| `testrun FILE` | run a test file (docs/TESTS.md) on a fresh copy; all failures go to `FILE.failures` | counts, first failures |
+| `testrun FILE` | run a test file (docs/TESTS.md) on a copy of the running calculator (ROM and patches, own memory); all failures go to `FILE.failures` | counts, first failures |
 | `chips V` | chip layout: `own`, `large` or `preset`; restarts the calculator | the status line |
 | `label [TEXT]` | set the faceplate label (`auto` = automatic); no text: read it | the label |
 | `message` | the status line at the bottom of the window | the text |

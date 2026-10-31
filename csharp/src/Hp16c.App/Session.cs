@@ -95,7 +95,31 @@ sealed class Session
     public (Voyager.Ncd Chips, bool Large) ChipMap(RomImage img)
     {
         bool large = UserLarge ?? NeedsLarge(img);
-        return (large ? Voyager.EmbeddedNcd(ModelCatalog.LargeChipMap) : Voyager.EmbeddedNcd(Model.Id), large);
+        return (large ? Voyager.EmbeddedNcd(ModelCatalog.LargeMapFor(img)) : Voyager.EmbeddedNcd(Model.Id), large);
+    }
+
+    public sealed record ChecksumFix(RomImage Patch, string Why);
+
+    /// <summary>The one word per chip to change so that every chip with ROM adds up
+    /// to 1 (the self-test's rule), or null if they all do. The word is the last of
+    /// the chip: where Voyager ROMs keep their checksum, or an unused 0.</summary>
+    public ChecksumFix? ChecksumFixFor(RomImage img)
+    {
+        var (chips, _) = ChipMap(img);
+        var patch = new RomImage();
+        var why = new List<string>();
+        foreach (var (lo, hi) in RomRanges(chips))
+        {
+            if (!img.Words.Keys.Any(a => a >= lo && a <= hi)) continue;
+            int sum = img.ChipSum(lo, hi);
+            if (sum == 1) continue;
+            int old = img.Words.GetValueOrDefault(hi);
+            int word = ((old + 1 - sum) % 1023 + 1023) % 1023;
+            patch.Words[hi] = word;
+            why.Add($"ROM chip {lo:X4}-{hi:X4} adds up to {sum}, the self-test wants 1. " +
+                    $"Word {hi:X4} would change from {old:X3} to {word:X3}.");
+        }
+        return patch.Words.Count == 0 ? null : new ChecksumFix(patch, string.Join(Environment.NewLine, why));
     }
 
     /// <summary>What does not run with the model's own chips, or null.</summary>
@@ -140,7 +164,7 @@ sealed class Session
         sb.AppendLine($"ROM: {BaseLabel}");
         foreach (var (name, p) in Patches) sb.AppendLine($"Patch: {name} ({p.Words.Count} words)");
         string why = UserLarge is null ? "preset" : "your choice";
-        sb.AppendLine(large ? $"Chip layout: large (15C chips: ROM 0000-17FF and 2000-37FF), {why}"
+        sb.AppendLine(large ? $"Chip layout: large (15C chips: ROM 0000-17FF and {(ModelCatalog.LargeMapFor(img) == ModelCatalog.LargeChipMap8K ? "1800-37FF as one 8K block" : "2000-37FF")}), {why}"
                             : $"Chip layout: the {Model.Name}'s own, {why}");
         if (NotLoaded(img, large) is { } missing) sb.AppendLine(missing);
         foreach (var (lo, hi) in RomRanges(chips))

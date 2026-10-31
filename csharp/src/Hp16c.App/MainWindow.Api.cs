@@ -25,6 +25,19 @@ sealed partial class MainWindow
                     _session.Patches.Add((Path.GetFileName(arg), RomImage.Load(arg)));
                     Run(_session);
                     return $"ok {_session.Patches.Count} patches";
+                case "load-rom":
+                    var rom = RomImage.Parse(await File.ReadAllLinesAsync(arg));
+                    if (rom.Words.Count == 0) return "error no ROM lines (aaaa:www)";
+                    var known = ModelCatalog.Identify(rom);
+                    StartFullRom(rom, Path.GetFileName(arg), known ?? _session?.Model ?? ModelCatalog.Get("16c"),
+                                 known is not null, arg);
+                    return "ok " + _message.Text;
+                case "fix-checksum":
+                    if (_session is null) return "error no calculator running";
+                    if (_session.ChecksumFixFor(_session.Image()) is not { } cs) return "ok nothing to fix";
+                    _session.Patches.Add(("checksum update", cs.Patch));
+                    Run(_session);
+                    return "ok " + cs.Why.Replace(Environment.NewLine, " ");
                 case "unpatch":
                     RemovePatches();
                     return "ok";

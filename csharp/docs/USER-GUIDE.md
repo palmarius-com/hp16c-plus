@@ -99,8 +99,17 @@ extend or experiment with the original firmware; the 16C+ is one.
 - ROM > Apply a patch...: choose a patch file. It goes on top of the
   ROM that is running. You can apply several.
 - ROM > Remove all patches: back to the original.
+- Checksum: if a patch or a ROM file you load leaves a chip that does not add
+  up to 1 (the self-test's rule), the app asks "Update the checksum?" and says
+  which word it would change (the last word of that chip). Yes adds the change
+  as a patch called "checksum update"; No leaves everything as it is, and the
+  calculator runs either way.
+- A ROM file is lines of `aaaa:www`; a note after the word is fine
+  (`01DA:3D0 del`), and `#` starts a comment.
 - ROM > ROM information: what is loaded, and whether the ROM
-  checksums are right (the calculator's self-test checks them).
+  checksums are right (the calculator's self-test checks them). The checksum
+  is checked per chip; a ROM with code in 1800-1FFF is checked with a second
+  chip of 8K at 1800-37FF, as such ROMs are made.
 - ROM > Export full ROM: writes the complete, patched ROM as one
   file, as Nonpareil text (`.rom`) or for NutEm/PC (`.MClst`). It contains
   HP's firmware, so the simulator reminds you to keep it for yourself.
@@ -157,7 +166,7 @@ not the saved calculator.
 ### Your own tests
 
 Help > Test window runs tests you write yourself, one line per test, on a
-fresh copy of the current calculator:
+copy of the current calculator (same ROM and patches, its own memory):
 
 ```
 1 2 [ENTER] 3 0 [+]  =>  '42 h'
