@@ -1,5 +1,8 @@
-# HP-16C: CHS stack-lift fix. Thanks to Amphitryon (MoHPC forum), who passed it on to us.
-# Who found the bug and who wrote which part is lost in old forum threads; we do not know.
+# HP-16C: CHS stack-lift fix. Credit: Thomas Klemm found the bug and wrote the first patches
+# (HP-15C 2015-12-12, HP-11C and HP-16C 2015-12-14; MoHPC forum, thread 5321 "HP-15C: Fixing the
+# CHS and Stack Lift Bug"). Amphitryon checked the 11C patch against a firmware trace and
+# corrected its jumps (same thread), passed this 16C version on to us and says he completed it;
+# which word is whose we cannot tell.
 # Bug: when X is 0, CHS does not clear the "stack lift disabled" flag,
 # so after CLx (or BSP) "CHS 7" overwrites X instead of lifting the stack.
 # Shows in FLOAT mode: f FLOAT .  3 ENTER 4 g CLx CHS 7 +

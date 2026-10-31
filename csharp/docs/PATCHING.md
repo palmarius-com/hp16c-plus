@@ -54,10 +54,12 @@ code jumps there. That is the next step.
 Your first useful patch can be tiny. The HP-11C, 15C and 16C share a
 small bug, known on the MoHPC forum: when X is 0, CHS does not switch
 stack lift back on. After CLx (or BSP) the next number then overwrites X
-instead of pushing the stack. The fix below reached us through Amphitryon
-(MoHPC forum), and we would not have known without him. Who found the bug and
-who wrote which part is lost in old forum threads: we do not know, and say
-so.
+instead of pushing the stack. Thomas Klemm found it and wrote the first
+patches in 2015 (MoHPC forum, thread 5321, "HP-15C: Fixing the CHS and Stack
+Lift Bug"). Amphitryon checked the 11C patch against a firmware trace and
+corrected its jumps. The 16C fix below reached us through him; he says he
+completed it, and we would not have known without him.
+Which word is whose, we cannot tell.
 
 **See the bug** on the original 16C. Floating-point mode shows it:
 
@@ -77,8 +79,11 @@ stack and the result should be 7 (-0 + 7). Without the CHS, 10 is right.
 project: `csharp/docs/examples/16c-chs-stack-lift.patch`.
 
 ```
-# HP-16C: CHS stack-lift fix. Thanks to Amphitryon (MoHPC forum), who passed it on to us.
-# Who found the bug and who wrote which part is lost in old forum threads; we do not know.
+# HP-16C: CHS stack-lift fix. Credit: Thomas Klemm found the bug and wrote the first patches
+# (HP-15C 2015-12-12, HP-11C and HP-16C 2015-12-14; MoHPC forum, thread 5321 "HP-15C: Fixing the
+# CHS and Stack Lift Bug"). Amphitryon checked the 11C patch against a firmware trace and
+# corrected its jumps (same thread), passed this 16C version on to us and says he completed it;
+# which word is whose we cannot tell.
 006f:390
 0c8c:183
 0c96:137

@@ -1,4 +1,5 @@
-# HP-16C: the CHS stack-lift bug and its fix, passed on to us by Amphitryon (MoHPC forum).
+# HP-16C: the CHS stack-lift bug and its fix. Found and first patched by Thomas Klemm (MoHPC forum,
+# thread 5321, 2015), corrected and completed by Amphitryon, who passed it on to us.
 # calculator: 16c
 # Keys are in brackets, as the handbook prints them (digits stay bare); the expected
 # display is in ticks. Help > How to write a test explains the notation.
