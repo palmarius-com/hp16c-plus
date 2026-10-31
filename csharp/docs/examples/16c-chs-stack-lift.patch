@@ -1,0 +1,19 @@
+# HP-16C: CHS stack-lift fix. Thanks to Amphitryon (MoHPC forum), who passed it on to us.
+# Who found the bug and who wrote which part is lost in old forum threads; we do not know.
+# Bug: when X is 0, CHS does not clear the "stack lift disabled" flag,
+# so after CLx (or BSP) "CHS 7" overwrites X instead of lifting the stack.
+# Shows in FLOAT mode: f FLOAT .  3 ENTER 4 g CLx CHS 7 +
+#   original 16C: 1.000000 01 (10)   patched: 7.000000 00 (7)
+# For: original HP-16C ROM (Nonpareil ncd/16c/16c.rom),
+#   fingerprint bbccd62ebc2da37688cbaa631b6fe38664896467a4aff676552ec51e17e7631d
+# 9 code words in 0C8C-0CE9, plus 006F so the chip checksum stays right.
+006f:390
+0c8c:183
+0c96:137
+0caf:05b
+0cb8:01b
+0cb9:2be
+0cba:0f0
+0cbc:251
+0cbd:002
+0ce9:28b

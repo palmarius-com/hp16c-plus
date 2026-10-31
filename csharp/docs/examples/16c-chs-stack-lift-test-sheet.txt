@@ -1,0 +1,36 @@
+# HP-16C: the CHS stack-lift bug and its fix, passed on to us by Amphitryon (MoHPC forum).
+# calculator: 16c
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
+# Start the HP-16C, then Run. On the original ROM the rows marked BUG fail, the
+# others pass. After applying 16c-chs-stack-lift.patch (ROM > Apply a patch...)
+# all of them pass.
+#
+# When X is 0, CHS does not clear the "stack lift disabled" flag, so after CLx
+# (or BSP) "CHS 7" overwrites X instead of lifting the stack.
+# Expected values: what CHS has to do (every other function on the 16C enables
+# the stack lift). The values are worked out from the stack, not taken from the
+# simulator.
+
+# Controls: the same keys without CHS. Both ROMs agree: after CLx a digit
+# overwrites X (stack lift disabled), so 3 and 7 are added.
+reset
+[FLOAT] [·]
+3 [ENTER] 4 [CLx] 7 [+]  =>  '1.000000 01'
+
+# BUG: CHS after CLx enables the stack lift, so 7 goes on top of the 0 and
+# the sum is 0 + 7. The original ROM overwrites the 0 instead and shows 10.
+reset
+[FLOAT] [·]
+3 [ENTER] 4 [CLx] [CHS] 7 [+]  =>  '7.000000 00'
+
+# BUG: the same with BSP in place of CLx.
+reset
+[FLOAT] [·]
+3 [ENTER] 4 [BSP] [CHS] 7 [+]  =>  '7.000000 00'
+
+# Control: CHS while keying a number always worked: 4 CHS 7 keys -47, and
+# 3 + (-47) = -44.
+reset
+[FLOAT] [·]
+3 [ENTER] 4 [CHS] 7 [+]  =>  '-4.400000 01'

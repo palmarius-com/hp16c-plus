@@ -49,6 +49,66 @@ it to their own copy of the original.
 Nothing breaks: the words at `2000` are never run, because no original
 code jumps there. That is the next step.
 
+## 3b. A real fix in ten words: the CHS stack-lift bug
+
+Your first useful patch can be tiny. The HP-11C, 15C and 16C share a
+small bug, known on the MoHPC forum: when X is 0, CHS does not switch
+stack lift back on. After CLx (or BSP) the next number then overwrites X
+instead of pushing the stack. The fix below reached us through Amphitryon
+(MoHPC forum), and we would not have known without him. Who found the bug and
+who wrote which part is lost in old forum threads: we do not know, and say
+so.
+
+**See the bug** on the original 16C. Floating-point mode shows it:
+
+```
+f FLOAT .          floating-point mode
+3 ENTER 4          Y = 3, X = 4
+g CLx              X = 0, stack lift off (as it should be)
+CHS                X = -0; this should switch stack lift on again
+7 +                original 16C: 1.000000 01 (it computed 3 + 7)
+```
+
+CHS is an operation like any other, so the 7 should go on top of the
+stack and the result should be 7 (-0 + 7). Without the CHS, 10 is right.
+
+**Apply the fix.** The patch is ten lines. Copy them into a text file
+(e.g. `16c-chs-stack-lift.patch`), or take the ready file from the
+project: `csharp/docs/examples/16c-chs-stack-lift.patch`.
+
+```
+# HP-16C: CHS stack-lift fix. Thanks to Amphitryon (MoHPC forum), who passed it on to us.
+# Who found the bug and who wrote which part is lost in old forum threads; we do not know.
+006f:390
+0c8c:183
+0c96:137
+0caf:05b
+0cb8:01b
+0cb9:2be
+0cba:0f0
+0cbc:251
+0cbd:002
+0ce9:28b
+```
+
+1. Start the HP-16C.
+2. ROM > Apply a patch..., choose the file.
+3. Type the same keys again: now the result is `7.000000 00`. The same
+   check as a test file: `csharp/docs/examples/16c-chs-stack-lift-test-sheet.txt`
+   fails on the original 16C (2 lines) and passes with the patch.
+4. ROM > ROM information: the checksum of chip 0000-17FF is still ok.
+
+**What the ten words do.** Nine of them (0C8C to 0CE9) change jumps in
+the original CHS code so that CHS clears the
+"stack lift disabled" flag also when X is 0. The tenth, at 006F, is
+0 in the original ROM; it is set so the chip still adds up to 1
+(see section 5), and the self-test stays happy. Nothing new is added
+to the ROM: the patch fits in the 16C's own chip, so the simulator does
+not need the larger 15C layout.
+
+To keep it: Calculator > Save as my calculator, name it "HP-16C (CHS fix)".
+
+
 ## 4. Where there is room
 
 | Calculator | Own ROM | Free for patches |

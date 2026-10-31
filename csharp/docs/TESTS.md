@@ -150,6 +150,11 @@ download and in `docs/examples` of the source. Load them with Open...:
   and the reason is below each. They are findings, the cause is not known
   yet. The examples that run a program from the handbook's listings are only
   partly in: the listings are not keyed in yet.
+- `16c-chs-stack-lift-test-sheet.txt`: four lines for the HP-16C and the CHS
+  stack-lift fix (`16c-chs-stack-lift.patch`, see PATCHING.md). On the
+  original ROM the two lines marked BUG fail; apply the patch (ROM > Apply a
+  patch...), run again, and all four pass. The expected values are worked out
+  from the stack, not taken from the simulator.
 - `16cplus-test-sheet.txt`: 77 tests for the 16C+. They need the 16C+; on an
   original HP-16C most of them fail, as they should.
 
