@@ -6,8 +6,19 @@ using Avalonia.Media;
 namespace HpSim;
 
 /// <summary>Draws the calculator (skin + LCD) and turns clicks into key presses.</summary>
-sealed class CalculatorView : Control
+sealed class CalculatorView : Panel
 {
+    // Three layers, each its own drawing: the face (body, key caps and legends) is drawn when
+    // the skin, label or size changes; the LCD when the display changes; a pressed key on top
+    // of the face when a key goes down. A key press or a new digit repaints only its layer.
+    sealed class Layer(Action<DrawingContext> draw) : Control
+    {
+        public override void Render(DrawingContext ctx) => draw(ctx);
+    }
+    readonly Layer _face, _lcd, _keys;
+    Size _lastSize;
+    static readonly Rect LcdRect = new(150, 38, 560, 130);
+
     // logical faceplate size; scaled to the control
     const double FaceW = 1000, FaceH = 620;
     const double KeysTop = 232, PitchX = 94, PitchY = 96, KeyW = 64, KeyH = 46, KeysLeft = 47;
@@ -41,7 +52,7 @@ sealed class CalculatorView : Control
             Bezel = B(value.Bezel, Brushes.Gray);
             Gold = B(value.FColor, Brushes.Goldenrod);
             Blue = B(value.GColor, Brushes.SkyBlue);
-            InvalidateVisual();
+            RepaintAll();
         }
     }
     MachineRunner.Snapshot? _snap;
@@ -50,26 +61,71 @@ sealed class CalculatorView : Control
     public MachineRunner? Runner
     {
         get => _runner;
-        set { _runner = value; _snap = null; InvalidateVisual(); }
+        set { _runner = value; _snap = null; _runner?.Touch(); RepaintAll(); }   // a runner put back must draw
     }
 
     public CalculatorView()
     {
         ClipToBounds = true;
         Focusable = true;
+        Background = Brushes.Transparent;               // so the panel itself takes the mouse
+        _face = new Layer(RenderFace) { IsHitTestVisible = false };
+        _lcd = new Layer(RenderLcd) { IsHitTestVisible = false };
+        _keys = new Layer(RenderPressedKey) { IsHitTestVisible = false };
+        Children.Add(_face);
+        Children.Add(_lcd);
+        Children.Add(_keys);
+    }
+
+    /// <summary>Draw everything again (View > Repaint all; also after a change of calculator,
+    /// skin, label or size).</summary>
+    public void RepaintAll()
+    {
+        _face.InvalidateVisual();
+        _lcd.InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 
     public void Refresh()
     {
         if (_runner is null) return;
-        _snap = _runner.Take();
-        InvalidateVisual();
+        var snap = _runner.TakeDisplay();
+        if (_snap is not null && SameDisplay(_snap, snap)) return;     // nothing to draw
+        _snap = snap;
+        _lcd.InvalidateVisual();
+    }
+
+    static bool SameDisplay(MachineRunner.Snapshot a, MachineRunner.Snapshot b)
+    {
+        if (a.DisplayOn != b.DisplayOn || a.Segments.Length != b.Segments.Length) return false;
+        for (int d = 0; d < a.Segments.Length; d++)
+        {
+            var x = a.Segments[d];
+            var y = b.Segments[d];
+            if (x.Count != y.Count) return false;
+            foreach (var (seg, lit) in x)
+                if (!y.TryGetValue(seg, out var other) || other != lit) return false;
+        }
+        return true;
     }
 
     protected override Size MeasureOverride(Size availableSize)
     {
         double w = double.IsInfinity(availableSize.Width) ? FaceW * 0.8 : availableSize.Width;
-        return new Size(w, w * FaceH / FaceW);
+        var size = new Size(w, w * FaceH / FaceW);
+        foreach (var c in Children) c.Measure(size);
+        return size;
+    }
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        var r = base.ArrangeOverride(finalSize);
+        if (finalSize != _lastSize)
+        {
+            _lastSize = finalSize;
+            RepaintAll();
+        }
+        return r;
     }
 
     (double Scale, double Ox, double Oy) Fit()
@@ -82,17 +138,20 @@ sealed class CalculatorView : Control
         new(KeysLeft + k.Col * PitchX, KeysTop + k.Row * PitchY,
             KeyW, KeyH + (k.Rows - 1) * PitchY);
 
-    public override void Render(DrawingContext ctx)
+    IDisposable Scaled(DrawingContext ctx)
     {
         var (s, ox, oy) = Fit();
-        using var _ = ctx.PushTransform(Matrix.CreateScale(s, s) * Matrix.CreateTranslation(ox, oy));
+        return ctx.PushTransform(Matrix.CreateScale(s, s) * Matrix.CreateTranslation(ox, oy));
+    }
+
+    void RenderFace(DrawingContext ctx)
+    {
+        using var _ = Scaled(ctx);
 
         ctx.DrawRectangle(Body, null, new Rect(0, 0, FaceW, FaceH), 22, 22);
         ctx.DrawRectangle(BezelDark, null, new Rect(14, 14, FaceW - 28, 178), 10, 10);
         ctx.DrawRectangle(Bezel, null, new Rect(18, 18, FaceW - 36, 170), 8, 8);
-        var lcd = new Rect(150, 38, 560, 130);
-        DrawLcd(ctx, lcd);
-        DrawBadge(ctx, lcd, FaceW - 18, _skin.Label);
+        DrawBadge(ctx, LcdRect, FaceW - 18, _skin.Label);
 
         foreach (var (row, first, last, label) in _skin.Brackets)
         {
@@ -107,7 +166,23 @@ sealed class CalculatorView : Control
             ctx.DrawText(ft, new Point((x0 + x1) / 2 - ft.Width / 2, y - ft.Height / 2));
         }
 
-        foreach (var k in _skin.Keys) DrawKey(ctx, k);
+        foreach (var k in _skin.Keys) DrawKey(ctx, k, false, true);
+    }
+
+    void RenderLcd(DrawingContext ctx)
+    {
+        using var _ = Scaled(ctx);
+        DrawLcd(ctx, LcdRect);
+    }
+
+    /// <summary>The key that is down, drawn pressed over its unpressed picture in the face.</summary>
+    void RenderPressedKey(DrawingContext ctx)
+    {
+        if (_pressed < 0) return;
+        var k = _skin.Keys.FirstOrDefault(x => x.Code == _pressed);
+        if (k is null) return;
+        using var _ = Scaled(ctx);
+        DrawKey(ctx, k, true, false);
     }
 
     static readonly IBrush PalmBlue = new SolidColorBrush(Color.FromRgb(0x00, 0x80, 0xFF)); // PALM_BLUE 0x041F
@@ -188,13 +263,12 @@ sealed class CalculatorView : Control
         ctx.DrawGeometry(GlintStar, null, star);
     }
 
-    void DrawKey(DrawingContext ctx, Skin.Key k)
+    void DrawKey(DrawingContext ctx, Skin.Key k, bool down, bool withGoldLegend)
     {
         var r = KeyRect(k);
-        bool down = k.Code == _pressed;
         bool shift = k.Main is "f" or "g"; // by legend: 43 is P/R on the 10C
         var cap = k.Main switch { "f" => Gold, "g" => Blue, _ => down ? KeyPressed : KeyCap };
-        if (k.F.Length > 0) Text(ctx, k.F, r.Center.X, r.Top - 12, k.F.Length > 7 ? 10 : 12, Gold);
+        if (withGoldLegend && k.F.Length > 0) Text(ctx, k.F, r.Center.X, r.Top - 12, k.F.Length > 7 ? 10 : 12, Gold);
         ctx.DrawRectangle(Brushes.Black, null, r.Inflate(2), 6, 6);
         ctx.DrawRectangle(cap, null, r, 5, 5);
         double faceH = (k.Rows == 2 ? r.Height - 18 : 30);
@@ -248,7 +322,13 @@ sealed class CalculatorView : Control
                 ctx.DrawGeometry(lit('i') ? LcdInk : LcdGhost, null, comma);
             }
             if (lit('j') && d < _skin.Annunciators.Length && _skin.Annunciators[d].Length > 0)
-                Text(ctx, _skin.Annunciators[d], x + 16, area.Bottom - 16, 12, LcdInk, bold: true);
+            {
+                // G and RAD are two annunciators that light together: the display reads GRAD
+                double ax = x + 16;
+                if (_skin.Annunciators[d] == "G" && d + 1 < _skin.Annunciators.Length && _skin.Annunciators[d + 1] == "RAD")
+                    ax = x + cw - 5;
+                Text(ctx, _skin.Annunciators[d], ax, area.Bottom - 16, 12, LcdInk, bold: true);
+            }
         }
     }
 
@@ -291,6 +371,14 @@ sealed class CalculatorView : Control
     }
 
     // ----------------------------------------------------------- input
+    /// <summary>Centre of a key in this control's coordinates (for tests that click it).</summary>
+    public Point KeyCenter(Skin.Key k)
+    {
+        var (s, ox, oy) = Fit();
+        var c = KeyRect(k).Center;
+        return new Point(ox + c.X * s, oy + c.Y * s);
+    }
+
     int HitTest(Point p)
     {
         var (s, ox, oy) = Fit();
@@ -372,7 +460,7 @@ sealed class CalculatorView : Control
         _pressed = code;
         e.Pointer.Capture(this);
         _runner.Press(code);
-        InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
@@ -382,14 +470,14 @@ sealed class CalculatorView : Control
         _pressed = -1;
         e.Pointer.Capture(null);
         _runner?.Release();
-        InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 
     /// <summary>Show a key as pressed (-1 = none) while a test plays it.</summary>
     public void ShowKey(int code)
     {
         _pressed = code;
-        InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 
     /// <summary>Key from the PC keyboard (press now, release on key up).</summary>
@@ -398,7 +486,7 @@ sealed class CalculatorView : Control
         if (_runner is null || _pressed == code || Locked) return;
         _pressed = code;
         _runner.Press(code);
-        InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 
     public void ReleaseFromKeyboard()
@@ -406,6 +494,6 @@ sealed class CalculatorView : Control
         if (_pressed < 0 || Locked) return;
         _pressed = -1;
         _runner?.Release();
-        InvalidateVisual();
+        _keys.InvalidateVisual();
     }
 }

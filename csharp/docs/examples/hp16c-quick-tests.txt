@@ -1,0 +1,63 @@
+# HP-16C quick test: the first 30 checks of hp16c-handbook-tests.txt.
+# For a release check: keys, display, stack and a stored program still work. A few seconds.
+# Start the HP-16C, then Run. Tests build on the line before them.
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
+# calculator: 16c
+
+# PDF page 14
+# before Section 1
+reset
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-43,22, A'
+1  =>  '002-     1'
+[+]  =>  '003-    40'
+hold [f] [BIN]  =>  '004- 42 26'
+[GTO] [A]  =>  '005-  22 A'
+# PDF page 15
+[P/R]
+# PDF page 15
+[DEC]
+16 [WSIZE]
+0  =>  '0 d'
+## [GSB] [A]
+#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
+# 22 d at the moment R/S is pressed (p. 15): a running loop has no fixed value, so no check
+## [R/S]
+#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
+# PDF page 20
+# Section 1
+reset
+[HEX]
+1234  =>  '1234 h'
+[BSP]  =>  '123 h'
+1  =>  '1231 h'
+[ENTER]  =>  '1231 h'
+[BSP]  =>  '0 h'
+12  =>  '12 h'
+[CLx]  =>  '0 h'
+# PDF page 20
+0  =>  '0 h'
+[NOT]  =>  'FFFF h'
+# PDF page 21
+[DEC]
+6 [ENTER]  =>  '6 d'
+7 [+]  =>  '13 d'
+9 [ENTER]  =>  '9 d'
+3 [−]  =>  '6 d'
+[×]  =>  '78 d'
+# PDF page 26
+# Section 2
+reset
+[BIN]
+1010 [ENTER]  =>  '1010 b'
+10 [+]  =>  '1100 b'
+[LSTx]  =>  '10 b'
+[−]  =>  '1010 b'
+11 [+]  =>  '1101 b'
+# PDF page 28
+[DEC]
+6 [ENTER] 7 [+]  =>  '13 d'
+5 [×]  =>  '65 d'
+4 [+]  =>  '69 d'

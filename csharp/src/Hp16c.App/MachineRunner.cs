@@ -48,6 +48,15 @@ sealed class MachineRunner : IDisposable
     const long MinHoldCycles = 200;
     readonly System.Collections.Concurrent.ConcurrentQueue<int> _keys = new(); // code, or -1 = release
     long _pressedAt = -1;
+    // The CPU thread sleeps on this while the calculator sleeps: a key (or a stop) wakes it
+    // at once, otherwise it looks again every 50 ms. No polling every 2 ms.
+    readonly AutoResetEvent _wake = new(false);
+
+    // Set whenever the display may have changed (CPU ran, key applied, state loaded); the window
+    // draws only when it is set, so an idle calculator costs nothing.
+    int _dirty = 1;
+    public void Touch() => Volatile.Write(ref _dirty, 1);
+    public bool TakeDirty() => Interlocked.Exchange(ref _dirty, 0) != 0;
 
     void ApplyKeys()
     {
@@ -87,12 +96,13 @@ sealed class MachineRunner : IDisposable
             bool awake;
             lock (_gate)
             {
+                if (!_keys.IsEmpty) Touch();
                 ApplyKeys();
                 awake = Calc.Cpu.Awake;
             }
             if (!awake)
             {
-                Thread.Sleep(2);
+                _wake.WaitOne(_keys.IsEmpty ? 250 : 2);
                 last = clock.ElapsedTicks;
                 credit = 0;
                 continue;
@@ -108,6 +118,7 @@ sealed class MachineRunner : IDisposable
                 if (budget == 0) { Thread.Sleep(1); continue; }
             }
             lock (_gate) Calc.Cpu.Run(budget);
+            Touch();
         }
     }
 
@@ -117,12 +128,14 @@ sealed class MachineRunner : IDisposable
     public void Press(int userKeycode)
     {
         _keys.Enqueue(userKeycode);
+        _wake.Set();
         KeySeen?.Invoke(userKeycode);
     }
 
     public void Release()
     {
         _keys.Enqueue(-1);
+        _wake.Set();
         KeySeen?.Invoke(-1);
     }
 
@@ -136,6 +149,7 @@ sealed class MachineRunner : IDisposable
             _keys.Enqueue(userKeycode);
             _keys.Enqueue(-1);
         }
+        _wake.Set();
         KeySeen?.Invoke(userKeycode);
         KeySeen?.Invoke(-1);
     }
@@ -180,10 +194,24 @@ sealed class MachineRunner : IDisposable
         }
     }
 
+    /// <summary>Count from 0 again (the count is saved in a state file). Keeps a key that is
+    /// down counting its hold time.</summary>
+    public void ResetCycles()
+    {
+        lock (_gate)
+        {
+            Calc.Cpu.Cycles = 0;
+            if (_pressedAt >= 0) _pressedAt = 0;
+        }
+        Touch();
+    }
+
     public void PowerOn()
     {
         _keys.Clear();
         lock (_gate) { Calc.PowerOn(); _pressedAt = -1; }
+        Touch();
+        _wake.Set();
     }
 
     public MachineState SaveState()
@@ -199,9 +227,18 @@ sealed class MachineRunner : IDisposable
             state.Apply(Calc);
             _pressedAt = -1;
         }
+        Touch();
+        _wake.Set();
     }
 
     public sealed record Snapshot(Dictionary<char, bool>[] Segments, bool DisplayOn, string Status);
+
+    /// <summary>Only what the view draws: the segments and whether the display is on.
+    /// No status text, which is costly to build and only the panel needs.</summary>
+    public Snapshot TakeDisplay()
+    {
+        lock (_gate) return new Snapshot(Calc.SegmentState(), Calc.DisplayEnable, "");
+    }
 
     public Snapshot Take()
     {
@@ -249,7 +286,7 @@ sealed class MachineRunner : IDisposable
         }
         sb.AppendLine(Fit(Title));
         sb.AppendLine($"PC {cpu.Pc:X4}  {(cpu.Awake ? "running" : cpu.DisplayEnable ? "light sleep" : "deep sleep")}");
-        sb.AppendLine($"cycles {cpu.Cycles:N0}");
+        sb.AppendLine($"cycles since reset {cpu.Cycles:N0}");
         sb.AppendLine();
         sb.AppendLine($"A  {Reg(cpu.A)}");
         sb.AppendLine($"B  {Reg(cpu.B)}");
@@ -314,6 +351,8 @@ sealed class MachineRunner : IDisposable
     public void Dispose()
     {
         _stop = true;
+        _wake.Set();
         _thread.Join(500);
+        _wake.Dispose();
     }
 }

@@ -1,0 +1,46 @@
+# HP-15C quick test: the first 30 checks of hp15c-handbook-tests.txt.
+# For a release check: keys, display, stack and a stored program still work. A few seconds.
+# Start the HP-15C, then Run. Tests build on the line before them.
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
+# calculator: 15c
+
+# PDF page 16
+# before Section 1
+reset
+3 0 0 . 5 1 [ENTER]  =>  '300.5100'
+2 [×]  =>  '601.0200'
+9 . 8 [÷]  =>  '61.3286'
+[√x]  =>  '7.8313'
+# PDF page 17
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+2  =>  '002-     2'
+[×]  =>  '003-    20'
+9  =>  '004-     9'
+.  =>  '005-    48'
+8  =>  '006-     8'
+[÷]  =>  '007-    10'
+[√x]  =>  '008-    11'
+[RTN]  =>  '009- 43 32'
+[P/R]  =>  '7.8313'
+# PDF page 17
+3 0 0 . 5 1  =>  '300.51'
+[A]  =>  '7.8313'
+1050 [A]  =>  '14.6385'
+# PDF page 22
+# Section 1
+reset
+6 . 6 2 6 2  =>  '6.6262'
+[EEX]  =>  '6.6262   00'
+3  =>  '6.6262   03'
+4  =>  '6.6262   34'
+[CHS]  =>  '6.6262  -34'
+[ENTER]  =>  '6.6262  -34'
+50 [×]  =>  '3.3131  -32'
+# PDF page 23
+12345  =>  '12,345'
+[←]  =>  '1,234'
+9  =>  '12,349'
+[√x]  =>  '111.1261'

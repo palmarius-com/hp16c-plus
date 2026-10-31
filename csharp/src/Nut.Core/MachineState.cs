@@ -26,6 +26,12 @@ public sealed class MachineState
     public List<string> Patches { get; set; } = [];
     /// <summary>"own" or "large": decides which RAM the state holds.</summary>
     public string ChipLayout { get; set; } = "";
+    /// <summary>The faceplate label the user set (null = automatic) and the name of the
+    /// skin file in use. Written only when set, so older files keep their checksum.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Label { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SkinName { get; set; }
     public string SavedAt { get; set; } = "";
     public string Note { get; set; } = "";
     public string DisplayText { get; set; } = "";

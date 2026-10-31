@@ -20,6 +20,12 @@ through the same code as the mouse and keyboard.
 | `patch FILE` | apply a patch to the running calculator | number of patches |
 | `load-rom FILE` | what "Load full ROM file" does, without the dialogs: an original ROM is recognised, any other runs on the current calculator's keyboard and display (the 16C if none runs) | the status line |
 | `fix-checksum` | what the checksum popup does on Yes: one word per off chip, as a patch called "checksum update" | the change, or `nothing to fix` |
+| `keys NAMES` | press keys one after the other on the keyboard path, as typing does, so the window shows each press; names as in a test line (`1 2 [ENTER] [f] [FIX] 4`) | |
+| `key-pos NAME` | where that key is, in window pixels | `X Y` |
+| `repaint-all` | View > Repaint all | |
+| `size W H` | set the window size in pixels | |
+| `panel show` or `panel hide` | View > Status panel | |
+| `reset-cycles` | set the cycle counter of the status panel back to 0 | |
 | `unpatch` | remove all patches | |
 | `testrun FILE` | run a test file (docs/TESTS.md) on a copy of the running calculator (ROM and patches, own memory); all failures go to `FILE.failures` | counts, first failures |
 | `chips V` | chip layout: `own`, `large` or `preset`; restarts the calculator | the status line |

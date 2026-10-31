@@ -99,7 +99,8 @@ sealed partial class MainWindow : Window
             calcMenu.Add(Item(m.Name, async () => { if (await ConfirmLeave()) StartOriginal(m); }));
         _myInsertAt = calcMenu.Count;
         foreach (var tail in new object[] { new Separator(), Item("Save as my calculator...", async () => await SaveMyCalc()),
-                                             new Separator(), Item("Batteries out and in (reset)", () => _runner?.PowerOn()), _realSpeed })
+                                             new Separator(), Item("Batteries out and in (reset)", () => _runner?.PowerOn()),
+                                             Item("Reset the cycle counter", () => _runner?.ResetCycles()), _realSpeed })
             calcMenu.Add(tail);
         RefreshMyMenu();
 
@@ -138,7 +139,7 @@ sealed partial class MainWindow : Window
                         Item("Faceplate label...", async () => await AskLabel()),
                     },
                 },
-                new MenuItem { Header = "_View", ItemsSource = new object[] { _showStatus } },
+                new MenuItem { Header = "_View", ItemsSource = new object[] { _showStatus, Item("_Repaint all", () => { _calc.RepaintAll(); Say("Window repainted."); }) } },
                 new MenuItem
                 {
                     Header = "_Help",
@@ -254,9 +255,17 @@ sealed partial class MainWindow : Window
     void Tick()
     {
         if (_runner is null) return;
-        _calc.Refresh();
-        if (_statusPanel.IsVisible) _status.Text = _runner.Take().Status;
+        bool dirty = _runner.TakeDirty();              // nothing changed: nothing to do
+        bool panel = _statusPanel.IsVisible;
+        if (!panel) _statusStale = true;
+        if (dirty) _calc.Refresh();
+        if (panel && (dirty || _statusStale))
+        {
+            _status.Text = _runner.Take().Status;
+            _statusStale = false;
+        }
     }
+    bool _statusStale = true;
 
     bool CalcActive => _runner is not null && _main.Content == _calc;
 
@@ -995,6 +1004,8 @@ sealed partial class MainWindow : Window
         st.ChipLayout = _session.ChipMap(_session.Image()).Large ? "large" : "own";
         st.RomFingerprint = _session.Image().CanonicalSha256();
         st.Patches = _session.Patches.Select(p => p.Name).ToList();
+        st.Label = _session.UserLabel;
+        st.SkinName = _session.SkinName;
         st.Note = "Voyager simulator machine state. Registers: hex digits, most significant first. " +
                   "ram: register address -> 14 digits. Load it with the same calculator, ROM and patches.";
         return st;
@@ -1015,8 +1026,18 @@ sealed partial class MainWindow : Window
         if (!anyway && st.RomFingerprint != _session.Image().CanonicalSha256())
             return "different-rom";
         _runner.LoadState(st);
+        _stateNote = "";
+        if (st.Label is not null && st.Label != _session.UserLabel)
+        {
+            // a label you set yourself stays until you change it; an automatic one is replaced
+            if (_session.UserLabel is null) { SetLabel(st.Label); _stateNote += $" Faceplate label \"{st.Label}\" restored."; }
+            else _stateNote += $" It was saved with the label \"{st.Label}\"; yours stays (Skin > Faceplate label).";
+        }
+        if (st.SkinName is not null && st.SkinName != _session.SkinName)
+            _stateNote += $" It was saved with the skin {st.SkinName}; Skin > Load skin file if you want it.";
         return "ok";
     }
+    string _stateNote = "";
 
     async Task<bool> AskLoadAnyway(MachineState st)
     {
@@ -1079,7 +1100,7 @@ sealed partial class MainWindow : Window
                 if (!await AskLoadAnyway(st)) return;
                 ApplyState(st, true);
             }
-            Say($"State loaded from {f.Value.Name} (saved {st.SavedAt}).");
+            Say($"State loaded from {f.Value.Name} (saved {st.SavedAt}).{_stateNote}");
         }
         catch (Exception ex) { Say("State not loaded: " + ex.Message); }
     }

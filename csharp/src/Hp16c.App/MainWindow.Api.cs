@@ -38,6 +38,46 @@ sealed partial class MainWindow
                     _session.Patches.Add(("checksum update", cs.Patch));
                     Run(_session);
                     return "ok " + cs.Why.Replace(Environment.NewLine, " ");
+                case "keys":
+                    // keys one after the other on the keyboard path, so the window shows each press
+                    if (_session is null || _runner is null) return "error no calculator running";
+                    var names = new KeyNames(_calc.Skin, _session.Model.Id);
+                    foreach (var word in arg.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        if (names.Resolve(word) is not { } codes) return $"error unknown key '{word}'";
+                        foreach (var code in codes)
+                        {
+                            _calc.PressFromKeyboard(code);
+                            await Task.Delay(150);
+                            _calc.ReleaseFromKeyboard();
+                            await Task.Delay(150);
+                        }
+                    }
+                    return "ok";
+                case "key-pos":
+                    // where a key is, in window coordinates, for mouse-down
+                    if (_session is null) return "error no calculator running";
+                    if (new KeyNames(_calc.Skin, _session.Model.Id).Resolve(arg) is not { } kc)
+                        return $"error unknown key '{arg}'";
+                    var key = _calc.Skin.Keys.First(k => k.Code == kc[^1]);
+                    var inWindow = _calc.TranslatePoint(_calc.KeyCenter(key), this);
+                    return inWindow is { } wp ? $"ok {wp.X:F0} {wp.Y:F0}" : "error key not visible";
+                case "repaint-all":
+                    _calc.RepaintAll();
+                    return "ok";
+                case "size":
+                    var wh = arg.Split(' ');
+                    Width = int.Parse(wh[0]);
+                    Height = int.Parse(wh[1]);
+                    await Task.Delay(300);
+                    return "ok";
+                case "panel":
+                    _showStatus.IsChecked = arg == "show";
+                    _statusPanel.IsVisible = _showStatus.IsChecked && _runner is not null;
+                    return "ok";
+                case "reset-cycles":
+                    _runner?.ResetCycles();
+                    return "ok";
                 case "unpatch":
                     RemovePatches();
                     return "ok";

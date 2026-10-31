@@ -24,7 +24,11 @@ show. That example is for the 16C, which starts in HEX: 12 + 30 = 42.
 While tests run, both sides of the window follow along: the newest result
 stays at the bottom on the right, the line it came from at the bottom on the
 left. At the end the window says `Finished:` with the counts, or `Stopped:`
-if you pressed Stop.
+if you pressed Stop. Then an **Export Log** button appears next to that line: it saves the
+result as a text file (calculator, test file, date, the counts, then every line with `ok` or
+`FAIL`), for a bug report or to compare two runs. The Save dialog opens in the folder the test
+file came from and suggests its name plus `-results-` and the date and time, for example
+`hp10c-quick-tests-results-20261031_133159.txt`.
 
 ## Writing the keys
 
@@ -125,14 +129,17 @@ chord [*]  =>  '-8,8,8,8,8,8,8,8,8,8,'  [C G]
 Tests run at full speed, and a line waits until the calculator is idle again.
 So a value shown by PSE is gone before a test can read it, and a program that
 only stops on a key never lets the next line start: after 60 seconds the test
-moves on. Check what a program leaves in the display when it stops.
+moves on. Check what a program leaves in the display when it stops. A line that starts a
+program which never ends costs those 60 seconds (about 3 billion calculator cycles at full
+speed), so leave such a line out of a test file (`##`).
 
 ## Example files
 
 Save your tests with Save..., and share the file; it holds no firmware.
 
 The example files come with the program, in the `examples` folder of the
-download and in `docs/examples` of the source. Load them with Open...:
+download and in `docs/examples` of the source. Load them with Open...: the
+dialog starts in that folder, and later in the folder of the last file you opened.
 
 - `hp10c-handbook-tests.txt`: 536 tests from the examples of the HP-10C Owner's
   Handbook, about a minute on the HP-10C. The expected values are the

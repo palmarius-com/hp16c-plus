@@ -1,0 +1,48 @@
+# HP-10C quick test: the first 30 checks of hp10c-handbook-tests.txt.
+# For a release check: keys, display, stack and a stored program still work. A few seconds.
+# Start the HP-10C, then Run. Tests build on the line before them.
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
+# calculator: 10c
+
+reset
+
+# Problem solver: manual solutions (page 8)
+9 [ENTER] 6 [+]  =>  '15.0000'
+9 [ENTER] 6 [-]  =>  '3.0000'
+9 [ENTER] 6 [*]  =>  '54.0000'
+9 [ENTER] 6 [/]  =>  '1.5000'
+
+# Water heater heat loss (page 9)
+1 5 [ENTER]  =>  '15.0000'
+3 0  =>  '30.'
+[*]  =>  '450.0000'
+. 4 7  =>  '0.47'
+[*]  =>  '211.5000'
+
+# Keying in exponents (page 15/16)
+6 . 0 2 2 5  =>  '6.0225'
+[EEX]  =>  '6.0225   00'
+2  =>  '6.0225   02'
+3  =>  '6.0225   23'
+[ENTER]  =>  '6.0225   23'
+6 . 6 2 6 2 [EEX] 3 4  =>  '6.6262   34'
+[CHS]  =>  '6.6262  -34'
+[ENTER]  =>  '6.6262  -34'
+5 0  =>  '50.'
+[*]  =>  '3.3131  -32'
+6 . 6 2 6 2 [EEX] [CHS] 3 4  =>  '6.6262  -34'
+[ENTER] 1 2 [EEX] 3 [CHS]  =>  '12.     -03'
+[ENTER] 1 2 3 4 5 6 7 8 [EEX]  =>  '12,345,678.'
+
+# CLx, CHS, one-number function (page 15-17)
+[CLx]  =>  '0.0000'
+4 5 [LOG]  =>  '1.6532'
+5 [CHS]  =>  '-5.'
+[CHS]  =>  '5.'
+[CLx]  =>  '0.0000'
+
+# Two-number functions and ENTER (page 17-18)
+2 [ENTER] 3 [/]  =>  '0.6667'
+9 [ENTER] 1 7 [+]  =>  '26.0000'
+4 [-]  =>  '22.0000'

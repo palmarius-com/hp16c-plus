@@ -195,6 +195,17 @@ if (windowExe is not null)
     Check("checksum fix changes one word", machine.Ask("fix-checksum").Contains("Word 17FF would change from 3E0 to 3DF") &&
           machine.Ask("rominfo").Contains("0000-17FF: checksum ok") && machine.Ask("rominfo").Contains("checksum update (1 words)"));
     Check("nothing left to fix", machine.Ask("fix-checksum") == "ok nothing to fix");
+    var labelState = Path.Combine(root, "build", "app-flow-label-state.json");
+    machine.Ask("label MINE");
+    machine.Ask("save-state " + labelState);
+    machine.Ask("label auto");
+    Check("state file keeps the label", machine.Ask("load-state " + labelState) == "ok" && machine.Ask("label") == "ok MINE");
+    machine.Ask("label KEEP");
+    Check("a label set by hand stays when a state is loaded", machine.Ask("load-state " + labelState) == "ok" &&
+          machine.Ask("label") == "ok KEEP");
+    machine.Ask("label auto");
+    Check("cycle counter resets", machine.Ask("reset-cycles") == "ok" && machine.Ask("poll").EndsWith(" 0") &&
+          machine.Ask("status").Contains("cycles since reset 0"));
     machine.Ask("unpatch");
     // the same sheet as a test file, one line per test, run by the Test window's code
     var sheetText = new StringBuilder("# HP-16C+ test sheet: 16C ROM + the 16C+ patch. One line, one test.\n");

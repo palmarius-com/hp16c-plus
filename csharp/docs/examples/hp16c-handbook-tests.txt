@@ -8,7 +8,7 @@
 # Lines starting with ## are not run: their check fails in the simulator, the
 # reason is below each. They are findings, the cause is not known yet.
 # calculator: 16c
-# 253 checks run, 44 lines are not run (0.4.0 adds the listings).
+# 253 checks run, 46 lines are not run (0.4.0 adds the listings).
 
 
 # PDF page 14
@@ -27,9 +27,11 @@ hold [f] [BIN]  =>  '004- 42 26'
 [DEC]
 16 [WSIZE]
 0  =>  '0 d'
-[GSB] [A]
+## [GSB] [A]
+#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
 # 22 d at the moment R/S is pressed (p. 15): a running loop has no fixed value, so no check
-[R/S]
+## [R/S]
+#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
 # PDF page 20
 # Section 1
 reset

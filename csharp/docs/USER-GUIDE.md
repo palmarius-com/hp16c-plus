@@ -57,6 +57,15 @@ on the 16C, the X, Y, Z, T, LAST X and I registers. You do not need
 it to use the calculator; it is there for the curious and for people
 who write patches.
 
+View > Repaint all draws the whole window again. It is only for the rare case that
+something looks wrong: the calculator draws its LCD and a pressed key on their
+own, and the rest only when the skin, label, size or calculator changes.
+
+The line "cycles since reset" counts the processor's cycles, the CPU's own
+clock ticks (right after choosing a model it already shows 33 or so: the
+power-on run until the first sleep). A state file saves the count with the
+rest; Calculator > Reset the cycle counter starts it from 0 again.
+
 ### Saving and loading the state
 
 At the bottom of the status panel, "Save state..." writes everything the
@@ -65,6 +74,11 @@ display) into a `.json` file you can read in any text editor: registers
 as hex digits, memory listed register by register. "Load state..." puts
 it back, so you can return to exactly that point later, or send it to
 someone else.
+
+If you set a faceplate label (Skin > Faceplate label), the file keeps it, and the name
+of the skin file in use. Loading puts the label back unless you have set another one
+since (yours stays), and tells you if the skin was a different one; it does not load
+a skin for you (Skin > Load skin file).
 
 The file carries a checksum. Reading it is fine, but a state file that
 was changed after saving is refused, as are files from before version

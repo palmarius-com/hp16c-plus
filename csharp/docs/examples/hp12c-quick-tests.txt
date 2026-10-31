@@ -1,0 +1,52 @@
+# HP-12C quick test: the first 30 checks of hp12c-handbook-tests.txt.
+# For a release check: keys, display, stack and a stored program still work. A few seconds.
+# Start the HP-12C, then Run. Tests build on the line before them.
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
+# calculator: 12c
+
+# PDF page 13
+# before Section 1
+reset
+[REG] [f] 2  =>  '0.00'
+4 [12×]  =>  '48.00'
+6 [12÷]  =>  '0.50'
+500 [PMT]  =>  '500.00'
+[BEG]  =>  '500.00'
+[PV]  =>  '-21,396.61'
+# PDF page 14
+[FIN]  =>  '-21,396.61'
+14 [ENTER] 2 [×] [n]  =>  '28.00'
+5 . 3 5 [ENTER] 2 [÷] [i]  =>  '2.68'
+5000 [CHS] [PV]  =>  '-5,000.00'
+[FV]  =>  '10,470.85'
+# PDF page 14
+[FIN]  =>  '10,470.85'
+14 [12×]  =>  '168.00'
+6 [12÷]  =>  '0.50'
+1 0 9 2 5 . 7 6 [FV]  =>  '10,925.76'
+[END]  =>  '10,925.76'
+[PMT]  =>  '-41.65'
+# PDF page 15
+[CLX]
+45 [CHS] [PMT]  =>  '-45.00'
+[i]  =>  '0.42'
+12 [×]  =>  '5.01'
+# PDF page 20
+# Section 1
+reset
+1 . 7 8 1 4 [EEX] 12  =>  '1.7814   12'
+# PDF page 22
+[CLX]
+13  =>  '13.'
+[ENTER]  =>  '13.00'
+2  =>  '2.'
+[÷]  =>  '6.50'
+# PDF page 23
+[CLX]
+5 8 . 3 3  =>  '58.33'
+[ENTER]  =>  '58.33'
+2 2 . 9 5  =>  '22.95'
+[-]  =>  '35.38'
+1 3 . 7 0  =>  '13.70'
+# PDF page 24
