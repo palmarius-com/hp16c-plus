@@ -121,7 +121,10 @@ window: download, a test sheet of key sequences, patch, sheet again.
   stack and the last program counters.
 - **Guides** (also under Help in the app):
   [user guide](csharp/docs/USER-GUIDE.md),
-  [how to write a patch](csharp/docs/PATCHING.md).
+  [how to write a patch](csharp/docs/PATCHING.md),
+  [how to write a test](csharp/docs/TESTS.md): the simulator's Test window
+  runs test files; `csharp/docs/examples/` has the examples of the Owner's
+  Handbook of the 10C, 11C, 12C, 15C and 16C as test files.
   `tools/make_patch.py` assembles a Nut source file into a patch and
   can fix the chip checksums.
 - The 16C+ needs its patch: `python tools/build_plus.py` writes

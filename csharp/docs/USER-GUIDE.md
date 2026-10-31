@@ -160,17 +160,27 @@ Help > Test window runs tests you write yourself, one line per test, on a
 fresh copy of the current calculator:
 
 ```
-1 2 ENTER 3 0 +  =>  42 h
+1 2 [ENTER] 3 0 [+]  =>  '42 h'
 ```
 
-The window follows the run on both sides and says `Finished:` with the
-counts at the end. Ready-made files are in the `examples` folder of the
-download; load them with Open...: `hp10c-handbook.txt` (536 tests from the
-HP-10C Owner's Handbook, for the HP-10C), `hp11c-handbook.txt`,
-`hp12c-handbook.txt`, `hp15c-handbook.txt` and `hp16c-handbook.txt` (the same
-for the other four; each runs on its own calculator, lines starting with ##
-are left out because they fail) and `16cplus-test-sheet.txt` (77 tests for
-the 16C+). Help > How to write a test explains it.
+Every key is in brackets, as the handbooks draw them; digits stay bare. Right
+of `=>`, in ticks, is what the display must show. The window follows the run
+on both sides and says `Finished:` with the counts at the end. A line that
+fails shows what you expected and what the display had, both in ticks.
+
+Ready-made files are in the `examples` folder of the download; load them with
+Open...:
+
+- `hp10c-handbook-tests.txt`: 536 tests from the HP-10C Owner's Handbook, for
+  the HP-10C.
+- `hp11c-handbook-tests.txt`, `hp12c-handbook-tests.txt`,
+  `hp15c-handbook-tests.txt` and `hp16c-handbook-tests.txt`: the same for the
+  other four. Each runs on its own calculator. Lines starting with `##` are
+  switched off because their check fails in the simulator; the reason is
+  below each.
+- `16cplus-test-sheet.txt`: 77 tests for the 16C+.
+
+Help > How to write a test explains every line you can write.
 
 ## 6. The HP-16C+
 

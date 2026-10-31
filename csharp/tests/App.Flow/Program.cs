@@ -212,7 +212,7 @@ if (windowExe is not null)
     var badFile = Path.Combine(root, "build", "app-flow-bad.txt");
     File.WriteAllLines(badFile, ["1 2 ENTER 3 0 +  =>  43 h", "NOSUCHKEY"]);
     var badRun = machine.Ask("testrun " + badFile);
-    Check("test window reports failures", badRun.StartsWith("ok 0 ok, 2 failed") && badRun.Contains("got '42 h'") && badRun.Contains("unknown key"));
+    Check("test window reports failures", badRun.StartsWith("ok 0 ok, 2 failed") && badRun.Contains("failed with '42 h'") && badRun.Contains("unknown key"));
     var shot = Path.Combine(root, "build", "app-flow-window.png");
     Say("screenshot: " + machine.Ask("screenshot " + shot));
     machine.Ask("quit");

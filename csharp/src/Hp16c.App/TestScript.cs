@@ -19,9 +19,11 @@ sealed class KeyNames(Skin skin, string modelId)
     }
 
     /// <summary>Codes for one word of a keys line; null = unknown. Digit groups
-    /// like 12AB are split; _ stands for a space in a legend.</summary>
+    /// like 12AB are split; _ stands for a space in a legend. A key may be
+    /// written in brackets, as the handbooks print them: [R/S] is R/S.</summary>
     public List<int>? Resolve(string word)
     {
+        if (word.Length >= 3 && word[0] == '[' && word[^1] == ']') word = word[1..^1];
         var s = word.Replace('_', ' ');
         foreach (var candidate in new[] { s, Skin.Pretty(s) })
         {
@@ -146,14 +148,21 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
             flags = right[(open + 1)..^1];
             right = right[..open].Trim();
         }
+        // the expected text may stand in ticks: '005-  22 A'. Outer spaces never count:
+        // the display's sign cell and its trailing blanks are trimmed on both sides.
+        const char Tick = (char)39;
+        if (right.Length >= 2 && right[0] == Tick && right[^1] == Tick) right = right[1..^1].Trim();
         var got = run.Read(v => v.Display()).Trim();
         if (got.Length == 0) got = "(blank)";
         var lit = run.Read(v => v.Annunciators()).Select(a => skin.Annunciators[a]).ToHashSet();
         var wrong = flags.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
             .Where(f => f.StartsWith('-') ? lit.Contains(f[1..]) : !lit.Contains(f)).ToList();
         bool ok = got == right && wrong.Count == 0;
-        var detail = (got == right ? "" : $"got '{got}'") +
+        var detail = (got == right ? "" : $"failed with '{got}'") +
                      (wrong.Count == 0 ? "" : $" annunciators wrong: {string.Join(" ", wrong)}");
-        return new(no, line, ok, detail.Trim());
+        // a failing line shows both texts in ticks, so a stray space is visible
+        var text = ok ? line : line[..line.IndexOf("=>", StringComparison.Ordinal)].TrimEnd() +
+                   $"  =>  '{right}'" + (flags.Length > 0 ? $"  [{flags}]" : "");
+        return new(no, text, ok, detail.Trim());
     }
 }

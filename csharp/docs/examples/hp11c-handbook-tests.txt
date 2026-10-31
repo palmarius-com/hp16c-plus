@@ -1,5 +1,7 @@
 # HP-11C: the examples of the Owner's Handbook, one line, one test.
 # Start the HP-11C, then Run. Tests build on the line before them.
+# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
+# display is in ticks. Help > How to write a test explains the notation.
 # Expected values: the handbook prints them (spacing follows the LCD). They were
 # read from the scanned pages by a model, no person has proofread them.
 # "# PDF page N" is the page of the handbook's PDF (printed page = N - 2).
@@ -12,1635 +14,1635 @@
 # PDF page 13
 # before Section 1
 reset
-15 ENTER  =>  15.0000
-30  =>  30
-×  =>  450.0000
-. 4 7  =>  0.47
-×  =>  211.5000
-←  =>  0.0000
+15 [ENTER]  =>  '15.0000'
+30  =>  '30'
+[×]  =>  '450.0000'
+. 4 7  =>  '0.47'
+[×]  =>  '211.5000'
+[←]  =>  '0.0000'
 # PDF page 14
-P/R  =>  000-
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-3  =>  002-     3
-0  =>  003-     0
-×  =>  004-    20
-.  =>  005-    48
-4  =>  006-     4
-7  =>  007-     7
-×  =>  008-    20
-RTN  =>  009- 43 32
-P/R  =>  0.0000
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+3  =>  '002-     3'
+0  =>  '003-     0'
+[×]  =>  '004-    20'
+.  =>  '005-    48'
+4  =>  '006-     4'
+7  =>  '007-     7'
+[×]  =>  '008-    20'
+[RTN]  =>  '009- 43 32'
+[P/R]  =>  '0.0000'
 # PDF page 15
-15  =>  15
-A  =>  211.5000
-18 A  =>  253.8000
+15  =>  '15'
+[A]  =>  '211.5000'
+18 [A]  =>  '253.8000'
 # PDF page 19
 # Negative Numbers
 reset
-12345  =>  12,345
-√x  =>  111.1081
-←  =>  0.0000
+12345  =>  '12,345'
+[√x]  =>  '111.1081'
+[←]  =>  '0.0000'
 # PDF page 20
-12345  =>  12,345
-←  =>  1,234
-←  =>  123
-9  =>  1,239
+12345  =>  '12,345'
+[←]  =>  '1,234'
+[←]  =>  '123'
+9  =>  '1,239'
 # PDF page 21
 # Running
 reset
-4 CHS  =>  -4
-√x  =>  Error 0
-←  =>  -4.0000
+4 [CHS]  =>  '-4'
+[√x]  =>  'Error 0'
+[←]  =>  '-4.0000'
 # PDF page 23
-45  =>  45
-LOG  =>  1.6532
+45  =>  '45'
+[LOG]  =>  '1.6532'
 # PDF page 24
 # Two-Number Functions
 reset
-2  =>  2
-ENTER  =>  2.0000
-3  =>  3
-÷  =>  0.6667
+2  =>  '2'
+[ENTER]  =>  '2.0000'
+3  =>  '3'
+[÷]  =>  '0.6667'
 # PDF page 25
 # - For other two-number functions such as [yˣ], the number designated x
 reset
-2 ENTER  =>  2.0000
-3  =>  3
-yˣ  =>  8.0000
+2 [ENTER]  =>  '2.0000'
+3  =>  '3'
+[yˣ]  =>  '8.0000'
 # PDF page 25
-2 ENTER  =>  2.0000
-4  =>  4
-+  =>  6.0000
-8  =>  8
-÷  =>  0.7500
+2 [ENTER]  =>  '2.0000'
+4  =>  '4'
+[+]  =>  '6.0000'
+8  =>  '8'
+[÷]  =>  '0.7500'
 # PDF page 25
-9 ENTER  =>  9.0000
-17 +  =>  26.0000
-4 -  =>  22.0000
-23 +  =>  45.0000
-4 ÷  =>  11.2500
+9 [ENTER]  =>  '9.0000'
+17 [+]  =>  '26.0000'
+4 [-]  =>  '22.0000'
+23 [+]  =>  '45.0000'
+4 [÷]  =>  '11.2500'
 # PDF page 26
-6  =>  6
-ENTER  =>  6.0000
-7  =>  7
-+  =>  13.0000
+6  =>  '6'
+[ENTER]  =>  '6.0000'
+7  =>  '7'
+[+]  =>  '13.0000'
 # PDF page 26
-9  =>  9
-ENTER  =>  9.0000
-3  =>  3
--  =>  6.0000
+9  =>  '9'
+[ENTER]  =>  '9.0000'
+3  =>  '3'
+[-]  =>  '6.0000'
 # PDF page 36
 # Section 2
 reset
-287 ENTER  =>  287.0000
-1 2 . 9 ÷  =>  22.2481
-LSTx  =>  12.9000
-×  =>  287.0000
-1 3 . 9 ÷  =>  20.6475
+287 [ENTER]  =>  '287.0000'
+1 2 . 9 [÷]  =>  '22.2481'
+[LSTx]  =>  '12.9000'
+[×]  =>  '287.0000'
+1 3 . 9 [÷]  =>  '20.6475'
 # PDF page 40
-123  =>  123
-STO 4  =>  123.0000
-678  =>  678
-STO . 7  =>  678.0000
-RCL 4  =>  123.0000
-RCL . 7  =>  678.0000
+123  =>  '123'
+[STO] 4  =>  '123.0000'
+678  =>  '678'
+[STO] . 7  =>  '678.0000'
+[RCL] 4  =>  '123.0000'
+[RCL] . 7  =>  '678.0000'
 # PDF page 42
-18 STO 0  =>  18.0000
-3 STO ÷ 0  =>  3.0000
-RCL 0  =>  6.0000
-4 STO × 0  =>  4.0000
-RCL 0  =>  24.0000
-STO + 0  =>  24.0000
-RCL 0  =>  48.0000
-40 STO − 0  =>  40.0000
-RCL 0  =>  8.0000
+18 [STO] 0  =>  '18.0000'
+3 [STO] [÷] 0  =>  '3.0000'
+[RCL] 0  =>  '6.0000'
+4 [STO] [×] 0  =>  '4.0000'
+[RCL] 0  =>  '24.0000'
+[STO] [+] 0  =>  '24.0000'
+[RCL] 0  =>  '48.0000'
+40 [STO] [−] 0  =>  '40.0000'
+[RCL] 0  =>  '8.0000'
 # PDF page 60
 # Section 3
 reset
-Σ  =>  0.0000
-1 . 7 6 1 ENTER  =>  1.7610
-5 . 5 5 2 Σ+  =>  1.0000
-1 . 7 7 5 ENTER  =>  1.7750
-5 . 9 6 3 Σ+  =>  2.0000
-1 . 7 9 2 ENTER  =>  1.7920
-6 . 1 3 5 Σ+  =>  3.0000
-1 . 8 8 4 ENTER  =>  1.8840
-6 . 3 1 3 Σ+  =>  4.0000
-1 . 9 4 3 ENTER  =>  1.9430
-6 . 7 1 3 Σ+  =>  5.0000
-RCL 1  =>  30.6760
-RCL 2  =>  188.9386
-RCL 3  =>  9.1550
-RCL 4  =>  16.7877
-RCL 5  =>  56.2924
+[Σ]  =>  '0.0000'
+1 . 7 6 1 [ENTER]  =>  '1.7610'
+5 . 5 5 2 [Σ+]  =>  '1.0000'
+1 . 7 7 5 [ENTER]  =>  '1.7750'
+5 . 9 6 3 [Σ+]  =>  '2.0000'
+1 . 7 9 2 [ENTER]  =>  '1.7920'
+6 . 1 3 5 [Σ+]  =>  '3.0000'
+1 . 8 8 4 [ENTER]  =>  '1.8840'
+6 . 3 1 3 [Σ+]  =>  '4.0000'
+1 . 9 4 3 [ENTER]  =>  '1.9430'
+6 . 7 1 3 [Σ+]  =>  '5.0000'
+[RCL] 1  =>  '30.6760'
+[RCL] 2  =>  '188.9386'
+[RCL] 3  =>  '9.1550'
+[RCL] 4  =>  '16.7877'
+[RCL] 5  =>  '56.2924'
 # PDF page 61
-1 . 9 4 3 ENTER  =>  1.9430
-6 . 7 1 3 Σ−  =>  4.0000
-1 . 9 4 6 ENTER  =>  1.9460
-6 . 7 1 3 Σ+  =>  5.0000
+1 . 9 4 3 [ENTER]  =>  '1.9430'
+6 . 7 1 3 [Σ−]  =>  '4.0000'
+1 . 9 4 6 [ENTER]  =>  '1.9460'
+6 . 7 1 3 [Σ+]  =>  '5.0000'
 # PDF page 62
-x̄  =>  6.1352
-x≷y  =>  1.8316
+[x̄]  =>  '6.1352'
+[x≷y]  =>  '1.8316'
 # PDF page 64
-s  =>  0.4287
-x≷y  =>  0.0800
+[s]  =>  '0.4287'
+[x≷y]  =>  '0.0800'
 # PDF page 66
-L.R.  =>  0.7773
-x≷y  =>  0.1718
+[L.R.]  =>  '0.7773'
+[x≷y]  =>  '0.1718'
 # PDF page 68
-7 . 1 4 1 7  =>  7.1417
-ŷ,r  =>  2.0046
-x≷y  =>  0.9211
+7 . 1 4 1 7  =>  '7.1417'
+[ŷ,r]  =>  '2.0046'
+[x≷y]  =>  '0.9211'
 # PDF page 69
 # Section 4: Display Control
 reset
-1 2 3 4 5 6 FIX 4  =>  123,456.0000
-SCI 4  =>  1.2346   05
-ENG 4  =>  123.46   03
+1 2 3 4 5 6 [FIX] 4  =>  '123,456.0000'
+[SCI] 4  =>  '1.2346   05'
+[ENG] 4  =>  '123.46   03'
 # PDF page 70
 # Section 4
 reset
-1 2 3 . 4 5 6 7 8 ENTER  =>  123.4568
-FIX 6  =>  123.456780
-FIX 0  =>  123.
-FIX 4  =>  123.4568
+1 2 3 . 4 5 6 7 8 [ENTER]  =>  '123.4568'
+[FIX] 6  =>  '123.456780'
+[FIX] 0  =>  '123.'
+[FIX] 4  =>  '123.4568'
 # PDF page 70
 # Scientific Notation Display
 reset
-1 2 3 . 4 5 6 7 8 9 5 ENTER  =>  123.4568
-SCI 2  =>  1.23     02
+1 2 3 . 4 5 6 7 8 9 5 [ENTER]  =>  '123.4568'
+[SCI] 2  =>  '1.23     02'
 # PDF page 71
-SCI 4  =>  1.2346   02
-SCI 6  =>  1.234568 02
+[SCI] 4  =>  '1.2346   02'
+[SCI] 6  =>  '1.234568 02'
 # PDF page 71
-SCI 7  =>  1.234567 02
-SCI 8  =>  1.234567 02
-SCI 9  =>  1.234567 02
+[SCI] 7  =>  '1.234567 02'
+[SCI] 8  =>  '1.234567 02'
+[SCI] 9  =>  '1.234567 02'
 # PDF page 72
 # - Footnote: if trailing 9s follow the last allowed displayed digit, ro
 reset
-. 0 1 2 3 4 5  =>  0.012345
-ENG 1  =>  12.     -03
-ENG 3  =>  12.35   -03
-ENG 6  =>  12.34500-03
-ENG 0  =>  10.     -03
+. 0 1 2 3 4 5  =>  '0.012345'
+[ENG] 1  =>  '12.     -03'
+[ENG] 3  =>  '12.35   -03'
+[ENG] 6  =>  '12.34500-03'
+[ENG] 0  =>  '10.     -03'
 # PDF page 73
-ENG 2  =>  12.3    -03
-10 ×  =>  123.    -03
+[ENG] 2  =>  '12.3    -03'
+10 [×]  =>  '123.    -03'
 # PDF page 73
 # Keying In Exponents
 reset
-FIX 4
-95600 ENTER
-6 . 0 2 2 2  =>  6.0222
-EEX  =>  6.0222   00
-26  =>  6.0222   26
-÷  =>  1.5875  -22
+[FIX] 4
+95600 [ENTER]
+6 . 0 2 2 2  =>  '6.0222'
+[EEX]  =>  '6.0222   00'
+26  =>  '6.0222   26'
+[÷]  =>  '1.5875  -22'
 # PDF page 73
 # - For a negative exponent: key the number, press [EEX], then [CHS], th
 reset
-6 . 6 2 6 2 EEX  =>  6.6262   00
-CHS  =>  6.6262  -00
-3  =>  6.6262  -03
-4  =>  6.6262  -34
-ENTER  =>  6.6262  -34
-50 ×  =>  3.3131  -32
+6 . 6 2 6 2 [EEX]  =>  '6.6262   00'
+[CHS]  =>  '6.6262  -00'
+3  =>  '6.6262  -03'
+4  =>  '6.6262  -34'
+[ENTER]  =>  '6.6262  -34'
+50 [×]  =>  '3.3131  -32'
 # PDF page 74
 # - [EEX] does not work with a number having more than seven integer dig
 reset
-π  =>  3.1416
-hold PREFIX  =>  3141592654
+[π]  =>  '3.1416'
+hold [PREFIX]  =>  '3141592654'
 # PDF page 83
 # Section 5
 reset
-P/R
-PRGM LBL A  =>  001-42,21,11
-3  =>  002-     3
+[P/R]
+[PRGM] [LBL] [A]  =>  '001-42,21,11'
+3  =>  '002-     3'
 # PDF page 84
 # Interpreting Keycodes
 reset
-## hold BST  =>  001-42,21,11
+## hold [BST]  =>  '001-42,21,11'
 #     not run: the simulator shows '000-'
 # PDF page 85
-## hold SST  =>  002-     3
+## hold [SST]  =>  '002-     3'
 #     not run: the simulator shows '000-'
 # PDF page 85
-P/R
-## 0  =>  003-     0
+[P/R]
+## 0  =>  '003-     0'
 #     not run: the simulator shows '001-     0'
-## ×  =>  004-    20
+## [×]  =>  '004-    20'
 #     not run: the simulator shows '002-    20'
-## .  =>  005-    48
+## .  =>  '005-    48'
 #     not run: the simulator shows '003-    48'
-## 4  =>  006-     4
+## 4  =>  '006-     4'
 #     not run: the simulator shows '004-     4'
-## 7  =>  007-     7
+## 7  =>  '007-     7'
 #     not run: the simulator shows '005-     7'
-## ×  =>  008-    20
+## [×]  =>  '008-    20'
 #     not run: the simulator shows '006-    20'
-## RTN  =>  009- 43 32
+## [RTN]  =>  '009- 43 32'
 #     not run: the simulator shows '007- 43 32'
-P/R
+[P/R]
 # PDF page 88
-P/R
-## LBL  =>  000-
+[P/R]
+## [LBL]  =>  '000-'
 #     not run: the simulator shows '007- 43 32'
-## A  =>  001-42,21,11
+## [A]  =>  '001-42,21,11'
 #     not run: the simulator shows '008-42,21,11'
 # PDF page 88
-## x²  =>  002- 43 11
+## [x²]  =>  '002- 43 11'
 #     not run: the simulator shows '009- 43 11'
-## π  =>  003- 42 16
+## [π]  =>  '003- 42 16'
 #     not run: the simulator shows '010- 42 16'
-## ×  =>  004-    20
+## [×]  =>  '004-    20'
 #     not run: the simulator shows '011-    20'
-## RTN  =>  005- 43 32
+## [RTN]  =>  '005- 43 32'
 #     not run: the simulator shows '012- 43 32'
 # PDF page 89
-P/R
-## 7 . 5 A  =>  176.7146
+[P/R]
+## 7 . 5 [A]  =>  '176.7146'
 #     not run: the simulator shows 'Error 4'
-## 9 A  =>  254.4690
+## 9 [A]  =>  '254.4690'
 #     not run: the simulator shows 'Error 4'
-## 1 5 . 3 A  =>  735.4154
+## 1 5 . 3 [A]  =>  '735.4154'
 #     not run: the simulator shows 'Error 4'
 # PDF page 90
-USER
-## 7 . 5 A  =>  176.7146
+[USER]
+## 7 . 5 [A]  =>  '176.7146'
 #     not run: the simulator shows '2.7386'
-## 9 A  =>  254.4690
+## 9 [A]  =>  '254.4690'
 #     not run: the simulator shows '3.0000'
-## 1 5 . 3 A  =>  735.4154
+## 1 5 . 3 [A]  =>  '735.4154'
 #     not run: the simulator shows '3.9115'
-## 4 √x  =>  2.0000
+## 4 [√x]  =>  '2.0000'
 #     not run: the simulator shows '50.2655'
-## 1 eˣ  =>  2.7183
+## 1 [eˣ]  =>  '2.7183'
 #     not run: the simulator shows 'Error 4'
-## 1 10ˣ  =>  10.0000
+## 1 [10ˣ]  =>  '10.0000'
 #     not run: the simulator shows 'Error 4'
-## 2 ENTER  =>  2.0000
+## 2 [ENTER]  =>  '2.0000'
 #     not run: the simulator shows '1.0000'
-## 8 yˣ  =>  256.0000
+## 8 [yˣ]  =>  '256.0000'
 #     not run: the simulator shows 'Error 4'
-## . 5 1/x  =>  2.0000
+## . 5 [1/x]  =>  '2.0000'
 #     not run: the simulator shows 'Error 4'
-## USER  =>  2.0000
+## [USER]  =>  '2.0000'
 #     not run: the simulator shows '5.0000'
 # PDF page 92
-P/R
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-x²  =>  002- 43 11
-π  =>  003- 42 16
-×  =>  004-    20
-R/S  =>  005-    31
-×  =>  006-    20
-RTN  =>  007- 43 32
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[x²]  =>  '002- 43 11'
+[π]  =>  '003- 42 16'
+[×]  =>  '004-    20'
+[R/S]  =>  '005-    31'
+[×]  =>  '006-    20'
+[RTN]  =>  '007- 43 32'
 # PDF page 92
-P/R
-25 ENTER  =>  25.0000
-## 10 A  =>  314.1593
+[P/R]
+25 [ENTER]  =>  '25.0000'
+## 10 [A]  =>  '314.1593'
 #     not run: the simulator shows '3.1623'
-## R/S  =>  7,853.9816
+## [R/S]  =>  '7,853.9816'
 #     not run: the simulator shows '3.1623'
-8 ENTER  =>  8.0000
+8 [ENTER]  =>  '8.0000'
 # PDF page 93
-## 4 . 5 A  =>  63.6173
+## 4 . 5 [A]  =>  '63.6173'
 #     not run: the simulator shows '2.1213'
-## R/S  =>  508.9380
+## [R/S]  =>  '508.9380'
 #     not run: the simulator shows '14.1372'
 # PDF page 93
-P/R
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-x²  =>  002- 43 11
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[x²]  =>  '002- 43 11'
 # PDF page 94
-π  =>  003- 42 16
-×  =>  004-    20
-PSE  =>  005- 42 31
-×  =>  006-    20
-RTN  =>  007- 43 32
+[π]  =>  '003- 42 16'
+[×]  =>  '004-    20'
+[PSE]  =>  '005- 42 31'
+[×]  =>  '006-    20'
+[RTN]  =>  '007- 43 32'
 # PDF page 94
-P/R
-20 ENTER  =>  20.0000
-## 15 A  =>  706.8583
+[P/R]
+20 [ENTER]  =>  '20.0000'
+## 15 [A]  =>  '706.8583'
 #     not run: the simulator shows '3.8730'
-10 ENTER  =>  10.0000
-## 5 A  =>  78.5398
+10 [ENTER]  =>  '10.0000'
+## 5 [A]  =>  '78.5398'
 #     not run: the simulator shows '2.2361'
 # PDF page 99
 # Section 6
 reset
-## hold SST  =>  001-42,21,11
+## hold [SST]  =>  '001-42,21,11'
 #     not run: the simulator shows '000-'
 # PDF page 99
-## hold BST  =>  001-42,21,11
+## hold [BST]  =>  '001-42,21,11'
 #     not run: the simulator shows '000-'
 # PDF page 101
-P/R
-PRGM  =>  000-
-LBL E  =>  001-42,21,15
-x²  =>  002- 43 11
-x≷y  =>  003-    34
-x²  =>  004- 43 11
-+  =>  005-    40
-√x  =>  006-    11
-RTN  =>  007- 43 32
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [E]  =>  '001-42,21,15'
+[x²]  =>  '002- 43 11'
+[x≷y]  =>  '003-    34'
+[x²]  =>  '004- 43 11'
+[+]  =>  '005-    40'
+[√x]  =>  '006-    11'
+[RTN]  =>  '007- 43 32'
 # PDF page 101
-P/R
-22 ENTER  =>  22.0000
-9  =>  9
-E  =>  23.7697
+[P/R]
+22 [ENTER]  =>  '22.0000'
+9  =>  '9'
+[E]  =>  '23.7697'
 # PDF page 102
-22 ENTER  =>  22.0000
-9  =>  9
-hold SST  =>  001-42,21,15
-## hold SST  =>  9.0000
+22 [ENTER]  =>  '22.0000'
+9  =>  '9'
+hold [SST]  =>  '001-42,21,15'
+## hold [SST]  =>  '9.0000'
 #     not run: the simulator shows '002- 43 11'
-## hold SST  =>  002- 43 11
+## hold [SST]  =>  '002- 43 11'
 #     not run: the simulator shows '003-    34'
-## hold SST  =>  81.0000
+## hold [SST]  =>  '81.0000'
 #     not run: the simulator shows '004- 43 11'
-## hold SST  =>  003-    34
+## hold [SST]  =>  '003-    34'
 #     not run: the simulator shows '005-    40'
-## hold SST  =>  22.0000
+## hold [SST]  =>  '22.0000'
 #     not run: the simulator shows '006-    11'
-## hold SST  =>  004- 43 11
+## hold [SST]  =>  '004- 43 11'
 #     not run: the simulator shows '007- 43 32'
-## hold SST  =>  484.0000
+## hold [SST]  =>  '484.0000'
 #     not run: the simulator shows '001-42,21,15'
-## hold SST  =>  005-    40
+## hold [SST]  =>  '005-    40'
 #     not run: the simulator shows '002- 43 11'
-## hold SST  =>  565.0000
+## hold [SST]  =>  '565.0000'
 #     not run: the simulator shows '003-    34'
-## hold SST  =>  006-    11
+## hold [SST]  =>  '006-    11'
 #     not run: the simulator shows '004- 43 11'
-## hold SST  =>  23.7697
+## hold [SST]  =>  '23.7697'
 #     not run: the simulator shows '005-    40'
-## hold SST  =>  007- 43 32
+## hold [SST]  =>  '007- 43 32'
 #     not run: the simulator shows '006-    11'
-## hold SST  =>  23.7697
+## hold [SST]  =>  '23.7697'
 #     not run: the simulator shows '007- 43 32'
 # PDF page 103
-## P/R  =>  000-
+## [P/R]  =>  '000-'
 #     not run: the simulator shows '002- 43 11'
-## hold SST  =>  001-42,21,15
+## hold [SST]  =>  '001-42,21,15'
 #     not run: the simulator shows '005-    40'
-## hold SST  =>  002- 43 11
+## hold [SST]  =>  '002- 43 11'
 #     not run: the simulator shows '000-'
-## hold SST  =>  003-    34
+## hold [SST]  =>  '003-    34'
 #     not run: the simulator shows '000-'
-## hold SST  =>  004- 43 11
+## hold [SST]  =>  '004- 43 11'
 #     not run: the simulator shows '000-'
-## hold SST  =>  005-    40
+## hold [SST]  =>  '005-    40'
 #     not run: the simulator shows '007- 43 32'
-## hold SST  =>  006-    11
+## hold [SST]  =>  '006-    11'
 #     not run: the simulator shows '002- 43 11'
-## hold SST  =>  007- 43 32
+## hold [SST]  =>  '007- 43 32'
 #     not run: the simulator shows '000-'
-P/R
+[P/R]
 # PDF page 104
 # Example: insert [f] [PSE] after the [+] instruction (line 005):
 # no reset: the book edits the program of p. 101-103
-GTO . 000
-## P/R  =>  000-
+[GTO] . 000
+## [P/R]  =>  '000-'
 #     not run: the simulator shows '9.0000'
-## hold SST  =>  001-42,21,15
+## hold [SST]  =>  '001-42,21,15'
 #     not run: the simulator shows '000-'
-## hold SST  =>  002- 43 11
+## hold [SST]  =>  '002- 43 11'
 #     not run: the simulator shows '005-    40'
-## hold SST  =>  003-    34
+## hold [SST]  =>  '003-    34'
 #     not run: the simulator shows '007- 43 32'
-## hold SST  =>  004- 43 11
+## hold [SST]  =>  '004- 43 11'
 #     not run: the simulator shows '006-    11'
-## hold SST  =>  005-    40
+## hold [SST]  =>  '005-    40'
 #     not run: the simulator shows '001-42,21,15'
-## PSE  =>  006- 42 31
+## [PSE]  =>  '006- 42 31'
 #     not run: the simulator shows '002- 42 31'
 # PDF page 105
-## GTO . 004  =>  004- 43 11
+## [GTO] . 004  =>  '004- 43 11'
 #     not run: the simulator shows '004-    34'
-## PSE  =>  005- 42 31
+## [PSE]  =>  '005- 42 31'
 #     not run: the simulator shows '9.0000'
 # PDF page 106
-## hold BST  =>  004- 43 11
+## hold [BST]  =>  '004- 43 11'
 #     not run: the simulator shows '001-42,21,15'
-## hold BST  =>  003-    34
+## hold [BST]  =>  '003-    34'
 #     not run: the simulator shows '000-'
-## hold BST  =>  002- 43 11
+## hold [BST]  =>  '002- 43 11'
 #     not run: the simulator shows '005- 42 31'
-## PSE  =>  003- 42 31
+## [PSE]  =>  '003- 42 31'
 #     not run: the simulator shows '005- 42 31'
 # PDF page 106
-## LBL E  =>  001-42,21,15
+## [LBL] [E]  =>  '001-42,21,15'
 #     not run: the simulator shows '006-42,21,15'
-## x²  =>  002- 43 11
+## [x²]  =>  '002- 43 11'
 #     not run: the simulator shows '007- 43 11'
-## PSE  =>  003- 42 31
+## [PSE]  =>  '003- 42 31'
 #     not run: the simulator shows '008- 42 31'
-## x≷y  =>  004-    34
+## [x≷y]  =>  '004-    34'
 #     not run: the simulator shows '009-    34'
-## x²  =>  005- 43 11
+## [x²]  =>  '005- 43 11'
 #     not run: the simulator shows '010- 43 11'
-## PSE  =>  006- 42 31
+## [PSE]  =>  '006- 42 31'
 #     not run: the simulator shows '011- 42 31'
-## +  =>  007-    40
+## [+]  =>  '007-    40'
 #     not run: the simulator shows '012-    40'
-## PSE  =>  008- 42 31
+## [PSE]  =>  '008- 42 31'
 #     not run: the simulator shows '013- 42 31'
-## √x  =>  009-    11
+## [√x]  =>  '009-    11'
 #     not run: the simulator shows '014-    11'
-## RTN  =>  010- 43 32
+## [RTN]  =>  '010- 43 32'
 #     not run: the simulator shows '015- 43 32'
 # PDF page 107
-P/R
-## 22 ENTER  =>  22.0000
+[P/R]
+## 22 [ENTER]  =>  '22.0000'
 #     not run: the simulator shows '003-    36'
-## 9  =>  9
+## 9  =>  '9'
 #     not run: the simulator shows '004-     9'
-## E  =>  81.0000
+## [E]  =>  '81.0000'
 #     not run: the simulator shows '490.7311'
 # PDF page 108
-## P/R  =>  000-
+## [P/R]  =>  '000-'
 #     not run: the simulator shows '005- 42 31'
-## GTO . 006  =>  006- 42 31
+## [GTO] . 006  =>  '006- 42 31'
 #     not run: the simulator shows '006-42,21,15'
-## ←  =>  005- 43 11
+## [←]  =>  '005- 43 11'
 #     not run: the simulator shows '005- 42 31'
-## GTO . 003  =>  003- 42 31
+## [GTO] . 003  =>  '003- 42 31'
 #     not run: the simulator shows '003-    34'
-## ←  =>  002- 43 11
+## [←]  =>  '002- 43 11'
 #     not run: the simulator shows '004-    34'
 # PDF page 109
-P/R
-## 17 ENTER 34  =>  34
+[P/R]
+## 17 [ENTER] 34  =>  '34'
 #     not run: the simulator shows '005-     4'
-## E  =>  1,445.0000
+## [E]  =>  '1,445.0000'
 #     not run: the simulator shows '1,336,336.000'
 # PDF page 109
-P/R
-## LBL A  =>  001-42,21,11
+[P/R]
+## [LBL] [A]  =>  '001-42,21,11'
 #     not run: the simulator shows '005-42,21,11'
-## FIX 2  =>  002-42, 7, 2
+## [FIX] 2  =>  '002-42, 7, 2'
 #     not run: the simulator shows '006-42, 7, 2'
 # PDF page 110
-## 1  =>  003-     1
+## 1  =>  '003-     1'
 #     not run: the simulator shows '007-     1'
-## .  =>  004-    48
+## .  =>  '004-    48'
 #     not run: the simulator shows '008-    48'
-## 0  =>  005-     0
+## 0  =>  '005-     0'
 #     not run: the simulator shows '009-     0'
-## 7  =>  006-     7
+## 7  =>  '006-     7'
 #     not run: the simulator shows '010-     7'
-## 5  =>  007-     5
+## 5  =>  '007-     5'
 #     not run: the simulator shows '011-     5'
-## x≷y  =>  008-    34
+## [x≷y]  =>  '008-    34'
 #     not run: the simulator shows '012-    34'
-## yˣ  =>  009-    14
+## [yˣ]  =>  '009-    14'
 #     not run: the simulator shows '013-    14'
-## ×  =>  010-    20
+## [×]  =>  '010-    20'
 #     not run: the simulator shows '014-    20'
-## RTN  =>  011- 43 32
+## [RTN]  =>  '011- 43 32'
 #     not run: the simulator shows '015- 43 32'
 # PDF page 111
 # 2. Time of a fall
 reset
-P/R
-LBL B  =>  001-42,21,12
-2  =>  002-     2
-×  =>  003-    20
-9  =>  004-     9
-.  =>  005-    48
-8  =>  006-     8
-÷  =>  007-    10
-√x  =>  008-    11
-RTN  =>  009- 43 32
+[P/R]
+[LBL] [B]  =>  '001-42,21,12'
+2  =>  '002-     2'
+[×]  =>  '003-    20'
+9  =>  '004-     9'
+.  =>  '005-    48'
+8  =>  '006-     8'
+[÷]  =>  '007-    10'
+[√x]  =>  '008-    11'
+[RTN]  =>  '009- 43 32'
 # PDF page 116
 # Section 7
 reset
-P/R  =>  000-
-PRGM  =>  000-
-LBL C  =>  001-42,21,13
-0  =>  002-     0
-STO 1  =>  003-  44 1
-LBL 0  =>  004-42,21, 0
-1  =>  005-     1
-STO + 1  =>  006-44,40, 1
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [C]  =>  '001-42,21,13'
+0  =>  '002-     0'
+[STO] 1  =>  '003-  44 1'
+[LBL] 0  =>  '004-42,21, 0'
+1  =>  '005-     1'
+[STO] [+] 1  =>  '006-44,40, 1'
 # PDF page 117
-RCL 1  =>  007-  45 1
-PSE  =>  008- 42 31
-√x  =>  009-    11
-PSE  =>  010- 42 31
-LSTx  =>  011- 43 36
-1  =>  012-     1
-0  =>  013-     0
-x>y  =>  014- 42 20
-GTO 0  =>  015-  22 0
-CLx  =>  016- 43 35
-RTN  =>  017- 43 32
-P/R
+[RCL] 1  =>  '007-  45 1'
+[PSE]  =>  '008- 42 31'
+[√x]  =>  '009-    11'
+[PSE]  =>  '010- 42 31'
+[LSTx]  =>  '011- 43 36'
+1  =>  '012-     1'
+0  =>  '013-     0'
+[x>y]  =>  '014- 42 20'
+[GTO] 0  =>  '015-  22 0'
+[CLx]  =>  '016- 43 35'
+[RTN]  =>  '017- 43 32'
+[P/R]
 # PDF page 119
 # Using Flags
 reset
-P/R  =>  000-
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-CF 0  =>  002-43, 5, 0
-GTO 1  =>  003-  22 1
-LBL B  =>  004-42,21,12
-SF 0  =>  005-43, 4, 0
-LBL 1  =>  006-42,21, 1
-1  =>  007-     1
-.  =>  008-    48
-6  =>  009-     6
-0  =>  010-     0
-9  =>  011-     9
-3  =>  012-     3
-F? 0  =>  013-43, 6, 0
-GTO 2  =>  014-  22 2
-×  =>  015-    20
-RTN  =>  016- 43 32
-LBL 2  =>  017-42,21, 2
-÷  =>  018-    10
-RTN  =>  019- 43 32
-P/R
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[CF] 0  =>  '002-43, 5, 0'
+[GTO] 1  =>  '003-  22 1'
+[LBL] [B]  =>  '004-42,21,12'
+[SF] 0  =>  '005-43, 4, 0'
+[LBL] 1  =>  '006-42,21, 1'
+1  =>  '007-     1'
+.  =>  '008-    48'
+6  =>  '009-     6'
+0  =>  '010-     0'
+9  =>  '011-     9'
+3  =>  '012-     3'
+[F?] 0  =>  '013-43, 6, 0'
+[GTO] 2  =>  '014-  22 2'
+[×]  =>  '015-    20'
+[RTN]  =>  '016- 43 32'
+[LBL] 2  =>  '017-42,21, 2'
+[÷]  =>  '018-    10'
+[RTN]  =>  '019- 43 32'
+[P/R]
 # PDF page 120
-26  =>  26
-A  =>  41.8418
-1 . 5  =>  1.5
-B  =>  0.9321
+26  =>  '26'
+[A]  =>  '41.8418'
+1 . 5  =>  '1.5'
+[B]  =>  '0.9321'
 # PDF page 127
 # Section 8
 reset
-P/R  =>  000-
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-x²  =>  002- 43 11
-GSB A  =>  003- 32 11
-GSB A  =>  004- 32 11
-GSB A  =>  005- 32 11
-√x  =>  006-    11
-RTN  =>  007- 43 32
-LBL A  =>  008-42,21,11
-x≷y  =>  009-    34
-x²  =>  010- 43 11
-+  =>  011-    40
-RTN  =>  012- 43 32
-P/R
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[x²]  =>  '002- 43 11'
+[GSB] [A]  =>  '003- 32 11'
+[GSB] [A]  =>  '004- 32 11'
+[GSB] [A]  =>  '005- 32 11'
+[√x]  =>  '006-    11'
+[RTN]  =>  '007- 43 32'
+[LBL] [A]  =>  '008-42,21,11'
+[x≷y]  =>  '009-    34'
+[x²]  =>  '010- 43 11'
+[+]  =>  '011-    40'
+[RTN]  =>  '012- 43 32'
+[P/R]
 # PDF page 128
-8 ENTER  =>  8.0000
-1 . 3 ENTER  =>  1.3000
-7 . 9 ENTER 4 . 3 A  =>  12.1074
+8 [ENTER]  =>  '8.0000'
+1 . 3 [ENTER]  =>  '1.3000'
+7 . 9 [ENTER] 4 . 3 [A]  =>  '12.1074'
 # PDF page 134
 # Section 9
 reset
-P/R  =>  000-
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-2  =>  002-     2
-·  =>  003-    48
-0  =>  004-     0
-5  =>  005-     5
-0  =>  006-     0
-0  =>  007-     0
-2  =>  008-     2
-STO I  =>  009- 44 25
-LBL 1  =>  010-42,21, 1
-RCL I  =>  011- 45 25
-INT  =>  012- 43 44
-PSE  =>  013- 42 31
-x²  =>  014- 43 11
-PSE  =>  015- 42 31
-ISG  =>  016-  42 6
-GTO 1  =>  017-  22 1
-RTN  =>  018- 43 32
-P/R
+[P/R]  =>  '000-'
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+2  =>  '002-     2'
+[·]  =>  '003-    48'
+0  =>  '004-     0'
+5  =>  '005-     5'
+0  =>  '006-     0'
+0  =>  '007-     0'
+2  =>  '008-     2'
+[STO] [I]  =>  '009- 44 25'
+[LBL] 1  =>  '010-42,21, 1'
+[RCL] [I]  =>  '011- 45 25'
+[INT]  =>  '012- 43 44'
+[PSE]  =>  '013- 42 31'
+[x²]  =>  '014- 43 11'
+[PSE]  =>  '015- 42 31'
+[ISG]  =>  '016-  42 6'
+[GTO] 1  =>  '017-  22 1'
+[RTN]  =>  '018- 43 32'
+[P/R]
 # PDF page 135
-## hold A  =>  2.0000
+## hold [A]  =>  '2.0000'
 #     not run: the simulator shows '001-42,21,11'
-## =>  4.0000
+## =>  '4.0000'
 #     not run: the simulator shows '2,500.0000'
 # PDF page 148
 # Section 10
 reset
-FIX 4
-14 STO 5
-8 CHS STO 6
-0 STO 7
-8 CHS STO 8
-12 STO 9
-0 STO . 0
-STO . 1 STO . 2
-1 STO . 3
-## A  =>  104.0000
+[FIX] 4
+14 [STO] 5
+8 [CHS] [STO] 6
+0 [STO] 7
+8 [CHS] [STO] 8
+12 [STO] 9
+0 [STO] . 0
+[STO] . 1 [STO] . 2
+1 [STO] . 3
+## [A]  =>  '104.0000'
 #     not run: the simulator shows 'Error 4'
-## B  =>  0.1154
+## [B]  =>  '0.1154'
 #     not run: the simulator shows '2.7183'
 # PDF page 149
-## R/S  =>  0.0769
+## [R/S]  =>  '0.0769'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.0769
+## [R/S]  =>  '0.0769'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.1346
+## [R/S]  =>  '0.1346'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '2.7183'
-## R/S  =>  1.0000
+## [R/S]  =>  '1.0000'
 #     not run: the simulator shows '2.7183'
-RTN BST
-## P/R  =>  102-  32 9
+[RTN] [BST]
+## [P/R]  =>  '102-  32 9'
 #     not run: the simulator shows '000-'
-## ← ← ←  =>  078- 43 32
+## [←] [←] [←]  =>  '078- 43 32'
 #     not run: the simulator shows '000-'
 # PDF page 149
-P/R
-20 ENTER 5 ENTER
-## 0 C  =>  2.6923
+[P/R]
+20 [ENTER] 5 [ENTER]
+## 0 [C]  =>  '2.6923'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  2.2115
+## [R/S]  =>  '2.2115'
 #     not run: the simulator shows '0.0000'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '006-    31'
 # PDF page 150
-19 STO 5
-4 CHS STO 6
-15 CHS STO 7
-4 CHS STO 8
-22 STO 9
-10 CHS STO . 0
-15 CHS STO . 1
-10 CHS STO . 2
-26 STO . 3
+19 [STO] 5
+4 [CHS] [STO] 6
+15 [CHS] [STO] 7
+4 [CHS] [STO] 8
+22 [STO] 9
+10 [CHS] [STO] . 0
+15 [CHS] [STO] . 1
+10 [CHS] [STO] . 2
+26 [STO] . 3
 # PDF page 150
-## A  =>  2,402.0000
+## [A]  =>  '2,402.0000'
 #     not run: the simulator shows 'Error 4'
 # PDF page 150
-40 ENTER
-## 0 ENTER C  =>  7.8601
+40 [ENTER]
+## 0 [ENTER] [C]  =>  '7.8601'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  4.2298
+## [R/S]  =>  '4.2298'
 #     not run: the simulator shows '0.0000'
-## R/S  =>  6.1615
+## [R/S]  =>  '6.1615'
 #     not run: the simulator shows '0.0000'
 # PDF page 154
-REG
-FIX 4
-## A  =>  1.0000  0.0000
+[REG]
+[FIX] 4
+## [A]  =>  '1.0000  0.0000'
 #     not run: the simulator shows 'Error 4'
 # PDF page 155
-## 19 R/S  =>  2.0000  0.0000
+## 19 [R/S]  =>  '2.0000  0.0000'
 #     not run: the simulator shows '9.0000'
-## 4 CHS R/S  =>  3.0000  0.0000
+## 4 [CHS] [R/S]  =>  '3.0000  0.0000'
 #     not run: the simulator shows '-4.0000'
-## 15 CHS R/S  =>  4.0000  0.0000
+## 15 [CHS] [R/S]  =>  '4.0000  0.0000'
 #     not run: the simulator shows '-15.0000'
-## 4 CHS R/S  =>  5.0000  0.0000
+## 4 [CHS] [R/S]  =>  '5.0000  0.0000'
 #     not run: the simulator shows '-4.0000'
-## 22 R/S  =>  6.0000  0.0000
+## 22 [R/S]  =>  '6.0000  0.0000'
 #     not run: the simulator shows '22.0000'
-## 10 CHS R/S  =>  7.0000  0.0000
+## 10 [CHS] [R/S]  =>  '7.0000  0.0000'
 #     not run: the simulator shows '-10.0000'
-## 15 CHS R/S  =>  8.0000  0.0000
+## 15 [CHS] [R/S]  =>  '8.0000  0.0000'
 #     not run: the simulator shows '-15.0000'
-## 10 CHS R/S  =>  9.0000  0.0000
+## 10 [CHS] [R/S]  =>  '9.0000  0.0000'
 #     not run: the simulator shows '-10.0000'
-## 26 R/S  =>  2,402.0000
+## 26 [R/S]  =>  '2,402.0000'
 #     not run: the simulator shows '26.0000'
-40 ENTER
-## 0 ENTER B  =>  7.8601
+40 [ENTER]
+## 0 [ENTER] [B]  =>  '7.8601'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  4.2298
+## [R/S]  =>  '4.2298'
 #     not run: the simulator shows '0.0000'
-## R/S  =>  6.1615
+## [R/S]  =>  '6.1615'
 #     not run: the simulator shows '0.0000'
 # PDF page 155
 # Example 2
 reset
-## A  =>  1.0000  19.0000
+## [A]  =>  '1.0000  19.0000'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  2.0000  -4.0000
+## [R/S]  =>  '2.0000  -4.0000'
 #     not run: the simulator shows '0.0000'
-## 5 R/S  =>  3.0000  -15.0000
+## 5 [R/S]  =>  '3.0000  -15.0000'
 #     not run: the simulator shows '5.0000'
-## R/S  =>  4.0000  -4.0000
+## [R/S]  =>  '4.0000  -4.0000'
 #     not run: the simulator shows '5.0000'
-## R/S  =>  5.0000  22.0000
+## [R/S]  =>  '5.0000  22.0000'
 #     not run: the simulator shows '5.0000'
-## 12 CHS R/S  =>  6.0000  -10.0000
+## 12 [CHS] [R/S]  =>  '6.0000  -10.0000'
 #     not run: the simulator shows '-12.0000'
-## 8 R/S  =>  7.0000  -15.0000
+## 8 [R/S]  =>  '7.0000  -15.0000'
 #     not run: the simulator shows '8.0000'
-## 4 R/S  =>  8.0000  -10.0000
+## 4 [R/S]  =>  '8.0000  -10.0000'
 #     not run: the simulator shows '4.0000'
-## R/S  =>  9.0000  26.0000
+## [R/S]  =>  '9.0000  26.0000'
 #     not run: the simulator shows '4.0000'
-## 3 R/S  =>  -264.0000
+## 3 [R/S]  =>  '-264.0000'
 #     not run: the simulator shows '3.0000'
-5 ENTER
-3 CHS ENTER
-## 4 B  =>  -1.6667
+5 [ENTER]
+3 [CHS] [ENTER]
+## 4 [B]  =>  '-1.6667'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  -4.4091
+## [R/S]  =>  '-4.4091'
 #     not run: the simulator shows '4.0000'
-## R/S  =>  4.7576
+## [R/S]  =>  '4.7576'
 #     not run: the simulator shows '4.0000'
 # PDF page 160
-GTO C
-## P/R  =>  068-42,21,13
+[GTO] [C]
+## [P/R]  =>  '068-42,21,13'
 #     not run: the simulator shows '4.0000'
-P/R
-STO 5
-6 yˣ
-P/R
-## RCL 5 − 1 −  =>  075-    30
+[P/R]
+[STO] 5
+6 [yˣ]
+[P/R]
+## [RCL] 5 [−] 1 [−]  =>  '075-    30'
 #     not run: the simulator shows '3.0000'
-P/R
-FIX 9
-## A  =>  0.000000010
+[P/R]
+[FIX] 9
+## [A]  =>  '0.000000010'
 #     not run: the simulator shows '005- 32 11'
-## 2 B  =>  1.134724138
+## 2 [B]  =>  '1.134724138'
 #     not run: the simulator shows '007- 32 12'
-## C  =>  -0.000000004
+## [C]  =>  '-0.000000004'
 #     not run: the simulator shows '008- 32 13'
 # PDF page 161
-P/R
-## PRGM  =>  000-
+[P/R]
+## [PRGM]  =>  '000-'
 #     not run: the simulator shows '3.0000'
-## LBL A  =>  001-42,21,11
+## [LBL] [A]  =>  '001-42,21,11'
 #     not run: the simulator shows '3.0000'
-## STO 4  =>  002-  44 4
+## [STO] 4  =>  '002-  44 4'
 #     not run: the simulator shows '3.0000'
-## R/S  =>  003-    31
+## [R/S]  =>  '003-    31'
 #     not run: the simulator shows 'Error 4'
-## LBL B  =>  004-42,21,12
+## [LBL] [B]  =>  '004-42,21,12'
 #     not run: the simulator shows '9.999999 99'
-## STO 0  =>  005-  44 0
+## [STO] 0  =>  '005-  44 0'
 #     not run: the simulator shows '9.999999 99'
-## STO 5  =>  006-  44 5
+## [STO] 5  =>  '006-  44 5'
 #     not run: the simulator shows '9.999999 99'
-## 0  =>  007-     0
+## 0  =>  '007-     0'
 #     not run: the simulator shows '0'
-## STO 3  =>  008-  44 3
+## [STO] 3  =>  '008-  44 3'
 #     not run: the simulator shows '0.000000000'
-## LBL 1  =>  009-42,21, 1
+## [LBL] 1  =>  '009-42,21, 1'
 #     not run: the simulator shows '0.000000000'
 # PDF page 162
 # Program listing (part 2)
 reset
-P/R
-## R/S  =>  010-    31
+[P/R]
+## [R/S]  =>  '010-    31'
 #     not run: the simulator shows '001-    31'
-## LBL B  =>  011-42,21,12
+## [LBL] [B]  =>  '011-42,21,12'
 #     not run: the simulator shows '002-42,21,12'
-## STO 1  =>  012-  44 1
+## [STO] 1  =>  '012-  44 1'
 #     not run: the simulator shows '003-  44 1'
-## GSB 2  =>  013-  32 2
+## [GSB] 2  =>  '013-  32 2'
 #     not run: the simulator shows '004-  32 2'
-## ENTER  =>  014-    36
+## [ENTER]  =>  '014-    36'
 #     not run: the simulator shows '005-    36'
-## +  =>  015-    40
+## [+]  =>  '015-    40'
 #     not run: the simulator shows '006-    40'
-## STO + 5  =>  016-44,40, 5
+## [STO] [+] 5  =>  '016-44,40, 5'
 #     not run: the simulator shows '007-44,40, 5'
-## 1  =>  017-     1
+## 1  =>  '017-     1'
 #     not run: the simulator shows '008-     1'
-## STO + 3  =>  018-44,40, 3
+## [STO] [+] 3  =>  '018-44,40, 3'
 #     not run: the simulator shows '009-44,40, 3'
-## RCL 3  =>  019-  45 3
+## [RCL] 3  =>  '019-  45 3'
 #     not run: the simulator shows '010-  45 3'
-## R/S  =>  020-    31
+## [R/S]  =>  '020-    31'
 #     not run: the simulator shows '011-    31'
-## LBL B  =>  021-42,21,12
+## [LBL] [B]  =>  '021-42,21,12'
 #     not run: the simulator shows '012-42,21,12'
-## STO 1  =>  022-  44 1
+## [STO] 1  =>  '022-  44 1'
 #     not run: the simulator shows '013-  44 1'
-## GSB 2  =>  023-  32 2
+## [GSB] 2  =>  '023-  32 2'
 #     not run: the simulator shows '014-  32 2'
-## STO + 5  =>  024-44,40, 5
+## [STO] [+] 5  =>  '024-44,40, 5'
 #     not run: the simulator shows '015-44,40, 5'
-## 1  =>  025-     1
+## 1  =>  '025-     1'
 #     not run: the simulator shows '016-     1'
-## STO + 3  =>  026-44,40, 3
+## [STO] [+] 3  =>  '026-44,40, 3'
 #     not run: the simulator shows '017-44,40, 3'
-## RCL 3  =>  027-  45 3
+## [RCL] 3  =>  '027-  45 3'
 #     not run: the simulator shows '018-  45 3'
-## GTO 1  =>  028-  22 1
+## [GTO] 1  =>  '028-  22 1'
 #     not run: the simulator shows '019-  22 1'
-## LBL C  =>  029-42,21,13
+## [LBL] [C]  =>  '029-42,21,13'
 #     not run: the simulator shows '020-42,21,13'
-## 2  =>  030-     2
+## 2  =>  '030-     2'
 #     not run: the simulator shows '021-     2'
-## RCL 0  =>  031-  45 0
+## [RCL] 0  =>  '031-  45 0'
 #     not run: the simulator shows '022-  45 0'
-## GTO 0  =>  032-  22 0
+## [GTO] 0  =>  '032-  22 0'
 #     not run: the simulator shows '023-  22 0'
-## LBL D  =>  033-42,21,14
+## [LBL] [D]  =>  '033-42,21,14'
 #     not run: the simulator shows '024-42,21,14'
-## RCL 3  =>  034-  45 3
+## [RCL] 3  =>  '034-  45 3'
 #     not run: the simulator shows '025-  45 3'
-## GSB 3  =>  035-  32 3
+## [GSB] 3  =>  '035-  32 3'
 #     not run: the simulator shows '026-  32 3'
-## 3  =>  036-     3
+## 3  =>  '036-     3'
 #     not run: the simulator shows '027-     3'
-## RCL 5  =>  037-  45 5
+## [RCL] 5  =>  '037-  45 5'
 #     not run: the simulator shows '028-  45 5'
-## LBL 0  =>  038-42,21, 0
+## [LBL] 0  =>  '038-42,21, 0'
 #     not run: the simulator shows '029-42,21, 0'
-## RCL 1  =>  039-  45 1
+## [RCL] 1  =>  '039-  45 1'
 #     not run: the simulator shows '030-  45 1'
-## −  =>  040-    30
+## [−]  =>  '040-    30'
 #     not run: the simulator shows '031-    30'
-## RCL 4  =>  041-  45 4
+## [RCL] 4  =>  '041-  45 4'
 #     not run: the simulator shows '032-  45 4'
-## ×  =>  042-    20
+## [×]  =>  '042-    20'
 #     not run: the simulator shows '033-    20'
-## x≷y  =>  043-    34
+## [x≷y]  =>  '043-    34'
 #     not run: the simulator shows '034-    34'
-## ÷  =>  044-    10
+## [÷]  =>  '044-    10'
 #     not run: the simulator shows '035-    10'
-## R/S  =>  045-    31
+## [R/S]  =>  '045-    31'
 #     not run: the simulator shows '036-    31'
-## LBL 2  =>  046-42,21, 2
+## [LBL] 2  =>  '046-42,21, 2'
 #     not run: the simulator shows '037-42,21, 2'
-## ENTER  =>  047-    36
+## [ENTER]  =>  '047-    36'
 #     not run: the simulator shows '038-    36'
-## +  =>  048-    40
+## [+]  =>  '048-    40'
 #     not run: the simulator shows '039-    40'
-## STO + 0  =>  049-44,40, 0
+## [STO] [+] 0  =>  '049-44,40, 0'
 #     not run: the simulator shows '040-44,40, 0'
-## RTN  =>  050- 43 32
+## [RTN]  =>  '050- 43 32'
 #     not run: the simulator shows '041- 43 32'
-## LBL 3  =>  051-42,21, 3
+## [LBL] 3  =>  '051-42,21, 3'
 #     not run: the simulator shows '042-42,21, 3'
-## 2  =>  052-     2
+## 2  =>  '052-     2'
 #     not run: the simulator shows '043-     2'
-## ÷  =>  053-    10
+## [÷]  =>  '053-    10'
 #     not run: the simulator shows '044-    10'
-## FRAC  =>  054- 42 44
+## [FRAC]  =>  '054- 42 44'
 #     not run: the simulator shows '045- 42 44'
-## x=0  =>  055- 43 40
+## [x=0]  =>  '055- 43 40'
 #     not run: the simulator shows '046- 43 40'
-## RTN  =>  056- 43 32
+## [RTN]  =>  '056- 43 32'
 #     not run: the simulator shows '047- 43 32'
-## 0  =>  057-     0
+## 0  =>  '057-     0'
 #     not run: the simulator shows '048-     0'
-## ÷  =>  058-    10
+## [÷]  =>  '058-    10'
 #     not run: the simulator shows '049-    10'
-## RTN  =>  059- 43 32
+## [RTN]  =>  '059- 43 32'
 #     not run: the simulator shows '050- 43 32'
 # PDF page 163
 # Registers (as printed)
 reset
-FIX 2
-## . 2 5 A  =>  0.25
+[FIX] 2
+## . 2 5 [A]  =>  '0.25'
 #     not run: the simulator shows 'Error 4'
-## 2 B  =>  0.00
+## 2 [B]  =>  '0.00'
 #     not run: the simulator shows 'Error 4'
-## 2 . 8 B  =>  1.00
+## 2 . 8 [B]  =>  '1.00'
 #     not run: the simulator shows 'Error 4'
-## 3 . 8 B  =>  2.00
+## 3 . 8 [B]  =>  '2.00'
 #     not run: the simulator shows 'Error 4'
-## 5 . 2 B  =>  3.00
+## 5 . 2 [B]  =>  '3.00'
 #     not run: the simulator shows 'Error 4'
 # PDF page 164
-## 7 B  =>  4.00
+## 7 [B]  =>  '4.00'
 #     not run: the simulator shows 'Error 4'
-## 9 . 2 B  =>  5.00
+## 9 . 2 [B]  =>  '5.00'
 #     not run: the simulator shows 'Error 4'
-## 1 2 . 1 B  =>  6.00
+## 1 2 . 1 [B]  =>  '6.00'
 #     not run: the simulator shows 'Error 4'
-## 1 5 . 6 B  =>  7.00
+## 1 5 . 6 [B]  =>  '7.00'
 #     not run: the simulator shows 'Error 4'
-## 20 B  =>  8.00
+## 20 [B]  =>  '8.00'
 #     not run: the simulator shows 'Error 4'
-## C  =>  16.68
+## [C]  =>  '16.68'
 #     not run: the simulator shows '1.00'
-## D  =>  16.58
+## [D]  =>  '16.58'
 #     not run: the simulator shows 'Error 4'
 # PDF page 166
 # Curve Fitting
 reset
-P/R
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-REG  =>  002- 42 34
-FIX 2  =>  003-42, 7, 2
-ENTER  =>  004-    36
-ENTER  =>  005-    36
-6  =>  006-     6
-+  =>  007-    40
-STO I  =>  008- 44 25
-R↓  =>  009-    33
-SF 0  =>  010-43, 4, 0
-SF 1  =>  011-43, 4, 1
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[REG]  =>  '002- 42 34'
+[FIX] 2  =>  '003-42, 7, 2'
+[ENTER]  =>  '004-    36'
+[ENTER]  =>  '005-    36'
+6  =>  '006-     6'
+[+]  =>  '007-    40'
+[STO] [I]  =>  '008- 44 25'
+[R↓]  =>  '009-    33'
+[SF] 0  =>  '010-43, 4, 0'
+[SF] 1  =>  '011-43, 4, 1'
 # PDF page 167
 # Program listing (part 2)
 reset
-P/R
-## GTO I  =>  012- 22 25
+[P/R]
+## [GTO] [I]  =>  '012- 22 25'
 #     not run: the simulator shows '001- 22 25'
-## LBL 7  =>  013-42,21, 7
+## [LBL] 7  =>  '013-42,21, 7'
 #     not run: the simulator shows '002-42,21, 7'
-## CF 1  =>  014-43, 5, 1
+## [CF] 1  =>  '014-43, 5, 1'
 #     not run: the simulator shows '003-43, 5, 1'
-## GTO 9  =>  015-  22 9
+## [GTO] 9  =>  '015-  22 9'
 #     not run: the simulator shows '004-  22 9'
-## LBL 8  =>  016-42,21, 8
+## [LBL] 8  =>  '016-42,21, 8'
 #     not run: the simulator shows '005-42,21, 8'
-## CF 0  =>  017-43, 5, 0
+## [CF] 0  =>  '017-43, 5, 0'
 #     not run: the simulator shows '006-43, 5, 0'
-## LBL 9  =>  018-42,21, 9
+## [LBL] 9  =>  '018-42,21, 9'
 #     not run: the simulator shows '007-42,21, 9'
-## R/S  =>  019-    31
+## [R/S]  =>  '019-    31'
 #     not run: the simulator shows '008-    31'
-## F? 0  =>  020-43, 6, 0
+## [F?] 0  =>  '020-43, 6, 0'
 #     not run: the simulator shows '009-43, 6, 0'
-## LN  =>  021- 43 12
+## [LN]  =>  '021- 43 12'
 #     not run: the simulator shows '010- 43 12'
-## x≷y  =>  022-    34
+## [x≷y]  =>  '022-    34'
 #     not run: the simulator shows '011-    34'
-## F? 1  =>  023-43, 6, 1
+## [F?] 1  =>  '023-43, 6, 1'
 #     not run: the simulator shows '012-43, 6, 1'
-## LN  =>  024- 43 12
+## [LN]  =>  '024- 43 12'
 #     not run: the simulator shows '013- 43 12'
-## RCL 6  =>  025-  45 6
+## [RCL] 6  =>  '025-  45 6'
 #     not run: the simulator shows '014-  45 6'
-## x≠0  =>  026- 43 30
+## [x≠0]  =>  '026- 43 30'
 #     not run: the simulator shows '015- 43 30'
-## GTO 6  =>  027-  22 6
+## [GTO] 6  =>  '027-  22 6'
 #     not run: the simulator shows '016-  22 6'
-## R↓  =>  028-    33
+## [R↓]  =>  '028-    33'
 #     not run: the simulator shows '017-    33'
-## Σ+  =>  029-    49
+## [Σ+]  =>  '029-    49'
 #     not run: the simulator shows '018-    49'
-## GTO 9  =>  030-  22 9
+## [GTO] 9  =>  '030-  22 9'
 #     not run: the simulator shows '019-  22 9'
-## LBL 6  =>  031-42,21, 6
+## [LBL] 6  =>  '031-42,21, 6'
 #     not run: the simulator shows '020-42,21, 6'
-## R↓  =>  032-    33
+## [R↓]  =>  '032-    33'
 #     not run: the simulator shows '021-    33'
-## 0  =>  033-     0
+## 0  =>  '033-     0'
 #     not run: the simulator shows '022-     0'
-## STO 6  =>  034-  44 6
+## [STO] 6  =>  '034-  44 6'
 #     not run: the simulator shows '023-  44 6'
-## R↓  =>  035-    33
+## [R↓]  =>  '035-    33'
 #     not run: the simulator shows '024-    33'
-## Σ−  =>  036- 43 49
+## [Σ−]  =>  '036- 43 49'
 #     not run: the simulator shows '025- 43 49'
-## GTO 9  =>  037-  22 9
+## [GTO] 9  =>  '037-  22 9'
 #     not run: the simulator shows '026-  22 9'
-## LBL B  =>  038-42,21,12
+## [LBL] [B]  =>  '038-42,21,12'
 #     not run: the simulator shows '027-42,21,12'
-## L.R.  =>  039- 42 49
+## [L.R.]  =>  '039- 42 49'
 #     not run: the simulator shows '028- 42 49'
-## F? 0  =>  040-43, 6, 0
+## [F?] 0  =>  '040-43, 6, 0'
 #     not run: the simulator shows '029-43, 6, 0'
-## e^x  =>  041-    12
+## [e^x]  =>  '041-    12'
 #     not run: the simulator shows '030-    12'
-## R/S  =>  042-    31
+## [R/S]  =>  '042-    31'
 #     not run: the simulator shows '031-    31'
-## x≷y  =>  043-    34
+## [x≷y]  =>  '043-    34'
 #     not run: the simulator shows '032-    34'
-## R/S  =>  044-    31
+## [R/S]  =>  '044-    31'
 #     not run: the simulator shows '033-    31'
-## ŷ,r  =>  045- 42 48
+## [ŷ,r]  =>  '045- 42 48'
 #     not run: the simulator shows '034- 42 48'
-## x≷y  =>  046-    34
+## [x≷y]  =>  '046-    34'
 #     not run: the simulator shows '035-    34'
-## x²  =>  047- 43 11
+## [x²]  =>  '047- 43 11'
 #     not run: the simulator shows '036- 43 11'
-## RTN  =>  048- 43 32
+## [RTN]  =>  '048- 43 32'
 #     not run: the simulator shows '037- 43 32'
-## LBL D  =>  049-42,21,14
+## [LBL] [D]  =>  '049-42,21,14'
 #     not run: the simulator shows '038-42,21,14'
-## 1  =>  050-     1
+## 1  =>  '050-     1'
 #     not run: the simulator shows '039-     1'
-## STO 6  =>  051-  44 6
+## [STO] 6  =>  '051-  44 6'
 #     not run: the simulator shows '040-  44 6'
-## GTO 9  =>  052-  22 9
+## [GTO] 9  =>  '052-  22 9'
 #     not run: the simulator shows '041-  22 9'
-## LBL C  =>  053-42,21,13
+## [LBL] [C]  =>  '053-42,21,13'
 #     not run: the simulator shows '042-42,21,13'
-## F? 1  =>  054-43, 6, 1
+## [F?] 1  =>  '054-43, 6, 1'
 #     not run: the simulator shows '043-43, 6, 1'
-## LN  =>  055- 43 12
+## [LN]  =>  '055- 43 12'
 #     not run: the simulator shows '044- 43 12'
-## ŷ,r  =>  056- 42 48
+## [ŷ,r]  =>  '056- 42 48'
 #     not run: the simulator shows '045- 42 48'
-## F? 0  =>  057-43, 6, 0
+## [F?] 0  =>  '057-43, 6, 0'
 #     not run: the simulator shows '046-43, 6, 0'
-## e^x  =>  058-    12
+## [e^x]  =>  '058-    12'
 #     not run: the simulator shows '047-    12'
 # PDF page 169
 # Registers (as printed)
 reset
-## 1 A  =>  1.00
+## 1 [A]  =>  '1.00'
 #     not run: the simulator shows 'Error 4'
-. 7 2 ENTER 2 . 1 6 R/S
-1 . 3 1 ENTER 1 . 6 1 R/S
-1 . 9 5 ENTER 1 . 1 6 R/S
-2 . 5 8 ENTER . 8 5 R/S
-3 . 1 4 ENTER . 5 R/S
-## B  =>  3.45
+. 7 2 [ENTER] 2 . 1 6 [R/S]
+1 . 3 1 [ENTER] 1 . 6 1 [R/S]
+1 . 9 5 [ENTER] 1 . 1 6 [R/S]
+2 . 5 8 [ENTER] . 8 5 [R/S]
+3 . 1 4 [ENTER] . 5 [R/S]
+## [B]  =>  '3.45'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  -0.58
+## [R/S]  =>  '-0.58'
 #     not run: the simulator shows '0.5000'
-## R/S  =>  0.98
+## [R/S]  =>  '0.98'
 #     not run: the simulator shows '0.5000'
-## 1 . 5 C  =>  1.44
+## 1 . 5 [C]  =>  '1.44'
 #     not run: the simulator shows 'Error 4'
 # PDF page 169
 # Example 2: logarithmic, code = 2
 reset
-## 2 A  =>  2.00
+## 2 [A]  =>  '2.00'
 #     not run: the simulator shows 'Error 4'
-3 ENTER 1 . 5 R/S
-4 ENTER 9 . 3 R/S
-6 ENTER 2 3 . 4 R/S
+3 [ENTER] 1 . 5 [R/S]
+4 [ENTER] 9 . 3 [R/S]
+6 [ENTER] 2 3 . 4 [R/S]
 # PDF page 170
-10 ENTER 4 5 . 8 R/S
-12 ENTER 6 0 . 1 R/S
-## B  =>  -47.02
+10 [ENTER] 4 5 . 8 [R/S]
+12 [ENTER] 6 0 . 1 [R/S]
+## [B]  =>  '-47.02'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  41.39
+## [R/S]  =>  '41.39'
 #     not run: the simulator shows '60.1000'
-## R/S  =>  0.98
+## [R/S]  =>  '0.98'
 #     not run: the simulator shows '60.1000'
-## 8 C  =>  39.06
+## 8 [C]  =>  '39.06'
 #     not run: the simulator shows 'Error 4'
-## 1 4 . 5 C  =>  63.67
+## 1 4 . 5 [C]  =>  '63.67'
 #     not run: the simulator shows 'Error 4'
 # PDF page 170
 # Example 3: power, code = 3
 reset
-## 3 A  =>  3.00
+## 3 [A]  =>  '3.00'
 #     not run: the simulator shows 'Error 4'
-1 . 3 ENTER 3 . 7 4 R/S
-2 . 6 ENTER 6 . 1 5 R/S
-4 ENTER 7 . 2 1 R/S
-5 . 4 ENTER 8 . 0 3 R/S
-7 . 1 ENTER 8 . 8 4 R/S
-## B  =>  3.49
+1 . 3 [ENTER] 3 . 7 4 [R/S]
+2 . 6 [ENTER] 6 . 1 5 [R/S]
+4 [ENTER] 7 . 2 1 [R/S]
+5 . 4 [ENTER] 8 . 0 3 [R/S]
+7 . 1 [ENTER] 8 . 8 4 [R/S]
+## [B]  =>  '3.49'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  0.50
+## [R/S]  =>  '0.50'
 #     not run: the simulator shows '8.8400'
-## R/S  =>  0.97
+## [R/S]  =>  '0.97'
 #     not run: the simulator shows '8.8400'
 # PDF page 172
 # Triangle Solutions
 reset
-P/R
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-STO 5  =>  002-  44 5
-R↓  =>  003-    33
-STO 3  =>  004-  44 3
-R↓  =>  005-    33
-STO 1  =>  006-  44 1
-RCL 3  =>  007-  45 3
-→P  =>  008- 43 26
-x²  =>  009- 43 11
-RCL 5  =>  010-  45 5
-x²  =>  011- 43 11
-−  =>  012-    30
-RCL 1  =>  013-  45 1
-RCL 3  =>  014-  45 3
-×  =>  015-    20
-2  =>  016-     2
-×  =>  017-    20
-÷  =>  018-    10
-COS⁻¹  =>  019- 43 24
-STO 2  =>  020-  44 2
-GTO 0  =>  021-  22 0
-LBL B  =>  022-42,21,12
-STO 2  =>  023-  44 2
-R↓  =>  024-    33
-STO 1  =>  025-  44 1
-R↓  =>  026-    33
-STO 6  =>  027-  44 6
-SIN  =>  028-    23
-RCL 2  =>  029-  45 2
-RCL 6  =>  030-  45 6
-+  =>  031-    40
-SIN  =>  032-    23
-÷  =>  033-    10
-RCL 1  =>  034-  45 1
-×  =>  035-    20
-STO 3  =>  036-  44 3
-GTO 0  =>  037-  22 0
-LBL C  =>  038-42,21,13
-STO 4  =>  039-  44 4
-R↓  =>  040-    33
-STO 2  =>  041-  44 2
-R↓  =>  042-    33
-STO 1  =>  043-  44 1
-RCL 4  =>  044-  45 4
-RCL 2  =>  045-  45 2
-+  =>  046-    40
-SIN  =>  047-    23
-RCL 4  =>  048-  45 4
-SIN  =>  049-    23
-÷  =>  050-    10
-RCL 1  =>  051-  45 1
-×  =>  052-    20
-STO 3  =>  053-  44 3
-GTO 0  =>  054-  22 0
-LBL E  =>  055-42,21,15
-STO 4  =>  056-  44 4
-R↓  =>  057-    33
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[STO] 5  =>  '002-  44 5'
+[R↓]  =>  '003-    33'
+[STO] 3  =>  '004-  44 3'
+[R↓]  =>  '005-    33'
+[STO] 1  =>  '006-  44 1'
+[RCL] 3  =>  '007-  45 3'
+[→P]  =>  '008- 43 26'
+[x²]  =>  '009- 43 11'
+[RCL] 5  =>  '010-  45 5'
+[x²]  =>  '011- 43 11'
+[−]  =>  '012-    30'
+[RCL] 1  =>  '013-  45 1'
+[RCL] 3  =>  '014-  45 3'
+[×]  =>  '015-    20'
+2  =>  '016-     2'
+[×]  =>  '017-    20'
+[÷]  =>  '018-    10'
+[COS⁻¹]  =>  '019- 43 24'
+[STO] 2  =>  '020-  44 2'
+[GTO] 0  =>  '021-  22 0'
+[LBL] [B]  =>  '022-42,21,12'
+[STO] 2  =>  '023-  44 2'
+[R↓]  =>  '024-    33'
+[STO] 1  =>  '025-  44 1'
+[R↓]  =>  '026-    33'
+[STO] 6  =>  '027-  44 6'
+[SIN]  =>  '028-    23'
+[RCL] 2  =>  '029-  45 2'
+[RCL] 6  =>  '030-  45 6'
+[+]  =>  '031-    40'
+[SIN]  =>  '032-    23'
+[÷]  =>  '033-    10'
+[RCL] 1  =>  '034-  45 1'
+[×]  =>  '035-    20'
+[STO] 3  =>  '036-  44 3'
+[GTO] 0  =>  '037-  22 0'
+[LBL] [C]  =>  '038-42,21,13'
+[STO] 4  =>  '039-  44 4'
+[R↓]  =>  '040-    33'
+[STO] 2  =>  '041-  44 2'
+[R↓]  =>  '042-    33'
+[STO] 1  =>  '043-  44 1'
+[RCL] 4  =>  '044-  45 4'
+[RCL] 2  =>  '045-  45 2'
+[+]  =>  '046-    40'
+[SIN]  =>  '047-    23'
+[RCL] 4  =>  '048-  45 4'
+[SIN]  =>  '049-    23'
+[÷]  =>  '050-    10'
+[RCL] 1  =>  '051-  45 1'
+[×]  =>  '052-    20'
+[STO] 3  =>  '053-  44 3'
+[GTO] 0  =>  '054-  22 0'
+[LBL] [E]  =>  '055-42,21,15'
+[STO] 4  =>  '056-  44 4'
+[R↓]  =>  '057-    33'
 # PDF page 173
 # Program listing (part 2; lines 058-115)
 reset
-P/R
-## STO 3  =>  058-  44 3
+[P/R]
+## [STO] 3  =>  '058-  44 3'
 #     not run: the simulator shows '001-  44 3'
-## R↓  =>  059-    33
+## [R↓]  =>  '059-    33'
 #     not run: the simulator shows '002-    33'
-## STO 1  =>  060-  44 1
+## [STO] 1  =>  '060-  44 1'
 #     not run: the simulator shows '003-  44 1'
-## RCL 3  =>  061-  45 3
+## [RCL] 3  =>  '061-  45 3'
 #     not run: the simulator shows '004-  45 3'
-## RCL 4  =>  062-  45 4
+## [RCL] 4  =>  '062-  45 4'
 #     not run: the simulator shows '005-  45 4'
-## SIN  =>  063-    23
+## [SIN]  =>  '063-    23'
 #     not run: the simulator shows '006-    23'
-## RCL 1  =>  064-  45 1
+## [RCL] 1  =>  '064-  45 1'
 #     not run: the simulator shows '007-  45 1'
-## ÷  =>  065-    10
+## [÷]  =>  '065-    10'
 #     not run: the simulator shows '008-    10'
-## ×  =>  066-    20
+## [×]  =>  '066-    20'
 #     not run: the simulator shows '009-    20'
-## SIN⁻¹  =>  067- 43 23
+## [SIN⁻¹]  =>  '067- 43 23'
 #     not run: the simulator shows '010- 43 23'
-## RCL 4  =>  068-  45 4
+## [RCL] 4  =>  '068-  45 4'
 #     not run: the simulator shows '011-  45 4'
-## +  =>  069-    40
+## [+]  =>  '069-    40'
 #     not run: the simulator shows '012-    40'
-## GSB 9  =>  070-  32 9
+## [GSB] 9  =>  '070-  32 9'
 #     not run: the simulator shows '013-  32 9'
-## STO 2  =>  071-  44 2
+## [STO] 2  =>  '071-  44 2'
 #     not run: the simulator shows '014-  44 2'
-## GSB 0  =>  072-  32 0
+## [GSB] 0  =>  '072-  32 0'
 #     not run: the simulator shows '015-  32 0'
-## RCL 1  =>  073-  45 1
+## [RCL] 1  =>  '073-  45 1'
 #     not run: the simulator shows '016-  45 1'
-## RCL 3  =>  074-  45 3
+## [RCL] 3  =>  '074-  45 3'
 #     not run: the simulator shows '017-  45 3'
-## x≤y  =>  075- 42 10
+## [x≤y]  =>  '075- 42 10'
 #     not run: the simulator shows '018- 42 10'
-## GTO 8  =>  076-  22 8
+## [GTO] 8  =>  '076-  22 8'
 #     not run: the simulator shows '019-  22 8'
-## 2  =>  077-     2
+## 2  =>  '077-     2'
 #     not run: the simulator shows '020-     2'
-## R/S  =>  078-    31
+## [R/S]  =>  '078-    31'
 #     not run: the simulator shows '021-    31'
-## RCL 6  =>  079-  45 6
+## [RCL] 6  =>  '079-  45 6'
 #     not run: the simulator shows '022-  45 6'
-## GSB 9  =>  080-  32 9
+## [GSB] 9  =>  '080-  32 9'
 #     not run: the simulator shows '023-  32 9'
-## STO 6  =>  081-  44 6
+## [STO] 6  =>  '081-  44 6'
 #     not run: the simulator shows '024-  44 6'
-## RCL 4  =>  082-  45 4
+## [RCL] 4  =>  '082-  45 4'
 #     not run: the simulator shows '025-  45 4'
-## +  =>  083-    40
+## [+]  =>  '083-    40'
 #     not run: the simulator shows '026-    40'
-## GSB 9  =>  084-  32 9
+## [GSB] 9  =>  '084-  32 9'
 #     not run: the simulator shows '027-  32 9'
-## STO 2  =>  085-  44 2
+## [STO] 2  =>  '085-  44 2'
 #     not run: the simulator shows '028-  44 2'
-## GTO 0  =>  086-  22 0
+## [GTO] 0  =>  '086-  22 0'
 #     not run: the simulator shows '029-  22 0'
-## LBL D  =>  087-42,21,14
+## [LBL] [D]  =>  '087-42,21,14'
 #     not run: the simulator shows '030-42,21,14'
-## STO 3  =>  088-  44 3
+## [STO] 3  =>  '088-  44 3'
 #     not run: the simulator shows '031-  44 3'
-## R↓  =>  089-    33
+## [R↓]  =>  '089-    33'
 #     not run: the simulator shows '032-    33'
-## STO 2  =>  090-  44 2
+## [STO] 2  =>  '090-  44 2'
 #     not run: the simulator shows '033-  44 2'
-## R↓  =>  091-    33
+## [R↓]  =>  '091-    33'
 #     not run: the simulator shows '034-    33'
-## STO 1  =>  092-  44 1
+## [STO] 1  =>  '092-  44 1'
 #     not run: the simulator shows '035-  44 1'
-## LBL 0  =>  093-42,21, 0
+## [LBL] 0  =>  '093-42,21, 0'
 #     not run: the simulator shows '036-42,21, 0'
-## RCL 2  =>  094-  45 2
+## [RCL] 2  =>  '094-  45 2'
 #     not run: the simulator shows '037-  45 2'
-## RCL 1  =>  095-  45 1
+## [RCL] 1  =>  '095-  45 1'
 #     not run: the simulator shows '038-  45 1'
-## →R  =>  096- 42 26
+## [→R]  =>  '096- 42 26'
 #     not run: the simulator shows '039- 42 26'
-## RCL 3  =>  097-  45 3
+## [RCL] 3  =>  '097-  45 3'
 #     not run: the simulator shows '040-  45 3'
-## x≷y  =>  098-    34
+## [x≷y]  =>  '098-    34'
 #     not run: the simulator shows '041-    34'
-## −  =>  099-    30
+## [−]  =>  '099-    30'
 #     not run: the simulator shows '042-    30'
-## →P  =>  100- 43 26
+## [→P]  =>  '100- 43 26'
 #     not run: the simulator shows '043- 43 26'
-## STO 5  =>  101-  44 5
+## [STO] 5  =>  '101-  44 5'
 #     not run: the simulator shows '044-  44 5'
-## x≷y  =>  102-    34
+## [x≷y]  =>  '102-    34'
 #     not run: the simulator shows '045-    34'
-## STO 4  =>  103-  44 4
+## [STO] 4  =>  '103-  44 4'
 #     not run: the simulator shows '046-  44 4'
-## RCL 2  =>  104-  45 2
+## [RCL] 2  =>  '104-  45 2'
 #     not run: the simulator shows '047-  45 2'
-## +  =>  105-    40
+## [+]  =>  '105-    40'
 #     not run: the simulator shows '048-    40'
-## GSB 9  =>  106-  32 9
+## [GSB] 9  =>  '106-  32 9'
 #     not run: the simulator shows '049-  32 9'
-## STO 6  =>  107-  44 6
+## [STO] 6  =>  '107-  44 6'
 #     not run: the simulator shows '050-  44 6'
-## SIN  =>  108-    23
+## [SIN]  =>  '108-    23'
 #     not run: the simulator shows '051-    23'
-## ×  =>  109-    20
+## [×]  =>  '109-    20'
 #     not run: the simulator shows '052-    20'
-## RCL 1  =>  110-  45 1
+## [RCL] 1  =>  '110-  45 1'
 #     not run: the simulator shows '053-  45 1'
-## ×  =>  111-    20
+## [×]  =>  '111-    20'
 #     not run: the simulator shows '054-    20'
-## 2  =>  112-     2
+## 2  =>  '112-     2'
 #     not run: the simulator shows '055-     2'
-## ÷  =>  113-    10
+## [÷]  =>  '113-    10'
 #     not run: the simulator shows '056-    10'
-## STO 0  =>  114-  44 0
+## [STO] 0  =>  '114-  44 0'
 #     not run: the simulator shows '057-  44 0'
-## .  =>  115-    48
+## .  =>  '115-    48'
 #     not run: the simulator shows '058-    48'
 # PDF page 174
 # Program listing (part 3; lines 116-131)
 reset
-P/R
-## 0  =>  116-     0
+[P/R]
+## 0  =>  '116-     0'
 #     not run: the simulator shows '001-     0'
-## 0  =>  117-     0
+## 0  =>  '117-     0'
 #     not run: the simulator shows '002-     0'
-## 6  =>  118-     6
+## 6  =>  '118-     6'
 #     not run: the simulator shows '003-     6'
-## STO I  =>  119- 44 25
+## [STO] [I]  =>  '119- 44 25'
 #     not run: the simulator shows '004- 44 25'
-## LBL 2  =>  120-42,21, 2
+## [LBL] 2  =>  '120-42,21, 2'
 #     not run: the simulator shows '005-42,21, 2'
-## RCL (i)  =>  121- 45 24
+## [RCL] [(i)]  =>  '121- 45 24'
 #     not run: the simulator shows '006- 45 24'
-## R/S  =>  122-    31
+## [R/S]  =>  '122-    31'
 #     not run: the simulator shows '007-    31'
-## ISG  =>  123-  42 6
+## [ISG]  =>  '123-  42 6'
 #     not run: the simulator shows '008-  42 6'
-## GTO 2  =>  124-  22 2
+## [GTO] 2  =>  '124-  22 2'
 #     not run: the simulator shows '009-  22 2'
-## LBL 8  =>  125-42,21, 8
+## [LBL] 8  =>  '125-42,21, 8'
 #     not run: the simulator shows '010-42,21, 8'
-## CLx  =>  126- 43 35
+## [CLx]  =>  '126- 43 35'
 #     not run: the simulator shows '011- 43 35'
-## RTN  =>  127- 43 32
+## [RTN]  =>  '127- 43 32'
 #     not run: the simulator shows '012- 43 32'
-## LBL 9  =>  128-42,21, 9
+## [LBL] 9  =>  '128-42,21, 9'
 #     not run: the simulator shows '013-42,21, 9'
-## COS  =>  129-    24
+## [COS]  =>  '129-    24'
 #     not run: the simulator shows '014-    24'
-## CHS  =>  130-    16
+## [CHS]  =>  '130-    16'
 #     not run: the simulator shows '015-    16'
-## COS⁻¹  =>  131- 43 24
+## [COS⁻¹]  =>  '131- 43 24'
 #     not run: the simulator shows '016- 43 24'
 # PDF page 177
-P/R
-DEG
-FIX 2
-1 7 1 . 6 3 ENTER  =>  171.63
-9 8 . 1 2 →H  =>  98.20
-## 2 9 7 . 3 5 D  =>  25,256.21
+[P/R]
+[DEG]
+[FIX] 2
+1 7 1 . 6 3 [ENTER]  =>  '171.63'
+9 8 . 1 2 [→H]  =>  '98.20'
+## 2 9 7 . 3 5 [D]  =>  '25,256.21'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  171.63
+## [R/S]  =>  '171.63'
 #     not run: the simulator shows '297.35'
-## R/S  =>  98.20
+## [R/S]  =>  '98.20'
 #     not run: the simulator shows 'Error 0'
-## R/S  =>  297.35
+## [R/S]  =>  '297.35'
 #     not run: the simulator shows '98.20'
-## R/S  =>  27.83
+## [R/S]  =>  '27.83'
 #     not run: the simulator shows 'Error 0'
-## R/S  =>  363.91
+## [R/S]  =>  '363.91'
 #     not run: the simulator shows '297.35'
-## R/S  =>  53.97
+## [R/S]  =>  '53.97'
 #     not run: the simulator shows 'Error 0'
 # PDF page 178
 # Example 2
 reset
-## 2 5 . 6 ENTER  =>  25.60
+## 2 5 . 6 [ENTER]  =>  '25.60'
 #     not run: the simulator shows '25.6000'
-## 3 2 . 8 ENTER  =>  32.80
+## 3 2 . 8 [ENTER]  =>  '32.80'
 #     not run: the simulator shows '32.8000'
-## 4 2 . 3 E  =>  410.85
+## 4 2 . 3 [E]  =>  '410.85'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  25.60
+## [R/S]  =>  '25.60'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  78.12
+## [R/S]  =>  '78.12'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  32.80
+## [R/S]  =>  '32.80'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  42.30
+## [R/S]  =>  '42.30'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  37.22
+## [R/S]  =>  '37.22'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  59.58
+## [R/S]  =>  '59.58'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  2.00
+## [R/S]  =>  '2.00'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  124.68
+## [R/S]  =>  '124.68'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  25.60
+## [R/S]  =>  '25.60'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  17.28
+## [R/S]  =>  '17.28'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  32.80
+## [R/S]  =>  '32.80'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  42.30
+## [R/S]  =>  '42.30'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  11.30
+## [R/S]  =>  '11.30'
 #     not run: the simulator shows '42.3000'
-## R/S  =>  120.42
+## [R/S]  =>  '120.42'
 #     not run: the simulator shows '42.3000'
 # PDF page 180
-P/R
-PRGM  =>  000-
-LBL A  =>  001-42,21,11
-−  =>  002-    30
-Σ+  =>  003-    49
-R/S  =>  004-    31
-LBL C  =>  005-42,21,13
-x̄  =>  006-  43 0
-STO 6  =>  007-  44 6
-R/S  =>  008-    31
-s  =>  009- 43 48
-R/S  =>  010-    31
-RCL 6  =>  011-  45 6
-RCL 0  =>  012-  45 0
-√x  =>  013-    11
-×  =>  014-    20
-x≷y  =>  015-    34
-÷  =>  016-    10
-R/S  =>  017-    31
-RCL 0  =>  018-  45 0
-1  =>  019-     1
-−  =>  020-    30
-R/S  =>  021-    31
-GTO C  =>  022- 22 13
-LBL B  =>  023-42,21,12
-Σ+  =>  024-    49
-R/S  =>  025-    31
-RCL 1  =>  026-  45 1
-STO . 1  =>  027-  44 .1
-RCL 2  =>  028-  45 2
-STO . 2  =>  029-  44 .2
-RCL 0  =>  030-  45 0
-STO . 0  =>  031-  44 .0
-0  =>  032-     0
-Σ  =>  033- 42 32
-R/S  =>  034-    31
-LBL D  =>  035-42,21,14
-STO 6  =>  036-  44 6
-RCL . 1  =>  037-  45 .1
-RCL . 2  =>  038-  45 .2
-STO 4  =>  039-  44 4
-x≷y  =>  040-    34
-STO 3  =>  041-  44 3
-x̄  =>  042-  43 0
-STO 8  =>  043-  44 8
-x≷y  =>  044-    34
-RCL 0  =>  045-  45 0
-×  =>  046-    20
-RCL . 0  =>  047-  45 .0
-÷  =>  048-    10
-STO 7  =>  049-  44 7
-x≷y  =>  050-    34
-−  =>  051-    30
-RCL 6  =>  052-  45 6
-−  =>  053-    30
-RCL 4  =>  054-  45 4
-RCL 3  =>  055-  45 3
-RCL 7  =>  056-  45 7
-×  =>  057-    20
+[P/R]
+[PRGM]  =>  '000-'
+[LBL] [A]  =>  '001-42,21,11'
+[−]  =>  '002-    30'
+[Σ+]  =>  '003-    49'
+[R/S]  =>  '004-    31'
+[LBL] [C]  =>  '005-42,21,13'
+[x̄]  =>  '006-  43 0'
+[STO] 6  =>  '007-  44 6'
+[R/S]  =>  '008-    31'
+[s]  =>  '009- 43 48'
+[R/S]  =>  '010-    31'
+[RCL] 6  =>  '011-  45 6'
+[RCL] 0  =>  '012-  45 0'
+[√x]  =>  '013-    11'
+[×]  =>  '014-    20'
+[x≷y]  =>  '015-    34'
+[÷]  =>  '016-    10'
+[R/S]  =>  '017-    31'
+[RCL] 0  =>  '018-  45 0'
+1  =>  '019-     1'
+[−]  =>  '020-    30'
+[R/S]  =>  '021-    31'
+[GTO] [C]  =>  '022- 22 13'
+[LBL] [B]  =>  '023-42,21,12'
+[Σ+]  =>  '024-    49'
+[R/S]  =>  '025-    31'
+[RCL] 1  =>  '026-  45 1'
+[STO] . 1  =>  '027-  44 .1'
+[RCL] 2  =>  '028-  45 2'
+[STO] . 2  =>  '029-  44 .2'
+[RCL] 0  =>  '030-  45 0'
+[STO] . 0  =>  '031-  44 .0'
+0  =>  '032-     0'
+[Σ]  =>  '033- 42 32'
+[R/S]  =>  '034-    31'
+[LBL] [D]  =>  '035-42,21,14'
+[STO] 6  =>  '036-  44 6'
+[RCL] . 1  =>  '037-  45 .1'
+[RCL] . 2  =>  '038-  45 .2'
+[STO] 4  =>  '039-  44 4'
+[x≷y]  =>  '040-    34'
+[STO] 3  =>  '041-  44 3'
+[x̄]  =>  '042-  43 0'
+[STO] 8  =>  '043-  44 8'
+[x≷y]  =>  '044-    34'
+[RCL] 0  =>  '045-  45 0'
+[×]  =>  '046-    20'
+[RCL] . 0  =>  '047-  45 .0'
+[÷]  =>  '048-    10'
+[STO] 7  =>  '049-  44 7'
+[x≷y]  =>  '050-    34'
+[−]  =>  '051-    30'
+[RCL] 6  =>  '052-  45 6'
+[−]  =>  '053-    30'
+[RCL] 4  =>  '054-  45 4'
+[RCL] 3  =>  '055-  45 3'
+[RCL] 7  =>  '056-  45 7'
+[×]  =>  '057-    20'
 # PDF page 183
-P/R
-FIX 4
-REG
-14 ENTER 17 A  =>  1.0000
-17 ENTER 15 A  =>  2.0000
-17 ENTER
-15 − Σ−  =>  1.0000
-1 7 . 5 ENTER 2 0 . 7 A  =>  2.0000
-17 ENTER 2 1 . 6 A  =>  3.0000
-1 7 . 5 ENTER 2 0 . 9 A  =>  4.0000
-1 5 . 4 ENTER 1 7 . 2 A  =>  5.0000
-C  =>  -3.2000
-R/S  =>  1.0000
-R/S  =>  -7.1554
-R/S  =>  4.0000
+[P/R]
+[FIX] 4
+[REG]
+14 [ENTER] 17 [A]  =>  '1.0000'
+17 [ENTER] 15 [A]  =>  '2.0000'
+17 [ENTER]
+15 [−] [Σ−]  =>  '1.0000'
+1 7 . 5 [ENTER] 2 0 . 7 [A]  =>  '2.0000'
+17 [ENTER] 2 1 . 6 [A]  =>  '3.0000'
+1 7 . 5 [ENTER] 2 0 . 9 [A]  =>  '4.0000'
+1 5 . 4 [ENTER] 1 7 . 2 [A]  =>  '5.0000'
+[C]  =>  '-3.2000'
+[R/S]  =>  '1.0000'
+[R/S]  =>  '-7.1554'
+[R/S]  =>  '4.0000'
 # PDF page 183
 # Example 2 data (two means):
 reset
-REG
-79 B 84 B 99
-## B 99 Σ−  =>  2.0000
+[REG]
+79 [B] 84 [B] 99
+## [B] 99 [Σ−]  =>  '2.0000'
 #     not run: the simulator shows '-1.0000'
-108 B 114 B
-120 B 103 B
-## 122 B 120 B  =>  8.0000
+108 [B] 114 [B]
+120 [B] 103 [B]
+## 122 [B] 120 [B]  =>  '8.0000'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  0.0000
+## [R/S]  =>  '0.0000'
 #     not run: the simulator shows '20.0000'
-91 B 103 B
+91 [B] 103 [B]
 # PDF page 184
-90 B 113 B
-108 B 87 B
-100 B 80 B
-## 99 B 54 B  =>  10.0000
+90 [B] 113 [B]
+108 [B] 87 [B]
+100 [B] 80 [B]
+## 99 [B] 54 [B]  =>  '10.0000'
 #     not run: the simulator shows 'Error 4'
-## 0 D  =>  1.7316
+## 0 [D]  =>  '1.7316'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  16.0000
+## [R/S]  =>  '16.0000'
 #     not run: the simulator shows '4.0000'
 # PDF page 187
 # Chi-Square Evaluation
 reset
-REG
-FIX 4
-## 8 ENTER 9 . 6 A  =>  1.0000
+[REG]
+[FIX] 4
+## 8 [ENTER] 9 . 6 [A]  =>  '1.0000'
 #     not run: the simulator shows 'Error 4'
-## 50 ENTER 4 6 . 7 5 A  =>  2.0000
+## 50 [ENTER] 4 6 . 7 5 [A]  =>  '2.0000'
 #     not run: the simulator shows 'Error 4'
-## 47 ENTER 5 1 . 8 5 A  =>  3.0000
+## 47 [ENTER] 5 1 . 8 5 [A]  =>  '3.0000'
 #     not run: the simulator shows 'Error 4'
-## 56 ENTER 5 4 . 4 A  =>  4.0000
+## 56 [ENTER] 5 4 . 4 [A]  =>  '4.0000'
 #     not run: the simulator shows 'Error 4'
-## 100 ENTER A  =>  5.0000
+## 100 [ENTER] [A]  =>  '5.0000'
 #     not run: the simulator shows 'Error 4'
-## 100 ENTER E  =>  4.0000
+## 100 [ENTER] [E]  =>  '4.0000'
 #     not run: the simulator shows 'Error 4'
-## 5 ENTER 8 . 2 5 A  =>  5.0000
+## 5 [ENTER] 8 . 2 5 [A]  =>  '5.0000'
 #     not run: the simulator shows 'Error 4'
-## 14 ENTER 9 . 1 5 A  =>  6.0000
+## 14 [ENTER] 9 . 1 5 [A]  =>  '6.0000'
 #     not run: the simulator shows 'Error 4'
-## C  =>  4.8444
+## [C]  =>  '4.8444'
 #     not run: the simulator shows '1,412,537,545.'
 # PDF page 187
 # Example 2: observed frequencies from tossing a die 120 times; χ² tests
 reset
-REG
-## 25 B 17 B 19 B  =>  3.0000
+[REG]
+## 25 [B] 17 [B] 19 [B]  =>  '3.0000'
 #     not run: the simulator shows 'Error 4'
-## 19 Σ−  =>  2.0000
+## 19 [Σ−]  =>  '2.0000'
 #     not run: the simulator shows '-1.0000'
-15 B 23 B 24 B
-## 16 B  =>  6.0000
+15 [B] 23 [B] 24 [B]
+## 16 [B]  =>  '6.0000'
 #     not run: the simulator shows 'Error 4'
-## D  =>  5.0000
+## [D]  =>  '5.0000'
 #     not run: the simulator shows '4,096.0000'
-## R/S  =>  20.0000
+## [R/S]  =>  '20.0000'
 #     not run: the simulator shows '4,096.0000'
 # PDF page 193
-REG
-## 5 . 7 5 ENTER 12 ÷ A  =>  0.48
+[REG]
+## 5 . 7 5 [ENTER] 12 [÷] [A]  =>  '0.48'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  0.00
+## [R/S]  =>  '0.00'
 #     not run: the simulator shows '0.4792'
-## 9 ENTER 12 × B  =>  108.00
+## 9 [ENTER] 12 [×] [B]  =>  '108.00'
 #     not run: the simulator shows 'Error 4'
-## 155 CHS C  =>  -155.00
+## 155 [CHS] [C]  =>  '-155.00'
 #     not run: the simulator shows 'Error 4'
-## E R/S  =>  259.74
+## [E] [R/S]  =>  '259.74'
 #     not run: the simulator shows '-0.0182'
 # PDF page 194
 # Example 2: a $30,000 bank mortgage, 30 years, 13%; what monthly paymen
 reset
-REG
-## 13 ENTER 12 ÷ A  =>  1.08
+[REG]
+## 13 [ENTER] 12 [÷] [A]  =>  '1.08'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  1.00
+## [R/S]  =>  '1.00'
 #     not run: the simulator shows '1.0833'
-## 30 ENTER 12 × B  =>  360.00
+## 30 [ENTER] 12 [×] [B]  =>  '360.00'
 #     not run: the simulator shows 'Error 4'
-## 30000 C  =>  30,000.00
+## 30000 [C]  =>  '30,000.00'
 #     not run: the simulator shows 'Error 4'
-## D R/S  =>  -331.86
+## [D] [R/S]  =>  '-331.86'
 #     not run: the simulator shows '1.0000'
 # PDF page 194
 # Example 3: a loan of $3,600 at 10% annual interest with 36 monthly pay
 reset
-REG
-## 10 ENTER 12 ÷ A  =>  0.83
+[REG]
+## 10 [ENTER] 12 [÷] [A]  =>  '0.83'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  1.00
+## [R/S]  =>  '1.00'
 #     not run: the simulator shows '0.8333'
-## 36 B  =>  36.00
+## 36 [B]  =>  '36.00'
 #     not run: the simulator shows 'Error 4'
-## 3600 CHS C  =>  -3,600.00
+## 3600 [CHS] [C]  =>  '-3,600.00'
 #     not run: the simulator shows 'Error 4'
-## 100 D E R/S  =>  675.27
+## 100 [D] [E] [R/S]  =>  '675.27'
 #     not run: the simulator shows '0.0000'
 # PDF page 195
 # Example 4: accumulated interest / remaining balance for a loan. Intere
 reset
-REG
-## 360 B  =>  360.00
+[REG]
+## 360 [B]  =>  '360.00'
 #     not run: the simulator shows 'Error 4'
-## 14 ENTER 12 ÷ A  =>  1.17
+## 14 [ENTER] 12 [÷] [A]  =>  '1.17'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  1.00
+## [R/S]  =>  '1.00'
 #     not run: the simulator shows '0.3333'
-## 50000 CHS C  =>  -50,000.00
+## 50000 [CHS] [C]  =>  '-50,000.00'
 #     not run: the simulator shows 'Error 4'
-## D R/S  =>  592.44
+## [D] [R/S]  =>  '592.44'
 #     not run: the simulator shows '9.999999 99'
-## 24 B E R/S  =>  49,749.56
+## 24 [B] [E] [R/S]  =>  '49,749.56'
 #     not run: the simulator shows '0.0417'
-STO 9
-## 12 B E R/S  =>  49,883.48
+[STO] 9
+## 12 [B] [E] [R/S]  =>  '49,883.48'
 #     not run: the simulator shows '0.0833'
-## RCL 9 −  =>  133.92
+## [RCL] 9 [−]  =>  '133.92'
 #     not run: the simulator shows '0.0417'
-## RCL 4 12 ×  =>  7,109.23
+## [RCL] 4 12 [×]  =>  '7,109.23'
 #     not run: the simulator shows '0.0000'
-## x≷y −  =>  6,975.31
+## [x≷y] [−]  =>  '6,975.31'
 #     not run: the simulator shows '-0.0417'
 # PDF page 196
-REG
-## 13 ENTER 12 ÷ A  =>  1.08
+[REG]
+## 13 [ENTER] 12 [÷] [A]  =>  '1.08'
 #     not run: the simulator shows 'Error 4'
-## R/S  =>  0.00
+## [R/S]  =>  '0.00'
 #     not run: the simulator shows '1.0833'
-## 5 ENTER 12 × B  =>  60.00
+## 5 [ENTER] 12 [×] [B]  =>  '60.00'
 #     not run: the simulator shows 'Error 4'
-## 63000 CHS C  =>  -63,000.00
+## 63000 [CHS] [C]  =>  '-63,000.00'
 #     not run: the simulator shows 'Error 4'
-## 10000 E D R/S  =>  1,300.16
+## 10000 [E] [D] [R/S]  =>  '1,300.16'
 #     not run: the simulator shows '1.0000'
 # PDF page 196
-## 70000 CHS C  =>  -70,000.00
+## 70000 [CHS] [C]  =>  '-70,000.00'
 #     not run: the simulator shows 'Error 4'
-## D R/S  =>  1,457.73
+## [D] [R/S]  =>  '1,457.73'
 #     not run: the simulator shows '1.0000'
 # PDF page 203
-## 0 . 5 8 E  =>  0.
+## 0 . 5 8 [E]  =>  '0.'
 #     not run: the simulator shows 'Error 4'
-## 3 ENTER 8 B  =>  1.
+## 3 [ENTER] 8 [B]  =>  '1.'
 #     not run: the simulator shows 'Error 4'
-## 4 ENTER 7 B  =>  0.
-#     not run: the simulator shows 'Error 4'
-# PDF page 204
-## 2 ENTER 9 B  =>  0.
+## 4 [ENTER] 7 [B]  =>  '0.'
 #     not run: the simulator shows 'Error 4'
 # PDF page 204
-## 4 ENTER 9 B  =>  1.
+## 2 [ENTER] 9 [B]  =>  '0.'
 #     not run: the simulator shows 'Error 4'
 # PDF page 204
-## hold 4 ENTER 9 A  =>  0.111
+## 4 [ENTER] 9 [B]  =>  '1.'
 #     not run: the simulator shows 'Error 4'
-## =>  0.11111
+# PDF page 204
+## hold 4 [ENTER] 9 [A]  =>  '0.111'
+#     not run: the simulator shows 'Error 4'
+## =>  '0.11111'
 #     not run: the simulator shows 'Error 4'
 # PDF page 205
 # PDF page 205
 # Example 2 (Submarine Hunt)
 reset
-## 0 . 6 E  =>  0
+## 0 . 6 [E]  =>  '0'
 #     not run: the simulator shows 'Error 4'
-## C  =>  1.
+## [C]  =>  '1.'
 #     not run: the simulator shows '3.9811'
 # PDF page 205
-## 7 ENTER 4 B  =>  1.
+## 7 [ENTER] 4 [B]  =>  '1.'
 #     not run: the simulator shows 'Error 4'
 # PDF page 205
-## 6 ENTER 4 B  =>  0.
+## 6 [ENTER] 4 [B]  =>  '0.'
 #     not run: the simulator shows 'Error 4'
 # PDF page 206
-## 7 ENTER 3 B  =>  1.
+## 7 [ENTER] 3 [B]  =>  '1.'
 #     not run: the simulator shows 'Error 4'
 # PDF page 207
-## hold 8 ENTER 3 A  =>  0.111
+## hold 8 [ENTER] 3 [A]  =>  '0.111'
 #     not run: the simulator shows 'Error 4'
-## =>  0.11111
+## =>  '0.11111'
 #     not run: the simulator shows 'Error 4'
-## =>  0.1111111
+## =>  '0.1111111'
 #     not run: the simulator shows 'Error 4'
-## =>  0.111111111
+## =>  '0.111111111'
 #     not run: the simulator shows 'Error 4'
-## =>  0.111111111
+## =>  '0.111111111'
 #     not run: the simulator shows 'Error 4'
 # PDF page 229
 # Appendix C
 reset
-## hold MEM  =>  p-19 r-.9
+## hold [MEM]  =>  'p-19 r-.9'
 #     not run: the simulator shows 'P-63  r- .9'
 # PDF page 230
-## hold MEM  =>  p-02 r-3
+## hold [MEM]  =>  'p-02 r-3'
 #     not run: the simulator shows 'P-63  r- .9'
-## hold MEM  =>  p-05 r-
+## hold [MEM]  =>  'p-05 r-'
 #     not run: the simulator shows 'P-63  r- .9'
