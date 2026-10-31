@@ -85,8 +85,25 @@ Save your tests with Save..., and share the file; it holds no firmware.
 Two example files come with the program, in the `examples` folder of the
 download and in `docs/examples` of the source. Load them with Open...:
 
-- `hp10c-handbook.txt`: 535 tests from the examples of the HP-10C Owner's
-  Handbook, about a minute on the HP-10C. All pass on the original ROM.
-  Where our notes and the firmware disagreed, the firmware decided.
+- `hp10c-handbook.txt`: 536 tests from the examples of the HP-10C Owner's
+  Handbook, about a minute on the HP-10C. The expected values are the
+  handbook's. A row marked "ROM only" shows what the original ROM displays
+  in the simulator, where the handbook prints no value. One row fails and is
+  meant to: `GTO 8 5 => Error 4`. The handbook names Error 4 for line
+  numbers above 79, the ROM shows none in that state. It is not yet known
+  if that is the simulator or the test.
+- `hp11c-handbook.txt`, `hp12c-handbook.txt`, `hp15c-handbook.txt`,
+  `hp16c-handbook.txt`: the examples of the Owner's Handbook of each
+  calculator (407, 654, 547 and 253 checks). The expected values are the
+  handbook's, read from the scanned pages by a model; no person has proofread
+  them. Each file runs on its own calculator. Lines starting with `##` are not
+  run: their check fails in the simulator, and the reason is below each. They
+  are findings, the cause is not known yet. The examples that run a program
+  from the handbook's listings are only partly in: the listings are not keyed
+  in yet.
 - `16cplus-test-sheet.txt`: 77 tests for the 16C+. They need the 16C+; on an
   original HP-16C most of them fail, as they should.
+
+A passing test shows that the display matches its expected value, no more.
+Where an expected value comes from is part of the test: a value taken from
+the simulator itself proves nothing about the simulator.

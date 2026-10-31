@@ -1,5 +1,9 @@
 # HP-10C: the examples of the Owner's Handbook, one line, one test.
 # Start the HP-10C, then Run. Tests build on the line before them.
+# Expected values: the handbook prints them. Where it prints none, the row
+# says "ROM only": what the original ROM shows in the simulator. The MEM
+# display (P-09  r-10) is ROM only: the handbook shows it on two lines.
+# A row that fails is a finding, not a mistake in this file.
 # Tests run at full speed: values shown by PSE are not checked, and
 # programs that only stop on a key are left out.
 
@@ -370,6 +374,7 @@ hold SST  =>  07-      2
 =>  32.
 hold SST  =>  08-     40
 =>  96.2600
+# ROM only: the handbook prints no line number for BST (the old sheet said 07)
 hold BST  =>  08-     40
 =>  96.2600
 GTO . 0 4
@@ -460,9 +465,13 @@ CLx P/R PRGM 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 hold MEM  =>  P-79  r-00
 1  =>  Error 4
 CLx
-P/R
+# OPEN: handbook p. 103 gives Error 4 for line numbers above 79.
+# The original ROM in the simulator ignores GTO 80 to 99 (nothing stored,
+# display unchanged, in Run and Program mode, with or without the point)
+# and gives Error 4 for unoccupied lines 10 to 79. This row fails.
+GTO 8 5  =>  Error 4
 CLx
-P/R PRGM P/R
+PRGM P/R
 RCL 9  =>  0.0000
 
 # CLEAR PRGM in Run mode only resets to line 00 (page 119)

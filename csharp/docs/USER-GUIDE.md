@@ -164,10 +164,13 @@ fresh copy of the current calculator:
 ```
 
 The window follows the run on both sides and says `Finished:` with the
-counts at the end. Two ready-made files are in the `examples` folder of the
-download; load them with Open...: `hp10c-handbook.txt` (535 tests from the
-HP-10C Owner's Handbook, for the HP-10C) and `16cplus-test-sheet.txt` (77
-tests for the 16C+). Help > How to write a test explains it.
+counts at the end. Ready-made files are in the `examples` folder of the
+download; load them with Open...: `hp10c-handbook.txt` (536 tests from the
+HP-10C Owner's Handbook, for the HP-10C), `hp11c-handbook.txt`,
+`hp12c-handbook.txt`, `hp15c-handbook.txt` and `hp16c-handbook.txt` (the same
+for the other four; each runs on its own calculator, lines starting with ##
+are left out because they fail) and `16cplus-test-sheet.txt` (77 tests for
+the 16C+). Help > How to write a test explains it.
 
 ## 6. The HP-16C+
 

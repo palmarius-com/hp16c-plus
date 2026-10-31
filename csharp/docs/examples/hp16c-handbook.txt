@@ -1,0 +1,489 @@
+# HP-16C: the examples of the Owner's Handbook, one line, one test.
+# Start the HP-16C, then Run. Tests build on the line before them.
+# Expected values: the handbook prints them (spacing follows the LCD). They were
+# read from the scanned pages by a model, no person has proofread them.
+# "# PDF page N" is the page of the handbook's PDF (printed page = N - 2).
+# Lines starting with ## are not run: their check fails in the simulator, the
+# reason is below each. They are findings, the cause is not known yet.
+# calculator: 16c
+# 253 checks run, 44 lines are not run (0.4.0 adds the listings).
+
+
+# PDF page 14
+# before Section 1
+reset
+P/R  =>  000-
+PRGM  =>  000-
+LBL A  =>  001-43,22, A
+1  =>  002-     1
++  =>  003-    40
+hold f BIN  =>  004- 42 26
+GTO A  =>  005-  22 A
+# PDF page 15
+P/R
+# PDF page 15
+DEC
+16 WSIZE
+0  =>  0 d
+GSB A
+# 22 d at the moment R/S is pressed (p. 15): a running loop has no fixed value, so no check
+R/S
+# PDF page 20
+# Section 1
+reset
+HEX
+1234  =>  1234 h
+BSP  =>  123 h
+1  =>  1231 h
+ENTER  =>  1231 h
+BSP  =>  0 h
+12  =>  12 h
+CLx  =>  0 h
+# PDF page 20
+0  =>  0 h
+NOT  =>  FFFF h
+# PDF page 21
+DEC
+6 ENTER  =>  6 d
+7 +  =>  13 d
+9 ENTER  =>  9 d
+3 −  =>  6 d
+×  =>  78 d
+# PDF page 26
+# Section 2
+reset
+BIN
+1010 ENTER  =>  1010 b
+10 +  =>  1100 b
+LSTx  =>  10 b
+−  =>  1010 b
+11 +  =>  1101 b
+# PDF page 28
+DEC
+6 ENTER 7 +  =>  13 d
+5 ×  =>  65 d
+4 +  =>  69 d
+3 ×  =>  207 d
+# PDF page 28
+BIN
+10001001 ENTER  =>  10001001 b
+1111  =>  1111 b
+AND  =>  1001 b
+# PDF page 29
+10101111  =>  10101111 b
+LSTx  =>  1111 b
+AND  =>  1111 b
+11110101 LSTx  =>  1111 b
+AND  =>  101 b
+# PDF page 29
+1111 ENTER  =>  1111 b
+ENTER ENTER  =>  1111 b
+10001001 AND  =>  1001 b
+BSP  =>  0 b
+10101111 AND  =>  1111 b
+BSP  =>  0 b
+11110101 AND  =>  101 b
+# PDF page 31
+# Section 3
+reset
+HEX F  =>  F h
+BIN  =>  1111 b
+hold f OCT  =>  17 o
+=>  1111 b
+# PDF page 34
+DEC 16 WSIZE
+2's
+32767 ENTER  =>  32767 d
+8 WSIZE  =>  -1 d
+16 WSIZE  =>  255 d
+# PDF page 36
+BIN
+11111111 ENTER  =>  11111111 b
+1 +  =>  00000000 .b
+>  =>  10000000 b.
+WINDOW 1  =>  1 b.
+WINDOW 0  =>  00000000 .b
+# PDF page 37
+HEX 8 WSIZE BSP  =>  0 h
+62  =>  62 h
+OCT  =>  142 o
+BIN  =>  1100010 b
+DEC  =>  98 d
+62  =>  62 d
+OCT  =>  76 o
+62  =>  62 o
+HEX  =>  32 h
+2's  =>  32 h
+CHS  =>  CE h
+OCT  =>  316 o
+BIN  =>  11001110 b
+DEC  =>  -50 d
+1's  =>  -49 d
+UNSGN  =>  206 d
+1's  =>  -49 d
+CHS  =>  49 d
+# PDF page 38
+2  =>  2 d
+5  =>  25 d
+4  =>  -001 d
+UNSGN  =>  254 d
+# PDF page 42
+# Section 4
+reset
+DEC 16 WSIZE 2's
+HEX FFFF ENTER  =>  FFFF h
+1 +  =>  0 h
+1 +  =>  1 h
+# PDF page 43
+DEC 32767 ENTER  =>  32767 d
+2 ×  =>  32766 d
+CF 5  =>  32766 d
+# PDF page 43
+HEX 5A0 ENTER  =>  5A0 h
+OCT 177764  =>  177764 o
+÷  =>  177610 o
+HEX  =>  FF88 h
+# PDF page 45
+BIN
+111 ENTER  =>  111 b
+110  =>  110 b
++  =>  1101 b
+# PDF page 46
+HEX 66 ENTER  =>  66 h
+7 ÷  =>  E h
+2 ÷  =>  7 h
+4 RMD  =>  3 h
+# PDF page 47
+BIN 11111111  =>  11111111 b
+NOT  =>  00000000 .b
+WINDOW 1  =>  11111111 b.
+# PDF page 47
+10101 ENTER  =>  10101 b
+10011  =>  10011 b
+OR  =>  10111 b
+# PDF page 48
+1010101 ENTER  =>  1010101 b
+1011101  =>  1011101 b
+XOR  =>  1000 b
+# PDF page 49
+# STATUS 2-08-0000 (p. 47, 'word size 8')
+DEC 8 WSIZE BIN
+1111  =>  1111 b
+LJ  =>  100 b
+R↓  =>  11110000 b
+# PDF page 49
+SF 3
+1111111  =>  01111111 b
+# PDF page 50
+hold f DEC  =>  127 d
+SR SR SR  =>  00001111 b
+hold f DEC  =>  15 d
+=>  00001111 b
+10000000  =>  10000000 b
+hold f DEC  =>  -128 d
+ASR ASR  =>  11100000 b
+ASR  =>  11110000 b
+hold f DEC  =>  -16 d
+=>  11110000 b
+# PDF page 51
+11100  =>  00011100 b
+SL  =>  00111000 b
+LSTx  =>  00011100 b
+11100111  =>  11100111 b
+# PDF page 52
+RLC  =>  11001110 b
+x≷y  =>  00011100 b
+RLC  =>  00111001 b
+x≷y  =>  11001110 b
+CF 3  =>  11001110 b
+# PDF page 52
+# STATUS 2-16-0000
+DEC 16 WSIZE BIN
+11111111 ENTER  =>  11111111 b
+11  =>  11 b
+CB  =>  11110111 b
+# PDF page 53
+HEX 3635 ENTER  =>  3635 h
+8 RRn  =>  3536 h
+4 MASKR  =>  F h
+AND  =>  6 h
+# PDF page 55
+# STATUS 2-05-1000
+DEC 5 WSIZE SF 3
+BIN 111 ENTER  =>  00111 b
+110 DBLX  =>  00001 b
+x≷y  =>  01010 b
+# PDF page 56
+1000 ENTER  =>  01000 b
+11101 ENTER  =>  11101 b
+1011 DBL÷  =>  11000 b
+CF 3  =>  11000 b
+# PDF page 57
+# STATUS 2-64-0000
+DEC 8 WSIZE 64 WSIZE
+HEX
+UNSGN
+0 ENTER  =>  0 h
+5714AF2 ENTER  =>  5714AF2 h
+7E14684 DBL÷  =>  7E985d8C .h
+WINDOW 1  =>  b0d06F6A h.
+# PDF page 59
+# Section 5
+reset
+DEC 64 WSIZE 2's
+HEX
+25E47 ENTER  =>  25E47 h
+0  =>  0 h
+FLOAT 2  =>  155,207.00
+# PDF page 60
+FLOAT 3
+45 √x  =>  6.708
+hold PREFIX  =>  6708203932
+=>  6.708
+# PDF page 61
+1 . 2 8 4  =>  1.284
+EEX  =>  1.284    00
+17 CHS  =>  1.284   -17
+# PDF page 62
+DEC  =>  -88 d
+x≷y  =>  73787526 .d
+WINDOW 1  =>  39 d.
+# PDF page 62
+HEX
+1 ENTER  =>  1 h
+0  =>  0 h
+FLOAT 4  =>  1.0000
+HEX  =>  FFFFFFE1 .h
+hold f DEC  =>  -31 d
+x≷y  =>  80000000 h
+# PDF page 67
+reset
+# Section 6
+reset
+BSP  =>  0 h
+hold MEM  =>  P-0  r-101
+=>  0 h
+P/R  =>  000-
+1  =>  001-     1
+# PDF page 68
+hold MEM  =>  P-6  r-098
+=>  001-     1
+PRGM  =>  000-
+P/R  =>  0 h
+# PDF page 69
+FLOAT 0
+EEX 8  =>  1       08
+STO 0  =>  100,000,000.
+BSP  =>  0.
+RCL 0  =>  100,000,000.
+2 ×  =>  200,000,000.
+# PDF page 69
+HEX 10 WSIZE
+REG
+1234 STO 0  =>  1234 h
+5678 STO 1  =>  5678 h
+20 WSIZE  =>  5678 h
+RCL 0  =>  56781234 h
+RCL 1  =>  0 h
+10 WSIZE  =>  0 h
+RCL 0  =>  1234 h
+RCL 1  =>  5678 h
+# PDF page 72
+DEC 0 WSIZE
+326  =>  326 d
+STO I  =>  326 d
+4 WSIZE  =>  6 d
+3 STO (i)  =>  3 d
+BSP  =>  0 d
+RCL (i)  =>  3 d
+# PDF page 74
+# Section 7
+reset
+P/R  =>  000-
+# PDF page 75
+PRGM  =>  000-
+LBL A  =>  001-43,22, A
+# PDF page 76
+HEX  =>  002-    23
+2  =>  003-     2
+0  =>  004-     0
+WSIZE  =>  005- 42 44
+LSTx  =>  006- 43 36
+SR  =>  007-  42 b
+RLn  =>  008-  42 E
+OR  =>  009- 42 40
+# PDF page 76
+RTN  =>  010- 43 21
+# PDF page 77
+P/R
+# PDF page 77
+HEX FFFE ENTER  =>  FFFE h
+DDDC  =>  dddC h
+GSB A  =>  dddCFFFE h
+hold STATUS  =>  2-32-0000
+# PDF page 80
+PRGM
+P/R  =>  000-
+LBL 1  =>  001-43,22, 1
+# PDF page 81
+UNSGN  =>  002-  42 3
+DBL×  =>  003- 43 20
+STO 1  =>  004-  44 1
+x≷y  =>  005-    34
+STO 2  =>  006-  44 2
+x≷y  =>  007-    34
+RCL 0  =>  008-  45 0
+DBLR  =>  009-  43 9
+RCL 2  =>  010-  45 2
+RCL 1  =>  011-  45 1
+RCL 0  =>  012-  45 0
+DBL÷  =>  013- 43 10
+DEC  =>  014-    24
+RTN  =>  015- 43 21
+# PDF page 82
+P/R
+0 WSIZE DEC
+UNSGN
+10000000 00000000  =>  00000000 .d
+0000 STO 0  =>  00000000 .d
+12345678987654 ENTER  =>  78987654 .d
+987654321234567  =>  21234567 .d
+GSB 1  =>  19326320 .d
+WINDOW 1  =>  12 d.
+x≷y  =>  31035818 .d
+WINDOW 1  =>  12676360 .d.
+WINDOW 2  =>  73 d.
+# PDF page 86
+# Section 8
+reset
+P/R
+## hold GTO · 004 SST  =>  004-     0
+#     not run: the simulator shows '000-'
+## BSP BSP  =>  002-    23
+#     not run: the simulator shows '000-'
+## 8  =>  003-     8
+#     not run: the simulator shows '001-     8'
+# PDF page 86
+P/R
+HEX
+7 ENTER  =>  7 h
+6  =>  6 h
+## GTO A  =>  6 h
+#     not run: the simulator shows 'Error 4'
+## hold SST  =>  001-43,22, A
+#     not run: the simulator shows '6 h'
+=>  6 h
+# PDF page 87
+## hold SST  =>  002-    23
+#     not run: the simulator shows '001-     8'
+## =>  6 h
+#     not run: the simulator shows '8 h'
+## hold SST  =>  003-     8
+#     not run: the simulator shows '001-     8'
+## =>  8 h
+#     not run: the simulator shows '6 h'
+## hold SST  =>  004- 42 44
+#     not run: the simulator shows '001-     8'
+## =>  6 h
+#     not run: the simulator shows '8 h'
+## hold SST  =>  005- 43 36
+#     not run: the simulator shows '001-     8'
+## =>  8 h
+#     not run: the simulator shows '6 h'
+## hold SST  =>  006-    42 b
+#     not run: the simulator shows '001-     8'
+## =>  4 h
+#     not run: the simulator shows '8 h'
+## hold SST  =>  007-  42 E
+#     not run: the simulator shows '001-     8'
+## =>  60 h
+#     not run: the simulator shows '8 h'
+## hold SST  =>  008- 42 40
+#     not run: the simulator shows '001-     8'
+## =>  67 h
+#     not run: the simulator shows '8 h'
+## hold SST  =>  009- 43 21
+#     not run: the simulator shows '001-     8'
+## =>  67 h
+#     not run: the simulator shows '8 h'
+# PDF page 93
+# Section 9
+reset
+DEC 8 WSIZE 2's
+P/R  =>  000-
+PRGM  =>  000-
+LBL D  =>  001-43,22, d
+UNSGN  =>  002-  42 3
+4  =>  003-     4
+WSIZE  =>  004- 42 44
+HEX  =>  005-    23
+A  =>  006-     A
+STO I  =>  007- 44 32
+0  =>  008-     0
+ENTER  =>  009-    36
+LBL 0  =>  010-43,22, 0
+## RCL  =>  011- 45 31
+#     not run: the simulator shows '010-43,22, 0'
+# PDF page 94
+#B  =>  012-  43 7
+## +  =>  013-    40
+#     not run: the simulator shows '011-    40'
+## x≷y  =>  014-    34
+#     not run: the simulator shows '012-    34'
+## 0  =>  015-     0
+#     not run: the simulator shows '013-     0'
+## RLC  =>  016-  43 C
+#     not run: the simulator shows '014-  43 C'
+## +  =>  017-    40
+#     not run: the simulator shows '015-    40'
+## x≷y  =>  018-    34
+#     not run: the simulator shows '016-    34'
+## DSZ  =>  019- 43 23
+#     not run: the simulator shows '017- 43 23'
+## GTO 0  =>  020-  22 0
+#     not run: the simulator shows '018-  22 0'
+## RTN  =>  021- 43 21
+#     not run: the simulator shows '019- 43 21'
+# PDF page 94
+P/R
+HEX
+A STO 1  =>  A h
+6 STO A  =>  6 h
+# PDF page 95
+## GSB D  =>  6 h
+#     not run: the simulator shows 'd h'
+## x≷y  =>  1 h
+#     not run: the simulator shows '6 h'
+# PDF page 119
+# Appendix D
+reset
+DEC 32 WSIZE 2's
+HEX 80000000  =>  80000000 h
+## GSB B  =>  0.000000 00
+#     not run: the simulator shows 'Error 4'
+HEX 7F800000
+## GSB B  =>  9.999999 99
+#     not run: the simulator shows 'Error 4'
+HEX 00800000
+## GSB B  =>  1.175494-38
+#     not run: the simulator shows 'Error 4'
+HEX 3F800001
+## GSB B  =>  1.000000 00
+#     not run: the simulator shows 'Error 4'
+## hold PREFIX  =>  1000000119
+#     not run: the simulator shows '0 h'
+# PDF page 121
+FLOAT · 8 EEX 72  =>  8       72
+## GSB A  =>  7F800000 h
+#     not run: the simulator shows 'Error 4'
+FLOAT ·
+## 1 . 4 0 4 EEX  =>  1.404    00
+#     not run: the simulator shows '0.404    00'
+## 45 CHS  =>  1.404   -45
+#     not run: the simulator shows '0.404   -45'
+## GSB A  =>  1 h
+#     not run: the simulator shows 'Error 4'
+## FLOAT · 3 . 1 4 1 5 9 2 6 5 4  =>  3.141592654
+#     not run: the simulator shows '0.141592654'
+## GSB A  =>  40490Fdb h
+#     not run: the simulator shows 'Error 4'
