@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Hp16c.App/Hp16c.App.csproj" />
     <Project Path="src/Nut.Core/Nut.Core.csproj" />
+    <Project Path="src/Nut.Dap/Nut.Dap.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/App.Flow/App.Flow.csproj" />

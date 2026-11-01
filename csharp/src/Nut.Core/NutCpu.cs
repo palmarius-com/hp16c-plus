@@ -67,6 +67,12 @@ public sealed class NutCpu
     public Action<NutCpu, int, int>? Trace;
     public HashSet<int>? Coverage;
 
+    // Debugger (optional, off when null/empty). A breakpoint is an instruction address; reaching it
+    // before the instruction runs sets BreakHit and makes Cycle() return false without executing.
+    // SkipBreak lets the next Cycle() run the instruction a halt stopped at.
+    public HashSet<int>? Breakpoints;
+    public bool BreakHit, SkipBreak;
+
     public byte[] A = new byte[W], B = new byte[W], C = new byte[W];
     public byte[] M = new byte[W], N = new byte[W];
     public byte[] G = new byte[2];
@@ -211,6 +217,11 @@ public sealed class NutCpu
     {
         KbdScannerCycle();
         if (!Awake) return false;
+        if (Breakpoints is { Count: > 0 })
+        {
+            if (SkipBreak) SkipBreak = false;
+            else if (InstState == Inst.Normal && Breakpoints.Contains(Pc)) { BreakHit = true; return false; }
+        }
         PrevPc = InstState == Inst.Cxisa ? CxisaAddr : Pc;
         int op = Rom[PrevPc];
         Coverage?.Add(PrevPc);
@@ -259,6 +270,7 @@ public sealed class NutCpu
         while (Awake && n < maxCycles)
         {
             Cycle();
+            if (BreakHit) break;
             n++;
         }
         return n;

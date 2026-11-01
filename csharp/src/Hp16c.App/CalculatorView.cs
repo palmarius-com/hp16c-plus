@@ -86,18 +86,43 @@ sealed class CalculatorView : Panel
         _keys.InvalidateVisual();
     }
 
+    // The Voyager's display chip blinks on its own clock once the firmware has told it to (`disp blink`, e.g. the
+    // `running` of a program, or an overflow): lit and dark for half a period each. Nonpareil counts 150 display
+    // updates of 16 CPU words: 2,400 words, about 0.625 s at the real 3,839 words a second. The CPU does not drive it,
+    // so it runs on the wall clock, also at full speed and while the CPU sleeps or the debugger has halted it.
+    const long BlinkHalfPeriodMs = 625;
+    long _blinkSince = -1;
+    bool _blinkLit = true;
+
+    bool BlinkNow => _snap is { Blink: true, DisplayOn: true };
+
+    bool BlinkLitAt(long now) => _blinkSince < 0 || ((now - _blinkSince) / BlinkHalfPeriodMs) % 2 == 0;
+
+    /// <summary>Called by the window's timer: redraw the LCD when the blink phase changes.</summary>
+    public void TickBlink()
+    {
+        if (!BlinkNow) return;
+        bool lit = BlinkLitAt(Environment.TickCount64);
+        if (lit == _blinkLit) return;
+        _blinkLit = lit;
+        _lcd.InvalidateVisual();
+    }
+
     public void Refresh()
     {
         if (_runner is null) return;
         var snap = _runner.TakeDisplay();
         if (_snap is not null && SameDisplay(_snap, snap)) return;     // nothing to draw
+        bool wasBlinking = BlinkNow;
         _snap = snap;
+        if (BlinkNow && !wasBlinking) { _blinkSince = Environment.TickCount64; _blinkLit = true; }   // starts lit
+        else if (!BlinkNow) { _blinkSince = -1; _blinkLit = true; }
         _lcd.InvalidateVisual();
     }
 
     static bool SameDisplay(MachineRunner.Snapshot a, MachineRunner.Snapshot b)
     {
-        if (a.DisplayOn != b.DisplayOn || a.Segments.Length != b.Segments.Length) return false;
+        if (a.DisplayOn != b.DisplayOn || a.Blink != b.Blink || a.Segments.Length != b.Segments.Length) return false;
         for (int d = 0; d < a.Segments.Length; d++)
         {
             var x = a.Segments[d];
@@ -295,7 +320,7 @@ sealed class CalculatorView : Panel
         ctx.DrawRectangle(Brushes.Black, null, area.Inflate(4), 4, 4);
         ctx.DrawRectangle(LcdBack, null, area, 3, 3);
         var segs = _snap?.Segments;
-        bool on = _snap?.DisplayOn ?? false;
+        bool on = (_snap?.DisplayOn ?? false) && (!BlinkNow || _blinkLit);
         double cw = 46, x0 = area.X + 26, y0 = area.Y + 20, h = 66;
         for (int d = 0; d < 11; d++)
         {

@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Nut.Core;
+using Nut.Dap;
 
 namespace HpSim;
 
@@ -20,6 +21,8 @@ sealed partial class MainWindow : Window
         Margin = new Thickness(10),
     };
     readonly Border _statusPanel;
+    DapServer? _debugServer;                       // only with --debug-port
+    TraceLog? _trace;                              // only with --trace / --trace-file
     readonly ContentControl _main = new();
     readonly TextBlock _message = new() { Margin = new Thickness(10, 4), TextWrapping = TextWrapping.Wrap };
     readonly MenuItem _realSpeed = new() { Header = "_Real speed", ToggleType = MenuItemToggleType.CheckBox };
@@ -168,7 +171,7 @@ sealed partial class MainWindow : Window
         AddHandler(KeyDownEvent, OnKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         AddHandler(TextInputEvent, OnTextInput, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         KeyUp += (_, _) => _calc.ReleaseFromKeyboard();
-        Closed += (_, _) => _runner?.Dispose();
+        Closed += (_, _) => { _runner?.Dispose(); _trace?.Close(); };
         Closing += (_, e) =>
         {
             if (_closeNow || (_session?.Changes().Count ?? 0) == 0) return;
@@ -183,9 +186,35 @@ sealed partial class MainWindow : Window
         DispatcherTimer.Run(() => { Tick(); return true; }, TimeSpan.FromMilliseconds(40));
         ShowStart();
         var args = Environment.GetCommandLineArgs();
+        _trace = TraceFromCommandLine(args);           // before --model: the first calculator is traced from its power-on
         int i = Array.IndexOf(args, "--model");
         if (i > 0 && i + 1 < args.Length && !StartByName(args[i + 1]))
             Say($"--model {args[i + 1]}: no such calculator (10c, 11c, 12c, 15c, 16c or one of yours).");
+        int d = Array.IndexOf(args, "--debug-port");
+        if (d > 0)
+        {
+            // remote debugging: a Debug Adapter Protocol server on 127.0.0.1 that taps into the running
+            // calculator (docs/DEBUGGER.md). Only the command line starts it, no menu item does.
+            if (d + 1 < args.Length && int.TryParse(args[d + 1], out int debugPort) && debugPort is > 0 and < 65536)
+            {
+                bool console = DebugConsole.Attach();
+                _debugServer = new DapServer(debugPort)
+                {
+                    // everything the server does goes to the terminal we were started from (verbose on
+                    // purpose); connect and disconnect also show in the window's status line
+                    Log = text =>
+                    {
+                        if (console) Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} debugger: {text}");
+                        if (text.StartsWith("client")) Dispatcher.UIThread.Post(() => Say("Debugger: " + text));
+                    },
+                };
+                _debugServer.Start();
+                var listening = $"Debugger listening on 127.0.0.1:{debugPort} (VS Code: attach with debug type nut).";
+                Say(listening);
+                if (console) Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} debugger: {listening}");
+            }
+            else Say("--debug-port needs a port number, for example --debug-port 4711.");
+        }
         int a = Array.IndexOf(args, "--api");
         if (a > 0)
         {
@@ -223,7 +252,7 @@ sealed partial class MainWindow : Window
 
     const string Shortcuts =
         "Digits 0-9, A-F (16C), Enter, + - * /, Backspace (BSP or the key with the arrow),\n" +
-        "period = decimal point, F1 = f, F2 = g, Esc = ON.\n\n" +
+        "period = decimal point, F1 = f, F2 = g, F3 = ON.\n\n" +
         "Hold a key with the mouse to hold it on the calculator (e.g. STATUS on the 16C).\n" +
         "Keys pressed together: right-click the key that goes first (ON, −, ·, yˣ) and choose one.";
 
@@ -252,13 +281,43 @@ sealed partial class MainWindow : Window
         return m;
     }
 
+    /// <summary>--trace N (keep the last N instructions), --trace-file FILE, --trace-max N, --trace-regs: docs/DEBUGGER.md.</summary>
+    TraceLog? TraceFromCommandLine(string[] args)
+    {
+        string? Value(string name) { int i = Array.IndexOf(args, name); return i > 0 && i + 1 < args.Length ? args[i + 1] : null; }
+        var ringArg = Value("--trace");
+        var file = Value("--trace-file");
+        if (ringArg is null && file is null) return null;
+        int ring = 0;
+        if (ringArg is not null && (!int.TryParse(ringArg, out ring) || ring < 0 || ring > 8_000_000))
+        {
+            Say("--trace needs a number of instructions from 1 to 8000000, for example --trace 100000.");
+            return null;
+        }
+        long max = long.TryParse(Value("--trace-max"), out var m) ? m : 1_000_000;
+        try
+        {
+            var log = new TraceLog(ring, Array.IndexOf(args, "--trace-regs") > 0, file, max);
+            log.OnLimit = text => Dispatcher.UIThread.Post(() => Say(text));
+            Say($"Tracing: last {ring} instructions in memory" + (file is null ? "" : $", every instruction to {file} (up to {max} lines)") + ".");
+            return log;
+        }
+        catch (Exception e)
+        {
+            Say($"--trace-file {file}: {e.Message}");
+            return null;
+        }
+    }
+
     void Tick()
     {
+        _debugServer?.Follow(_runner);                 // the debugger follows the calculator that is running
         if (_runner is null) return;
         bool dirty = _runner.TakeDirty();              // nothing changed: nothing to do
         bool panel = _statusPanel.IsVisible;
         if (!panel) _statusStale = true;
         if (dirty) _calc.Refresh();
+        _calc.TickBlink();                             // the display blinks on its own clock
         if (panel && (dirty || _statusStale))
         {
             _status.Text = _runner.Take().Status;
@@ -276,7 +335,7 @@ sealed partial class MainWindow : Window
         if ((e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) != 0) return;
         string? pc = e.Key switch
         {
-            Key.Enter => "ENTER", Key.Back => "BSP", Key.Escape => "ON", Key.F1 => "f", Key.F2 => "g",
+            Key.Enter => "ENTER", Key.Back => "BSP", Key.F3 => "ON", Key.F1 => "f", Key.F2 => "g",
             _ => null,
         };
         if (pc is not null && Press(pc)) e.Handled = true;
@@ -541,7 +600,7 @@ sealed partial class MainWindow : Window
         string title = (s.Name ?? s.Model.Name) + (s.Patches.Count > 0 ? " + " + string.Join(" + ", s.Patches.Select(p => p.Name)) : "");
         _session = s;
         SyncChips(large);
-        _runner = new MachineRunner(calc, title) { RealSpeed = _realSpeed.IsChecked };
+        _runner = new MachineRunner(calc, title, _trace) { RealSpeed = _realSpeed.IsChecked };
         _view.IsVisible = calc is Hp16c;
         bool preset = !_userView && calc is Hp16c { HasExtensionRam: true };
         if (!_userView)
@@ -558,7 +617,7 @@ sealed partial class MainWindow : Window
         _calc.Focus();
         var bad = s.Info().Split('\n').Where(l => l.Contains("checksum off")).ToList();
         var known = ModelCatalog.KnownBuild(img);
-        Say($"{title}: press ON (Esc) to switch on." +
+        Say($"{title}: press ON (F3) to switch on." +
             (large && s.UserLarge is null ? " Large chip layout preset, the ROM needs it (ROM > Chip layout)." : "") +
             (s.NotLoaded(img, large) is { } missing ? " " + missing : "") +
             (known is not null && s.UserLabel is null

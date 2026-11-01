@@ -62,6 +62,18 @@ sealed partial class MainWindow
                     var key = _calc.Skin.Keys.First(k => k.Code == kc[^1]);
                     var inWindow = _calc.TranslatePoint(_calc.KeyCenter(key), this);
                     return inWindow is { } wp ? $"ok {wp.X:F0} {wp.Y:F0}" : "error key not visible";
+                case "trace":
+                    // the last N executed instructions (needs --trace), or "save FILE"
+                    if (_runner is null) return "error no calculator running";
+                    var tw = arg.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (tw.Length == 2 && tw[0] == "save") return "ok " + _runner.TraceSave(tw[1]);
+                    return "ok " + string.Join("\n", _runner.TraceLast(tw.Length > 0 && int.TryParse(tw[0], out int tn) ? tn : 20));
+                case "speed":
+                    // Calculator > Real speed: "real" (the Voyager's 215 kHz) or "full"
+                    if (_runner is null) return "error no calculator running";
+                    _realSpeed.IsChecked = arg == "real";
+                    _runner.RealSpeed = _realSpeed.IsChecked;
+                    return "ok";
                 case "repaint-all":
                     _calc.RepaintAll();
                     return "ok";

@@ -25,6 +25,8 @@ through the same code as the mouse and keyboard.
 | `repaint-all` | View > Repaint all | |
 | `size W H` | set the window size in pixels | |
 | `panel show` or `panel hide` | View > Status panel | |
+| `speed real` or `speed full` | Calculator > Real speed on or off (real = the Voyager's 215 kHz; keys held "a person long" need it, a 3 second timeout in the ROM runs out in milliseconds at full speed) | |
+| `trace [N]` or `trace save FILE` | the last N (default 20) executed instructions as CSV lines, or write the whole ring to a file; needs `--trace N` at start (docs/DEBUGGER.md) | the lines |
 | `reset-cycles` | set the cycle counter of the status panel back to 0 | |
 | `unpatch` | remove all patches | |
 | `testrun FILE` | run a test file (docs/TESTS.md) on a copy of the running calculator (ROM and patches, own memory); all failures go to `FILE.failures` | counts, first failures |

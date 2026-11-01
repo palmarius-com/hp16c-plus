@@ -86,6 +86,9 @@ handbook (or the calculator's manual) says, not what the simulator shows.
 | `KEYS => (blank)` | the display must be off |
 | `hold KEYS => 'TEXT'` | keep the last key down while checking (for STATUS) |
 | `chord [K] => 'TEXT'` | hold ON, press K, release; the calculator must be off |
+| `KEYS wait 0.5 => 'TEXT'` | press the keys, check 0.5 s of calculator time later, without waiting for the calculator to go idle |
+| `hold KEYS wait 1 => 'TEXT'` | keep the last key down for 1 s of calculator time, then check |
+| `wait 2 => 'TEXT'` | only wait 2 s of calculator time, then check |
 | `reset` | memory reset: off, ON + -, clear Pr Error |
 | `# text` | comment |
 | `## KEYS => 'TEXT'` | a test that is switched off (see below) |
@@ -123,6 +126,13 @@ The self-test:
 [ON]  =>  (blank)
 chord [*]  =>  '-8,8,8,8,8,8,8,8,8,8,'  [C G]
 ```
+
+## Waiting
+
+`wait SECONDS` counts calculator time: words at the real Voyager speed (215 kHz, 56 clocks per word, about
+3840 words a second). The program still runs flat out, so a test stays fast and gives the same result every
+run. Use it for what a person sees while a key is down or during a pause (STATUS, a held matrix key, PSE,
+`running`). The wait ends early if the calculator goes to sleep.
 
 ## Programs
 

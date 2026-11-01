@@ -51,7 +51,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
 
     const int On = 41, FirstKey = 35;
     const long ChordHold = 20000;
-    bool _held;
+    bool _held, _unsettled;
 
     void Settle(CancellationToken stop)
     {
@@ -95,6 +95,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
             if (problem is not null) { yield return new(no, line, false, problem); continue; }
             if (cut >= 0) yield return Check(no, line, line[(cut + 2)..].Trim());
             Release(stop);
+            if (_unsettled) { _unsettled = false; Settle(stop); }
         }
         Release(stop);
     }
@@ -102,6 +103,20 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
     /// <summary>Carry out the left side of a line; returns a problem or null.</summary>
     string? Act(string left, CancellationToken stop)
     {
+        // Trailing `wait SECONDS`: calculator time, counted in words at the real Voyager speed
+        // (the CPU still runs flat out). Keys are pressed, then the check comes after the wait
+        // instead of after the calculator went idle.
+        long wait = 0;
+        var words = left.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length >= 2 && words[^2].Equals("wait", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!double.TryParse(words[^1], System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out var secs) || secs < 0)
+                return $"bad wait time '{words[^1]}'";
+            wait = (long)(secs * MachineRunner.RealWordsPerSecond);
+            left = string.Join(' ', words[..^2]);
+            if (left.Length == 0) { run.WaitCycles(wait, stop); _unsettled = true; return null; }
+        }
         var parts = left.Split((char[]?)null, 2, StringSplitOptions.RemoveEmptyEntries);
         var first = parts[0].ToLowerInvariant();
         var rest = parts.Length > 1 ? parts[1] : "";
@@ -128,12 +143,20 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
             codes.AddRange(c);
         }
         if (codes.Count == 0) return "no keys";
-        foreach (var c in hold ? codes[..^1] : codes) Tap(c, stop);
+        bool timed = wait > 0;
+        foreach (var c in hold || timed ? codes[..^1] : codes) Tap(c, stop);
         if (hold)
         {
             run.Press(codes[^1]);
-            run.WaitCycles(30000, stop);
+            run.WaitCycles(timed ? wait : 30000, stop);
             _held = true;
+            _unsettled = timed;
+        }
+        else if (timed)
+        {
+            run.Tap(codes[^1]);
+            run.WaitCycles(wait, stop);
+            _unsettled = true;
         }
         return null;
     }

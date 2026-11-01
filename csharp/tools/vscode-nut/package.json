@@ -1,0 +1,57 @@
+{
+  "name": "nut-debug",
+  "displayName": "Nut CPU debugger (Voyager)",
+  "description": "Debug the ROM of an HP Voyager calculator (10C, 11C, 12C, 15C, 16C) running in VoyagerSim: listing, registers, RAM, breakpoints, single step.",
+  "version": "0.0.2",
+  "publisher": "palmarius",
+  "license": "GPL-3.0-or-later",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Debuggers"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "nutasm",
+        "aliases": ["Nut assembly"],
+        "extensions": [".nutasm"]
+      }
+    ],
+    "breakpoints": [
+      { "language": "nutasm" }
+    ],
+    "debuggers": [
+      {
+        "type": "nut",
+        "label": "Nut CPU (Voyager)",
+        "languages": ["nutasm"],
+        "configurationAttributes": {
+          "attach": {
+            "properties": {
+              "debugServer": {
+                "type": "number",
+                "description": "Port of VoyagerSim started with --debug-port, on 127.0.0.1.",
+                "default": 4711
+              }
+            }
+          },
+          "launch": {
+            "properties": {
+              "debugServer": {
+                "type": "number",
+                "description": "Port of VoyagerSim started with --debug-port, on 127.0.0.1.",
+                "default": 4711
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "nut",
+            "request": "attach",
+            "name": "Nut: attach to the adapter",
+            "debugServer": 4711
+          }
+        ]
+      }
+    ]
+  }
+}

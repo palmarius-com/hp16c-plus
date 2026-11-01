@@ -48,6 +48,51 @@ if (args.Length >= 1 && args[0] == "--state-check")
     return same && a1.Display() == b1.Display() ? 0 : 1;
     static string Strip(string j) => string.Join("\n", j.Split('\n').Where(l => !l.Contains("savedAt") && !l.Contains("checksum")));
 }
+if (args.Length >= 2 && args[0] == "--ram-trace")
+{
+    // 11C: which RAM registers change while one key is down and after it is released?
+    // Used for g BST then SST (forum 25610 #9): does the line pointer step once or twice?
+    //   --ram-trace 11c.rom [hold-cycles]
+    var rom = RomImage.Load(args[1]);
+    long hold = args.Length > 2 ? long.Parse(args[2]) : 20_000;
+    var v = new Voyager(Voyager.EmbeddedNcd("11c"), null, rom);
+    v.PowerOn();
+    int Code(string legend) => v.Legends.First(kv => kv.Value[0] == legend).Key;
+    int g = Code("g"), sst = Code("SST");
+    v.Key(41); v.Key(Code("0")); v.Key(g); v.Key(Code("R/S"));
+    foreach (var d in "345") v.Key(Code(d.ToString()));
+    v.Key(g); v.Key(Code("R/S"));
+    Console.WriteLine($"program keyed, run mode: '{v.Display().Trim()}'");
+    byte[][] Snap() => v.Cpu.Ram.Select(r => (byte[])r.Clone()).ToArray();
+    var last = Snap();
+    long clock = 0;
+    void Step(string what, long cycles)
+    {
+        long end = clock + cycles;
+        while (clock < end && v.Cpu.Awake)
+        {
+            clock += v.Cpu.Run(200);
+            var now = Snap();
+            for (int a = 0; a < now.Length; a++)
+                if (a != 0x006 && a != 0x00A && !now[a].SequenceEqual(last[a]))
+                    Console.WriteLine($"  t={clock,7} {what,-9} RAM {a:X3}: {string.Concat(last[a].Reverse().Select(b => b.ToString("X")))} -> {string.Concat(now[a].Reverse().Select(b => b.ToString("X")))}   display '{v.Display().Trim()}'");
+            last = now;
+        }
+    }
+    foreach (var step in new[] { "g", "SST/BST", "SST" })
+    {
+        Console.WriteLine($"--- {step}");
+        int key = step == "g" ? g : sst;
+        clock = 0;
+        v.Cpu.Press(v.Keys[key]);
+        Step("down", hold);
+        v.Cpu.Release();
+        Console.WriteLine($"  t={clock,7} released, display '{v.Display().Trim()}'");
+        Step("up", 400_000);
+        Console.WriteLine($"  end: display '{v.Display().Trim()}', asleep={!v.Cpu.Awake}");
+    }
+    return 0;
+}
 if (args.Length >= 2 && args[0] == "--keys")
 {
     // every digit key per its legend must enter that digit, on the real firmware

@@ -32,8 +32,8 @@ per calculator. "ROM ready" in green means the calculator can start.
   key, as on the real calculator (the 16C's STATUS shows while held).
 - Or type on the PC keyboard: digits, Enter, + - * /, Backspace, the
   decimal point; on the 16C also A-F. F1 = f (gold), F2 = g (blue),
-  Esc = ON.
-- The calculator starts switched off. Press ON (or Esc).
+  F3 = ON.
+- The calculator starts switched off. Press ON (or F3).
 - After a fresh start the display shows `Pr Error` (as a real one does
   after new batteries). Any key clears it.
 - Keys pressed together: right-click the key that goes first and choose.
@@ -61,10 +61,19 @@ View > Repaint all draws the whole window again. It is only for the rare case th
 something looks wrong: the calculator draws its LCD and a pressed key on their
 own, and the rest only when the skin, label, size or calculator changes.
 
-The line "cycles since reset" counts the processor's cycles, the CPU's own
-clock ticks (right after choosing a model it already shows 33 or so: the
-power-on run until the first sleep). A state file saves the count with the
-rest; Calculator > Reset the cycle counter starts it from 0 again.
+The line "cycles since reset" counts the Nut processor's instruction cycles, one per
+instruction word it executes (not the host computer's cycles). Right after choosing a model it already
+shows 33 or so: the power-on run until the first sleep. A real Voyager executes about 3,840 of them a
+second (215 kHz, 56 clocks per word), so a count divided by 3,840 is the time on the real calculator.
+The line "last key" does that for you: the cycles from a key going down until the calculator sleeps
+again, and the same in milliseconds at real speed. A key held longer than the minimum (200 cycles) only
+makes the processor wait, and that part is left out, so a long hold does not inflate it. A state file saves the count with the rest;
+Calculator > Reset the cycle counter starts it, and "last key", from 0 again.
+
+While a program runs, the calculator shows `running`, and after an overflow the display flashes. As on the
+real calculator, the firmware only tells the display chip to blink; the chip then switches the display on and off by
+itself (about 0.6 seconds each), whatever the processor does. So it keeps blinking at full speed and while the
+processor sleeps.
 
 ### Saving and loading the state
 

@@ -1,0 +1,10 @@
+{
+  "debug.disassemblyView.showSourceCode": false,
+  "debug.openDebug": "openOnSessionStart",
+  "debug.allowBreakpointsEverywhere": true,
+  "files.associations": {
+    "*.nutasm": "nutasm"
+  },
+  "workbench.startupEditor": "welcomePage",
+  "workbench.tips.enabled": false
+}

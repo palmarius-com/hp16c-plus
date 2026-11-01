@@ -119,6 +119,13 @@ window: download, a test sheet of key sequences, patch, sheet again.
   as a template, edit, Skin > Load skin file).
 - **Status panel:** Nut CPU registers, flags, return stack, the 16C
   stack and the last program counters.
+- **Debugger and trace** (work in progress for the next version, not in a
+  release yet; tested on Windows with VS Code only): started with
+  `--debug-port N`, VS Code attaches to the running simulator over the
+  Debug Adapter Protocol: pause, breakpoints on ROM addresses, step
+  into / over / out, registers, RAM in the Hex Editor.
+  `--trace N` keeps the last N executed instructions, `--trace-file`
+  writes them as CSV. See [csharp/docs/DEBUGGER.md](csharp/docs/DEBUGGER.md).
 - **Guides** (also under Help in the app):
   [user guide](csharp/docs/USER-GUIDE.md),
   [how to write a patch](csharp/docs/PATCHING.md),

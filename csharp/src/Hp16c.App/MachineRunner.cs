@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Nut.Core;
+using Nut.Dap;
 
 namespace HpSim;
 
@@ -12,7 +13,7 @@ namespace HpSim;
 /// </summary>
 enum PanelView { WordSize, Bits64, Bits128 }
 
-sealed class MachineRunner : IDisposable
+sealed class MachineRunner : IDisposable, IDebugTarget
 {
     public const double RealWordsPerSecond = 215_000.0 / 56;
     const int HistorySize = 24;
@@ -28,14 +29,20 @@ sealed class MachineRunner : IDisposable
     public volatile bool RealSpeed;
     public volatile PanelView View = PanelView.WordSize;
 
-    public MachineRunner(Voyager calc, string title)
+    /// <summary>The instruction log, if the command line asked for one (--trace, --trace-file).</summary>
+    public TraceLog? TraceLog { get; }
+
+    public MachineRunner(Voyager calc, string title, TraceLog? traceLog = null)
     {
         Calc = calc;
         Title = title;
-        Calc.Cpu.Trace = (_, pc, _) =>
+        TraceLog = traceLog;
+        Calc.Cpu.Trace = (cpu, pc, _) =>
         {
             _history[_historyPos] = pc;
             _historyPos = (_historyPos + 1) % HistorySize;
+            // one line per instruction: the first word only (not the second word of a two-word instruction, not a data fetch)
+            if (TraceLog is not null && cpu.InstState == NutCpu.Inst.Normal) TraceLog.Record(cpu, pc);
         };
         lock (_gate) Calc.PowerOn();
         _thread = new Thread(Loop) { IsBackground = true, Name = "Nut CPU" };
@@ -48,6 +55,11 @@ sealed class MachineRunner : IDisposable
     const long MinHoldCycles = 200;
     readonly System.Collections.Concurrent.ConcurrentQueue<int> _keys = new(); // code, or -1 = release
     long _pressedAt = -1;
+    // Instruction cycles from a key going down to the calculator sleeping again: what a key (or a patched
+    // routine) costs, and with RealWordsPerSecond what it would take on the real calculator.
+    long _runStart = -1;
+    long _lastRun = -1;
+    long _releasedAt = -1;
     // The CPU thread sleeps on this while the calculator sleeps: a key (or a stop) wakes it
     // at once, otherwise it looks again every 50 ms. No polling every 2 ms.
     readonly AutoResetEvent _wake = new(false);
@@ -73,7 +85,11 @@ sealed class MachineRunner : IDisposable
                 }
                 else if (cpu.KbState != NutCpu.Kb.Idle) return;
                 _keys.TryDequeue(out _);
-                if (Calc.Keys.TryGetValue(ev, out var hw) && cpu.Press(hw)) _pressedAt = cpu.Cycles;
+                if (Calc.Keys.TryGetValue(ev, out var hw) && cpu.Press(hw))
+                {
+                    _pressedAt = cpu.Cycles;
+                    if (_runStart < 0) _runStart = cpu.Cycles;
+                }
                 else if (_keys.TryPeek(out var next) && next < 0) _keys.TryDequeue(out _);
             }
             else
@@ -81,6 +97,7 @@ sealed class MachineRunner : IDisposable
                 if (_pressedAt >= 0 && cpu.Awake && cpu.Cycles - _pressedAt < MinHoldCycles) return;
                 _keys.TryDequeue(out _);
                 cpu.Release();
+                _releasedAt = cpu.Cycles;
                 _pressedAt = -1;
             }
         }
@@ -96,9 +113,28 @@ sealed class MachineRunner : IDisposable
             bool awake;
             lock (_gate)
             {
-                if (!_keys.IsEmpty) Touch();
-                ApplyKeys();
+                if (!_halted)
+                {
+                    if (!_keys.IsEmpty) Touch();
+                    ApplyKeys();
+                }
                 awake = Calc.Cpu.Awake;
+                if (!awake && _runStart >= 0 && _keys.IsEmpty && _pressedAt < 0)
+                {
+                    // a key held longer than the minimum only makes the CPU spin: leave that out
+                    long held = _releasedAt >= _runStart ? _releasedAt - _runStart : 0;
+                    _lastRun = Calc.Cpu.Cycles - _runStart - Math.Max(0, held - MinHoldCycles);
+                    _runStart = -1;
+                    Touch();
+                }
+            }
+            if (_halted)
+            {
+                // stopped by the debugger: the window stays alive, keys wait in the queue
+                _wake.WaitOne(20);
+                last = clock.ElapsedTicks;
+                credit = 0;
+                continue;
             }
             if (!awake)
             {
@@ -117,8 +153,21 @@ sealed class MachineRunner : IDisposable
                 credit -= budget;
                 if (budget == 0) { Thread.Sleep(1); continue; }
             }
-            lock (_gate) Calc.Cpu.Run(budget);
+            bool hit;
+            int hitPc = 0;
+            lock (_gate)
+            {
+                Calc.Cpu.Run(budget);
+                hit = Calc.Cpu.BreakHit;
+                if (hit)
+                {
+                    Calc.Cpu.BreakHit = false;
+                    _halted = true;
+                    hitPc = Calc.Cpu.Pc;
+                }
+            }
             Touch();
+            if (hit) Stopped?.Invoke("instruction breakpoint", $"breakpoint at {hitPc:X4}");
         }
     }
 
@@ -202,6 +251,8 @@ sealed class MachineRunner : IDisposable
         {
             Calc.Cpu.Cycles = 0;
             if (_pressedAt >= 0) _pressedAt = 0;
+            if (_runStart >= 0) _runStart = 0;
+            _lastRun = -1;
         }
         Touch();
     }
@@ -231,13 +282,13 @@ sealed class MachineRunner : IDisposable
         _wake.Set();
     }
 
-    public sealed record Snapshot(Dictionary<char, bool>[] Segments, bool DisplayOn, string Status);
+    public sealed record Snapshot(Dictionary<char, bool>[] Segments, bool DisplayOn, bool Blink, string Status);
 
     /// <summary>Only what the view draws: the segments and whether the display is on.
     /// No status text, which is costly to build and only the panel needs.</summary>
     public Snapshot TakeDisplay()
     {
-        lock (_gate) return new Snapshot(Calc.SegmentState(), Calc.DisplayEnable, "");
+        lock (_gate) return new Snapshot(Calc.SegmentState(), Calc.DisplayEnable, Calc.Blink, "");
     }
 
     public Snapshot Take()
@@ -245,7 +296,7 @@ sealed class MachineRunner : IDisposable
         lock (_gate)
         {
             var cpu = Calc.Cpu;
-            return new Snapshot(Calc.SegmentState(), Calc.DisplayEnable, StatusText(cpu));
+            return new Snapshot(Calc.SegmentState(), Calc.DisplayEnable, Calc.Blink, StatusText(cpu));
         }
     }
 
@@ -285,8 +336,10 @@ sealed class MachineRunner : IDisposable
             return line[..(PanelColumns - Below.Length)] + Below;
         }
         sb.AppendLine(Fit(Title));
-        sb.AppendLine($"PC {cpu.Pc:X4}  {(cpu.Awake ? "running" : cpu.DisplayEnable ? "light sleep" : "deep sleep")}");
+        sb.AppendLine($"PC {cpu.Pc:X4}  {(_halted ? "HALTED by the debugger" : cpu.Awake ? "running" : cpu.DisplayEnable ? "light sleep" : "deep sleep")}");
         sb.AppendLine($"cycles since reset {cpu.Cycles:N0}");
+        sb.AppendLine(_lastRun < 0 ? "last key: (none yet)"
+            : $"last key: {_lastRun:N0} cycles, {_lastRun / RealWordsPerSecond * 1000:N0} ms real");
         sb.AppendLine();
         sb.AppendLine($"A  {Reg(cpu.A)}");
         sb.AppendLine($"B  {Reg(cpu.B)}");
@@ -346,6 +399,127 @@ sealed class MachineRunner : IDisposable
                 foreach (var line in Wrap(note)) sb.AppendLine(line);
         }
         return sb.ToString();
+    }
+
+    // ------------------------------------------------------------ debugger (IDebugTarget)
+    // The debug adapter (Nut.Dap, started with --debug-port) taps into this running calculator:
+    // it halts the CPU thread, reads the machine under the lock, steps, resumes. The window keeps
+    // working while halted (it shows the frozen display); keys wait in the queue.
+    volatile bool _halted;
+
+    public string Model => Calc.Model;
+    public bool Halted => _halted;
+    public event Action<string, string>? Stopped;
+
+    public void SetBreakpoints(IReadOnlyCollection<int> addresses)
+    {
+        lock (_gate)
+        {
+            Calc.Cpu.Breakpoints = addresses.Count == 0 ? null : new HashSet<int>(addresses);
+            Calc.Cpu.BreakHit = false;
+            Calc.Cpu.SkipBreak = false;
+        }
+    }
+
+    public void Halt()
+    {
+        int pc;
+        bool asleep;
+        lock (_gate)
+        {
+            _halted = true;
+            pc = Calc.Cpu.Pc;
+            asleep = !Calc.Cpu.Awake;
+        }
+        Touch();
+        Stopped?.Invoke("pause", $"paused at PC {pc:X4}" + (asleep ? " (the CPU sleeps, waiting for a key)" : ""));
+    }
+
+    public void Resume()
+    {
+        lock (_gate)
+        {
+            Calc.Cpu.BreakHit = false;
+            // run the instruction we stopped at first; a sleeping CPU stopped at no instruction (the next one
+            // after a key wake is the first of the wake path, a breakpoint there must stop)
+            Calc.Cpu.SkipBreak = Calc.Cpu.Breakpoints is not null && Calc.Cpu.Awake;
+            _halted = false;
+        }
+        Touch();
+        _wake.Set();
+    }
+
+    public void Step() => StepCore(StepMode.Into);
+
+    public void StepOver() => StepCore(StepMode.Over);
+
+    public void StepOut() => StepCore(StepMode.Out);
+
+    enum StepMode { Into, Over, Out }
+
+    void StepCore(StepMode mode)
+    {
+        string reason = "step";
+        int pc;
+        bool asleep;
+        lock (_gate)
+        {
+            var cpu = Calc.Cpu;
+            asleep = !cpu.Awake;
+            var d = NutDisassembler.Decode(cpu.Rom, cpu.Pc);
+            cpu.SkipBreak = cpu.Breakpoints is not null && cpu.Awake;
+            if (mode == StepMode.Out)
+            {
+                // run until the routine we are in returns: count the calls made on the way (taken calls
+                // go one level down, taken returns one up; a return at level 0 is the one we wait for)
+                int depth = 0;
+                long steps = 0;
+                while (cpu.Awake && !cpu.BreakHit && steps < 3_000_000)
+                {
+                    int at = cpu.Pc;
+                    var inst = NutDisassembler.Decode(cpu.Rom, at);
+                    bool atInstruction = cpu.InstState == NutCpu.Inst.Normal;
+                    do { cpu.Cycle(); steps++; }
+                    while (cpu.Awake && !cpu.BreakHit && cpu.InstState != NutCpu.Inst.Normal && steps < 3_000_000);
+                    if (!atInstruction) continue;
+                    int after = cpu.Pc;
+                    if (inst.Kind == Flow.CondCall && after == inst.Target) depth++;
+                    else if (inst.Kind is Flow.Return or Flow.CondReturn && after != ((at + 1) & 0xFFFF))
+                    {
+                        if (depth == 0) break;
+                        depth--;
+                    }
+                }
+                if (cpu.BreakHit) { cpu.BreakHit = false; reason = "instruction breakpoint"; }
+            }
+            else if (mode == StepMode.Over && d.Kind == Flow.CondCall && cpu.InstState == NutCpu.Inst.Normal)
+            {
+                int ret = (cpu.Pc + d.Length) & 0xFFFF;
+                long n = 0;
+                do { cpu.Cycle(); n++; }
+                while (cpu.Awake && !cpu.BreakHit && n < 3_000_000 && !(cpu.Pc == ret && cpu.InstState == NutCpu.Inst.Normal));
+                if (cpu.BreakHit) { cpu.BreakHit = false; reason = "instruction breakpoint"; }
+            }
+            else cpu.Cycle();
+            cpu.SkipBreak = false;
+            pc = cpu.Pc;
+        }
+        Touch();
+        Stopped?.Invoke(reason, asleep
+            ? $"nothing to step: the CPU sleeps at PC {pc:X4}, waiting for a key (press a key in the calculator; a breakpoint at 0000 stops on the key)"
+            : reason == "step" ? $"at PC {pc:X4}" : $"breakpoint at {pc:X4}");
+    }
+
+    public IReadOnlyList<string> TraceLast(int n)
+    {
+        if (TraceLog is null) return ["tracing is off: start VoyagerSim with --trace N (last N instructions) or --trace-file FILE"];
+        lock (_gate) { TraceLog.Flush(); return TraceLog.Last(n, Calc.Cpu.Rom); }
+    }
+
+    public string TraceSave(string path)
+    {
+        if (TraceLog is null) return "tracing is off: start VoyagerSim with --trace N";
+        lock (_gate) { TraceLog.Flush(); return $"{TraceLog.Save(path, Calc.Cpu.Rom)} lines written to {path}"; }
     }
 
     public void Dispose()
