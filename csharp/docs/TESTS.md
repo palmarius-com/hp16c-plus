@@ -161,8 +161,8 @@ dialog starts in that folder, and later in the folder of the last file you opene
   80 up cannot be a line; the next key only clears it.
 - `hp11c-handbook-tests.txt`, `hp12c-handbook-tests.txt`,
   `hp15c-handbook-tests.txt`, `hp16c-handbook-tests.txt`: the examples of the
-  Owner's Handbook of each calculator (1556, 1275, 688 and 447 checks; the 15C file has 247 lines switched
-  off: the matrix examples of pages 141 to 154 and what depends on them). The
+  Owner's Handbook of each calculator (1556, 1275, 770 and 447 checks; the 15C file has 165 lines switched
+  off: SOLVE, the integral and what depends on them; its matrix examples run at Real speed). The
   expected values are the handbook's, read from the scanned pages by a model;
   no person has proofread them. Each file runs on its own calculator. Lines
   starting with `##` are switched off: their check fails in the simulator,
