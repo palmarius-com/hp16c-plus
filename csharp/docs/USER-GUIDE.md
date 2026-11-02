@@ -46,7 +46,9 @@ per calculator. "ROM ready" in green means the calculator can start.
 - Calculator > Real speed runs the calculator as slowly as the real
   one (handy for programs that pause). Without it, the simulator runs
   as fast as your PC allows.
-- Calculator > Batteries out and in: a full reset.
+- Calculator > Battery replacement (memory lost): what taking the batteries out does. Every memory register is lost,
+  the ROM starts cold and shows Pr Error. The chord ON + - (from a switched-off calculator) is the ROM's own reset and
+  stays as it is.
 
 ## 3. The status panel
 
@@ -66,8 +68,9 @@ instruction word it executes (not the host computer's cycles). Right after choos
 shows 33 or so: the power-on run until the first sleep. A real Voyager executes about 3,840 of them a
 second (215 kHz, 56 clocks per word), so a count divided by 3,840 is the time on the real calculator.
 The line "last key" does that for you: the cycles from a key going down until the calculator sleeps
-again, and the same in milliseconds at real speed. A key held longer than the minimum (200 cycles) only
-makes the processor wait, and that part is left out, so a long hold does not inflate it. A state file saves the count with the rest;
+again, and the same in milliseconds at real speed. While a key is down the processor goes round the ROM's key wait loop, which changes nothing; at full speed a key held
+for a few milliseconds of your time makes millions of those. They are left out of both lines (the status line says how
+many): the count is the work, and it agrees with the real calculator's word time (`-99.5 x!` on the 11C: about 69,000). A state file saves the count with the rest;
 Calculator > Reset the cycle counter starts it, and "last key", from 0 again.
 
 While a program runs, the calculator shows `running`, and after an overflow the display flashes. As on the
@@ -237,7 +240,25 @@ Faceplate label sets your own; empty goes back to the automatic one.
 Quick start: `HEX 8 0 f WSIZE` sets 128 bits; `f WINDOW 0` to `3` and
 `g <` / `g >` show all 32 hex digits.
 
-## 7. Which calculators work
+## 7. Command line options
+
+Start `VoyagerSim` from a terminal or a shortcut with these options. They are all optional; without any, the app opens on
+the start page.
+
+| Option | Does |
+|---|---|
+| `--model NAME` | start that calculator at once: `10c`, `11c`, `12c`, `15c`, `16c`, or the short or full name of one of your own |
+| `--api [PIPE]` | the command API for scripts and tests ([API.md](API.md)) |
+| `--debug-port N` | lets VS Code attach to the running simulator and debug the ROM, on 127.0.0.1 port N ([DEBUGGER.md](DEBUGGER.md)) |
+| `--trace N` | keep the last N executed instructions in memory (docs/DEBUGGER.md, "The instruction trace") |
+| `--trace-file FILE` | also write the instructions to a CSV file as they run, up to `--trace-max` lines (default 1,000,000) |
+| `--trace-regs` | add the registers as more CSV columns |
+| `--record FILE` | write every key you press, with the display after it, as test lines (`[LBL]  =>  '001-42,21,11'`): the way to make a test file by hand, or to send someone a log of what you did |
+
+The debugger and the trace cost nothing when they are off, and only the command line turns them on: there is no menu
+item for them.
+
+## 8. Which calculators work
 
 Calculators with HP's Nut processor and the Voyager display: 10C,
 11C, 12C, 15C, 16C. Other Nonpareil models (HP-25, 41C, ...) use other

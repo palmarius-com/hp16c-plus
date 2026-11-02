@@ -87,6 +87,9 @@ sealed partial class MainWindow
                     _showStatus.IsChecked = arg == "show";
                     _statusPanel.IsVisible = _showStatus.IsChecked && _runner is not null;
                     return "ok";
+                case "battery-reset":
+                    _runner?.PowerOn();
+                    return "ok";
                 case "reset-cycles":
                     _runner?.ResetCycles();
                     return "ok";

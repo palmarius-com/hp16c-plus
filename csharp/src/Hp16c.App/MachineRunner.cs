@@ -43,10 +43,50 @@ sealed class MachineRunner : IDisposable, IDebugTarget
             _historyPos = (_historyPos + 1) % HistorySize;
             // one line per instruction: the first word only (not the second word of a two-word instruction, not a data fetch)
             if (TraceLog is not null && cpu.InstState == NutCpu.Inst.Normal) TraceLog.Record(cpu, pc);
+            NoteSpin(cpu, pc);
         };
         lock (_gate) Calc.PowerOn();
         _thread = new Thread(Loop) { IsBackground = true, Name = "Nut CPU" };
         _thread.Start();
+    }
+
+    // Spin: cycles the CPU spent going round a loop that changes nothing while a key was down (the ROM's key wait). They
+    // are no work: a real calculator spends them too, but in real time, and at full speed a key held for a few
+    // milliseconds of the host's time makes millions of them. An instruction is spin when the same instruction ran
+    // one to eight instructions earlier with exactly the same CPU state (all registers, flags, carry, return stack).
+    // Only looked at while a key is down.
+    const int SpinWindow = 8;
+    readonly int[] _spinPc = new int[SpinWindow];
+    readonly ulong[] _spinState = new ulong[SpinWindow];
+    int _spinAt;
+    long _spin, _spinPrevCycles;
+    bool _spinPrev;
+
+    static ulong StateHash(NutCpu c)
+    {
+        ulong h = 14695981039346656037UL;
+        foreach (var r in new[] { c.A, c.B, c.C, c.M, c.N, c.S })
+            for (int i = 0; i < r.Length; i++) h = (h ^ r[i]) * 1099511628211UL;
+        h = (h ^ (ulong)(c.Carry + 2 * c.P + 32 * c.Q + 1024 * (c.QSel ? 1 : 0) + 2048 * c.Fo + 65536 * (c.Decimal ? 1 : 0))) * 1099511628211UL;
+        foreach (var s in c.Stack) h = (h ^ (ulong)s) * 1099511628211UL;
+        return h;
+    }
+
+    void NoteSpin(NutCpu cpu, int pc)
+    {
+        if (_spinPrev) _spin += cpu.Cycles - _spinPrevCycles;           // the instruction before this one was spin
+        _spinPrev = false;
+        _spinPrevCycles = cpu.Cycles;
+        if (!cpu.KeyDown || cpu.InstState != NutCpu.Inst.Normal) return;
+        var h = StateHash(cpu);
+        for (int d = 1; d <= SpinWindow; d++)
+        {
+            int k = (_spinAt - d + SpinWindow * 2) % SpinWindow;
+            if (_spinPc[k] == pc && _spinState[k] == h) { _spinPrev = true; break; }
+        }
+        _spinPc[_spinAt] = pc;
+        _spinState[_spinAt] = h;
+        _spinAt = (_spinAt + 1) % SpinWindow;
     }
 
     // Key events from the UI, applied by the CPU thread: a key goes down only
@@ -58,6 +98,7 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     // Instruction cycles from a key going down to the calculator sleeping again: what a key (or a patched
     // routine) costs, and with RealWordsPerSecond what it would take on the real calculator.
     long _runStart = -1;
+    long _runSpin0;
     long _lastRun = -1;
     long _releasedAt = -1;
     // The CPU thread sleeps on this while the calculator sleeps: a key (or a stop) wakes it
@@ -88,7 +129,7 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                 if (Calc.Keys.TryGetValue(ev, out var hw) && cpu.Press(hw))
                 {
                     _pressedAt = cpu.Cycles;
-                    if (_runStart < 0) _runStart = cpu.Cycles;
+                    if (_runStart < 0) { _runStart = cpu.Cycles; _runSpin0 = _spin; }
                 }
                 else if (_keys.TryPeek(out var next) && next < 0) _keys.TryDequeue(out _);
             }
@@ -121,9 +162,8 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                 awake = Calc.Cpu.Awake;
                 if (!awake && _runStart >= 0 && _keys.IsEmpty && _pressedAt < 0)
                 {
-                    // a key held longer than the minimum only makes the CPU spin: leave that out
-                    long held = _releasedAt >= _runStart ? _releasedAt - _runStart : 0;
-                    _lastRun = Calc.Cpu.Cycles - _runStart - Math.Max(0, held - MinHoldCycles);
+                    // the spin of a held key is no work: leave it out
+                    _lastRun = Calc.Cpu.Cycles - _runStart - (_spin - _runSpin0);
                     _runStart = -1;
                     Touch();
                 }
@@ -174,11 +214,15 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     /// <summary>Told about every key: the code, or -1 for release (for showing it).</summary>
     public Action<int>? KeySeen;
 
+    /// <summary>Told about every key press (not releases): the code. For --record.</summary>
+    public Action<int>? KeyPressed;
+
     public void Press(int userKeycode)
     {
         _keys.Enqueue(userKeycode);
         _wake.Set();
         KeySeen?.Invoke(userKeycode);
+        KeyPressed?.Invoke(userKeycode);
     }
 
     public void Release()
@@ -201,6 +245,7 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         _wake.Set();
         KeySeen?.Invoke(userKeycode);
         KeySeen?.Invoke(-1);
+        KeyPressed?.Invoke(userKeycode);
     }
 
     /// <summary>Wait until the calculator ran n more words, or went to sleep.</summary>
@@ -250,6 +295,10 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         lock (_gate)
         {
             Calc.Cpu.Cycles = 0;
+            _spin = 0;
+            _spinPrev = false;
+            _spinPrevCycles = 0;
+            _runSpin0 = 0;
             if (_pressedAt >= 0) _pressedAt = 0;
             if (_runStart >= 0) _runStart = 0;
             _lastRun = -1;
@@ -257,13 +306,15 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         Touch();
     }
 
+    /// <summary>Batteries out and in: the memory is lost, the ROM starts cold (Pr Error).</summary>
     public void PowerOn()
     {
         _keys.Clear();
-        lock (_gate) { Calc.PowerOn(); _pressedAt = -1; }
+        lock (_gate) { Calc.BatteriesOutAndIn(); _pressedAt = -1; _spin = 0; _spinPrev = false; }
         Touch();
         _wake.Set();
     }
+
 
     public MachineState SaveState()
     {
@@ -337,7 +388,8 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         }
         sb.AppendLine(Fit(Title));
         sb.AppendLine($"PC {cpu.Pc:X4}  {(_halted ? "HALTED by the debugger" : cpu.Awake ? "running" : cpu.DisplayEnable ? "light sleep" : "deep sleep")}");
-        sb.AppendLine($"cycles since reset {cpu.Cycles:N0}");
+        sb.AppendLine($"cycles since reset {cpu.Cycles - _spin:N0}");
+        if (_spin > 0) sb.AppendLine($"  not counted: key wait {_spin:N0}");
         sb.AppendLine(_lastRun < 0 ? "last key: (none yet)"
             : $"last key: {_lastRun:N0} cycles, {_lastRun / RealWordsPerSecond * 1000:N0} ms real");
         sb.AppendLine();

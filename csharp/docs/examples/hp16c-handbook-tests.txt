@@ -1,14 +1,12 @@
 # HP-16C: the examples of the Owner's Handbook, one line, one test.
-# Start the HP-16C, then Run. Tests build on the line before them.
-# Keys are in brackets, as the handbook prints them (digits stay bare); the expected
-# display is in ticks. Help > How to write a test explains the notation.
-# Expected values: the handbook prints them (spacing follows the LCD). They were
-# read from the scanned pages by a model, no person has proofread them.
-# "# PDF page N" is the page of the handbook's PDF (printed page = N - 2).
+# Made by tools/make_handbook_plan.py from hp16c-oh-en-data.md. Expected values are the
+# handbook's, read from the scan by a model and not proofread by a person.
+# A row that fails is a lead: check the page image (# PDF page N above the
+# table), then the simulator. Start the calculator, then Run.
 # Lines starting with ## are not run: their check fails in the simulator, the
 # reason is below each. They are findings, the cause is not known yet.
 # calculator: 16c
-# 253 checks run, 46 lines are not run (0.4.0 adds the listings).
+# 447 checks run, 0 lines are not run.
 
 
 # PDF page 14
@@ -28,10 +26,8 @@ hold [f] [BIN]  =>  '004- 42 26'
 16 [WSIZE]
 0  =>  '0 d'
 ## [GSB] [A]
-#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
 # 22 d at the moment R/S is pressed (p. 15): a running loop has no fixed value, so no check
 ## [R/S]
-#     not run: the program runs forever, a test line waits 60 s for it (3 billion cycles) and there is no value to check
 # PDF page 20
 # Section 1
 reset
@@ -359,57 +355,51 @@ hold [STATUS]  =>  '2-32-0000'
 [WINDOW] 2  =>  '73 d.'
 # PDF page 86
 # Section 8
-reset
+# The book edits the program of lines 001-010 (label A, page 76): key it in again, the program of the
+# examples before it is in memory now. No reset.
 [P/R]
-## hold [GTO] [·] 004 [SST]  =>  '004-     0'
-#     not run: the simulator shows '000-'
-## [BSP] [BSP]  =>  '002-    23'
-#     not run: the simulator shows '000-'
-## 8  =>  '003-     8'
-#     not run: the simulator shows '001-     8'
+[PRGM]
+[LBL] [A]  =>  '001-43,22, A'
+[HEX]  =>  '002-    23'
+2  =>  '003-     2'
+0  =>  '004-     0'
+[WSIZE]  =>  '005- 42 44'
+[LSTx]  =>  '006- 43 36'
+[SR]  =>  '007-  42 b'
+[RLn]  =>  '008-  42 E'
+[OR]  =>  '009- 42 40'
+[RTN]  =>  '010- 43 21'
+[P/R]
+# PDF page 86
+[P/R]
+[GTO] [·] 004  =>  '004-     0'
+[BSP] [BSP]  =>  '002-    23'
+8  =>  '003-     8'
 # PDF page 86
 [P/R]
 [HEX]
 7 [ENTER]  =>  '7 h'
 6  =>  '6 h'
-## [GTO] [A]  =>  '6 h'
-#     not run: the simulator shows 'Error 4'
-## hold [SST]  =>  '001-43,22, A'
-#     not run: the simulator shows '6 h'
+[GTO] [A]  =>  '6 h'
+hold [SST]  =>  '001-43,22, A'
 =>  '6 h'
 # PDF page 87
-## hold [SST]  =>  '002-    23'
-#     not run: the simulator shows '001-     8'
-## =>  '6 h'
-#     not run: the simulator shows '8 h'
-## hold [SST]  =>  '003-     8'
-#     not run: the simulator shows '001-     8'
-## =>  '8 h'
-#     not run: the simulator shows '6 h'
-## hold [SST]  =>  '004- 42 44'
-#     not run: the simulator shows '001-     8'
-## =>  '6 h'
-#     not run: the simulator shows '8 h'
-## hold [SST]  =>  '005- 43 36'
-#     not run: the simulator shows '001-     8'
-## =>  '8 h'
-#     not run: the simulator shows '6 h'
-## hold [SST]  =>  '006-    42 b'
-#     not run: the simulator shows '001-     8'
-## =>  '4 h'
-#     not run: the simulator shows '8 h'
-## hold [SST]  =>  '007-  42 E'
-#     not run: the simulator shows '001-     8'
-## =>  '60 h'
-#     not run: the simulator shows '8 h'
-## hold [SST]  =>  '008- 42 40'
-#     not run: the simulator shows '001-     8'
-## =>  '67 h'
-#     not run: the simulator shows '8 h'
-## hold [SST]  =>  '009- 43 21'
-#     not run: the simulator shows '001-     8'
-## =>  '67 h'
-#     not run: the simulator shows '8 h'
+hold [SST]  =>  '002-    23'
+=>  '6 h'
+hold [SST]  =>  '003-     8'
+=>  '8 h'
+hold [SST]  =>  '004- 42 44'
+=>  '6 h'
+hold [SST]  =>  '005- 43 36'
+=>  '8 h'
+hold [SST]  =>  '006-  42 b'
+=>  '4 h'
+hold [SST]  =>  '007-  42 E'
+=>  '60 h'
+hold [SST]  =>  '008- 42 40'
+=>  '67 h'
+hold [SST]  =>  '009- 43 21'
+=>  '67 h'
 # PDF page 93
 # Section 9
 reset
@@ -426,68 +416,206 @@ reset
 0  =>  '008-     0'
 [ENTER]  =>  '009-    36'
 [LBL] 0  =>  '010-43,22, 0'
-## [RCL]  =>  '011- 45 31'
-#     not run: the simulator shows '010-43,22, 0'
+[RCL] [(i)]  =>  '011- 45 31'
 # PDF page 94
-#B  =>  012-  43 7
-## [+]  =>  '013-    40'
-#     not run: the simulator shows '011-    40'
-## [x≷y]  =>  '014-    34'
-#     not run: the simulator shows '012-    34'
-## 0  =>  '015-     0'
-#     not run: the simulator shows '013-     0'
-## [RLC]  =>  '016-  43 C'
-#     not run: the simulator shows '014-  43 C'
-## [+]  =>  '017-    40'
-#     not run: the simulator shows '015-    40'
-## [x≷y]  =>  '018-    34'
-#     not run: the simulator shows '016-    34'
-## [DSZ]  =>  '019- 43 23'
-#     not run: the simulator shows '017- 43 23'
-## [GTO] 0  =>  '020-  22 0'
-#     not run: the simulator shows '018-  22 0'
-## [RTN]  =>  '021- 43 21'
-#     not run: the simulator shows '019- 43 21'
+[#B]  =>  '012-  43 7'
+[+]  =>  '013-    40'
+[x≷y]  =>  '014-    34'
+0  =>  '015-     0'
+[RLC]  =>  '016-  43 C'
+[+]  =>  '017-    40'
+[x≷y]  =>  '018-    34'
+[DSZ]  =>  '019- 43 23'
+[GTO] 0  =>  '020-  22 0'
+[RTN]  =>  '021- 43 21'
 # PDF page 94
 [P/R]
+# STATUS 0-04-0000: the test data is stored at word size 4 (registers are laid out by word size), unsigned
 [HEX]
+4 [WSIZE]
+[UNSGN]
 [A] [STO] 1  =>  'A h'
+7 [STO] 2
+[B] [STO] 3
+1 [STO] 4
+3 [STO] 5
+[D] [STO] 6
+[A] [STO] 7
+2 [STO] 8
+[D] [STO] 9
 6 [STO] [A]  =>  '6 h'
 # PDF page 95
-## [GSB] [D]  =>  '6 h'
-#     not run: the simulator shows 'd h'
-## [x≷y]  =>  '1 h'
-#     not run: the simulator shows '6 h'
+[GSB] [D]  =>  '6 h'
+[x≷y]  =>  '1 h'
+# listing begin: page 118 table 1 (keycodes checked against the handbook, gaps as the simulator shows them)
+[P/R]
+[PRGM]
+[g] [LBL] B  =>  '001-43,22, b'
+[HEX]  =>  '002-    23'
+[f] [2's]  =>  '003-  42 2'
+2  =>  '004-     2'
+0  =>  '005-     0'
+[f] [WSIZE]  =>  '006- 42 44'
+[f] [SL]  =>  '007-  42 A'
+[ENTER]  =>  '008-    36'
+[ENTER]  =>  '009-    36'
+[g] [x=0]  =>  '010- 43 40'
+[GTO] 2  =>  '011-  22 2'
+1  =>  '012-     1'
+8  =>  '013-     8'
+[f] [MASKR]  =>  '014-  42 8'
+[f] [AND]  =>  '015- 42 20'
+[f] [XOR]  =>  '016- 42 10'
+[g] [LSTx]  =>  '017- 43 36'
+[x≷y]  =>  '018-    34'
+8  =>  '019-     8'
+[f] [MASKL]  =>  '020-  42 7'
+[g] [x=y]  =>  '021- 43 49'
+[GTO] 4  =>  '022-  22 4'
+[R↓]  =>  '023-    33'
+[g] [x=0]  =>  '024- 43 40'
+[GTO] 3  =>  '025-  22 3'
+[x≷y]  =>  '026-    34'
+1  =>  '027-     1'
+8  =>  '028-     8'
+[f] [SB]  =>  '029-  42 4'
+[g] [LBL] 1  =>  '030-43,22, 1'
+[g] [F?] 4  =>  '031-43, 6, 4'
+[CHS]  =>  '032-    49'
+[x≷y]  =>  '033-    34'
+8  =>  '034-     8'
+[f] [RLn]  =>  '035-  42 E'
+9  =>  '036-     9'
+7  =>  '037-     7'
+[−]  =>  '038-    30'
+[g] [CF] 4  =>  '039-43, 5, 4'
+[g] [LBL] 2  =>  '040-43,22, 2'
+[f] [FLOAT] .  =>  '041-42,45,48'
+[g] [RTN]  =>  '042- 43 21'
+[g] [LBL] 3  =>  '043-43,22, 3'
+1  =>  '044-     1'
+8  =>  '045-     8'
+[f] [SB]  =>  '046-  42 4'
+[x≷y]  =>  '047-    34'
+[GTO] 1  =>  '048-  22 1'
+[g] [LBL] 4  =>  '049-43,22, 4'
+[R↓]  =>  '050-    33'
+[g] [CLx]  =>  '051- 43 35'
+[g] [x≠y]  =>  '052-  43 0'
+[GTO] 5  =>  '053-  22 5'
+1  =>  '054-     1'
+4  =>  '055-     4'
+5  =>  '056-     5'
+[ENTER]  =>  '057-    36'
+[g] [LBL] 5  =>  '058-43,22, 5'
+[x≷y]  =>  '059-    34'
+[g] [F?] 4  =>  '060-43, 6, 4'
+[CHS]  =>  '061-    49'
+[g] [ASR]  =>  '062-  43 b'
+[x≷y]  =>  '063-    34'
+[g] [SF] 4  =>  '064-43, 4, 4'
+[GTO] 2  =>  '065-  22 2'
+[P/R]
+# listing end: page 118 table 1
 # PDF page 119
-# Appendix D
-reset
+# Appendix D: the conversion program of page 118 (label B) is in memory; no reset
+# STATUS 2-32-0000. The word size is 4 here, where 32 cannot be keyed in (it would stop at 3): 0 [WSIZE] is 64 bits first
+0 [WSIZE]
 [DEC] 32 [WSIZE] [2's]
 [HEX] 80000000  =>  '80000000 h'
-## [GSB] [B]  =>  '0.000000 00'
-#     not run: the simulator shows 'Error 4'
+[GSB] [B]  =>  '0.000000 00'
 [HEX] 7F800000
-## [GSB] [B]  =>  '9.999999 99'
-#     not run: the simulator shows 'Error 4'
+[GSB] [B]  =>  '9.999999 99'
 [HEX] 00800000
-## [GSB] [B]  =>  '1.175494-38'
-#     not run: the simulator shows 'Error 4'
+[GSB] [B]  =>  '1.175494-38'
 [HEX] 3F800001
-## [GSB] [B]  =>  '1.000000 00'
-#     not run: the simulator shows 'Error 4'
-## hold [PREFIX]  =>  '1000000119'
-#     not run: the simulator shows '0 h'
+[GSB] [B]  =>  '1.000000 00'
+hold [PREFIX]  =>  '1000000119'
+# listing begin: page 120 table 2 (keycodes checked against the handbook, gaps as the simulator shows them)
+[P/R]
+[PRGM]
+[g] [LBL] A  =>  '001-43,22, A'
+[f] [2's]  =>  '002-  42 2'
+[HEX]  =>  '003-    23'
+[g] [CF] 4  =>  '004-43, 5, 4'
+[g] [CF] 5  =>  '005-43, 5, 5'
+[g] [x=y]  =>  '006- 43 49'
+[g] [RTN]  =>  '007- 43 21'
+9  =>  '008-     9'
+D  =>  '009-     d'
+[+]  =>  '010-    40'
+[x≷y]  =>  '011-    34'
+[g] [CF] 0  =>  '012-43, 5, 0'
+[g] [x<0]  =>  '013-  43 2'
+[g] [SF] 0  =>  '014-43, 4, 0'
+[g] [ABS]  =>  '015-  43 8'
+[x≷y]  =>  '016-    34'
+[g] [x<0]  =>  '017-  43 2'
+[GTO] 9  =>  '018-  22 9'
+1  =>  '019-     1'
+[+]  =>  '020-    40'
+[g] [LBL] 6  =>  '021-43,22, 6'
+[STO] I  =>  '022- 44 32'
+[R↓]  =>  '023-    33'
+2  =>  '024-     2'
+0  =>  '025-     0'
+[f] [WSIZE]  =>  '026- 42 44'
+8  =>  '027-     8'
+0  =>  '028-     0'
+[+]  =>  '029-    40'
+1  =>  '030-     1'
+8  =>  '031-     8'
+[f] [MASKL]  =>  '032-  42 7'
+[f] [AND]  =>  '033- 42 20'
+[g] [F?] 4  =>  '034-43, 6, 4'
+[g] [ISZ]  =>  '035- 43 24'
+[f] [SL]  =>  '036-  42 A'
+[RCL] I  =>  '037- 45 32'
+F  =>  '038-     F'
+F  =>  '039-     F'
+[g] [x>y]  =>  '040-  43 3'
+[GTO] 7  =>  '041-  22 7'
+[x≷y]  =>  '042-    34'
+[R↓]  =>  '043-    33'
+[R↓]  =>  '044-    33'
+[g] [CLx]  =>  '045- 43 35'
+[g] [R↑]  =>  '046- 43 33'
+[g] [R↑]  =>  '047- 43 33'
+[g] [SF] 5  =>  '048-43, 4, 5'
+[g] [LBL] 7  =>  '049-43,22, 7'
+[R↓]  =>  '050-    33'
+[f] [OR]  =>  '051- 42 40'
+[g] [F?] 0  =>  '052-43, 6, 0'
+[GSB] 8  =>  '053-  21 8'
+9  =>  '054-     9'
+[f] [RRn]  =>  '055-  42 F'
+[g] [CF] 4  =>  '056-43, 5, 4'
+[g] [RTN]  =>  '057- 43 21'
+[g] [LBL] 8  =>  '058-43,22, 8'
+8  =>  '059-     8'
+[f] [SB]  =>  '060-  42 4'
+[g] [RTN]  =>  '061- 43 21'
+[g] [LBL] 9  =>  '062-43,22, 9'
+[g] [ABS]  =>  '063-  43 8'
+3  =>  '064-     3'
+0  =>  '065-     0'
+[g] [x≤y]  =>  '066-  43 1'
+[x≷y]  =>  '067-    34'
+[R↓]  =>  '068-    33'
+0  =>  '069-     0'
+[x≷y]  =>  '070-    34'
+[f] [SB]  =>  '071-  42 4'
+[÷]  =>  '072-    10'
+0  =>  '073-     0'
+[GTO] 6  =>  '074-  22 6'
+[P/R]
+# listing end: page 120 table 2
 # PDF page 121
 [FLOAT] [·] 8 [EEX] 72  =>  '8       72'
-## [GSB] [A]  =>  '7F800000 h'
-#     not run: the simulator shows 'Error 4'
+[GSB] [A]  =>  '7F800000 h'
 [FLOAT] [·]
-## 1 . 4 0 4 [EEX]  =>  '1.404    00'
-#     not run: the simulator shows '0.404    00'
-## 45 [CHS]  =>  '1.404   -45'
-#     not run: the simulator shows '0.404   -45'
-## [GSB] [A]  =>  '1 h'
-#     not run: the simulator shows 'Error 4'
-## [FLOAT] [·] 3 . 1 4 1 5 9 2 6 5 4  =>  '3.141592654'
-#     not run: the simulator shows '0.141592654'
-## [GSB] [A]  =>  '40490Fdb h'
-#     not run: the simulator shows 'Error 4'
+1 . 4 0 4 [EEX]  =>  '1.404    00'
+45 [CHS]  =>  '1.404   -45'
+[GSB] [A]  =>  '1 h'
+[FLOAT] [·] 3 . 1 4 1 5 9 2 6 5 4  =>  '3.141592654'
+[GSB] [A]  =>  '40490Fdb h'

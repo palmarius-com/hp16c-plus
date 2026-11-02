@@ -205,6 +205,13 @@ user guide), so you and your testers do not have to apply the patch by
 hand every time. The HP-16C+ works the same way: start the 16C, apply
 the patch, save it, and it is your first own calculator.
 
+### Watching your code run
+
+When a patch does not do what you expect, look at what the processor really does. Start the simulator with
+`--debug-port 4711`, attach VS Code, set a breakpoint on the first instruction of your code and step through it;
+registers and the RAM are on the screen. `--trace N` writes the executed instructions as CSV: address, words,
+mnemonic, with the registers if you ask. Both are described in [DEBUGGER.md](DEBUGGER.md).
+
 ## 9. Sharing
 
 Publish the patch file and your source, never an exported full ROM

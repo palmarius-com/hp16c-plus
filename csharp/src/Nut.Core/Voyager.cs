@@ -251,6 +251,18 @@ public class Voyager
         return Cpu.Run(maxCycles);
     }
 
+    /// <summary>
+    /// Batteries out and in: every memory register is lost (a real calculator comes back with garbage and the ROM
+    /// clears it), the CPU starts cold and the ROM shows Pr Error. Unlike <see cref="PowerOn"/>, which only starts
+    /// the CPU over and leaves the memory as it is.
+    /// </summary>
+    public long BatteriesOutAndIn(long maxCycles = 2_000_000)
+    {
+        for (int i = 0; i < NutCpu.MaxRam; i++)
+            if (Cpu.RamExists[i] && !Cpu.RamReadFn.ContainsKey(i)) Array.Clear(Cpu.Ram[i]);
+        return PowerOn(maxCycles);
+    }
+
     /// <summary>Press a key (HP row/column code, 41 = ON), run, release, run.</summary>
     public bool Key(int userKeycode, long holdCycles = 200_000, long maxCycles = 5_000_000)
     {

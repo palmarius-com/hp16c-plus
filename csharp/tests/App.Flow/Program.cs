@@ -216,7 +216,7 @@ if (windowExe is not null)
         {
             bool held = st.Keys.EndsWith(" (hold)");
             var keyText = st.Keys.Replace(" (hold)", "").Replace("f·", "").Replace("g·", "");
-            if (keyText == "ON + *") keyText = "chord *";
+            if (keyText == "ON + *") keyText = "chord { [ON] [*] }";
             else if (held) keyText = "hold " + keyText;
             var lit = st.Flags.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var flagText = string.Join(" ", new[] { "C", "G" }.Select(f => lit.Contains(f) ? f : "-" + f));

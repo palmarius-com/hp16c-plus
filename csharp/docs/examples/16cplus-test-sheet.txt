@@ -105,4 +105,4 @@ reset
 8 0 WSIZE 4 0 WSIZE  =>  0 h  [-C -G]
 hold STATUS  =>  2-64-0000  [-C -G]
 ON  =>  (blank)  [-C -G]
-chord *  =>  -8,8,8,8,8,8,8,8,8,8,  [C G]
+chord { [ON] [*] }  =>  -8,8,8,8,8,8,8,8,8,8,  [C G]

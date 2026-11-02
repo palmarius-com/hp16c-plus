@@ -85,7 +85,8 @@ handbook (or the calculator's manual) says, not what the simulator shows.
 | `KEYS => 'TEXT'  [C -G]` | also annunciators: C must be lit, G must not be |
 | `KEYS => (blank)` | the display must be off |
 | `hold KEYS => 'TEXT'` | keep the last key down while checking (for STATUS) |
-| `chord [K] => 'TEXT'` | hold ON, press K, release; the calculator must be off |
+| `chord { [ON] [K] } => 'TEXT'` | the keys go down in the order written, each for a moment, then all come up; the calculator must be off before (a line `[ON] => (blank)` above does that). A key marked `hold` stays down for the check: `chord { [ON] hold [-] }` |
+| `[ON] wait 0.5 chord { [ON] [-] } [CLx] => 'TEXT'` | a line is a list of actions, left to right, with one check at the end: keys, `wait SECONDS`, `chord { ... }` |
 | `KEYS wait 0.5 => 'TEXT'` | press the keys, check 0.5 s of calculator time later, without waiting for the calculator to go idle |
 | `hold KEYS wait 1 => 'TEXT'` | keep the last key down for 1 s of calculator time, then check |
 | `wait 2 => 'TEXT'` | only wait 2 s of calculator time, then check |
@@ -124,7 +125,7 @@ The self-test:
 
 ```
 [ON]  =>  (blank)
-chord [*]  =>  '-8,8,8,8,8,8,8,8,8,8,'  [C G]
+chord { [ON] [*] }  =>  '-8,8,8,8,8,8,8,8,8,8,'  [C G]
 ```
 
 ## Waiting
@@ -152,21 +153,25 @@ download and in `docs/examples` of the source. Load them with Open...: the
 dialog starts in that folder, and later in the folder of the last file you opened.
 
 - `hp10c-handbook-tests.txt`: 536 tests from the examples of the HP-10C Owner's
-  Handbook, about a minute on the HP-10C. The expected values are the
+  Handbook, about a minute on the HP-10C, all pass. The expected values are the
   handbook's. A row marked "ROM only" shows what the original ROM displays
-  in the simulator, where the handbook prints no value. One row fails and is
-  meant to: `[GTO] 8 5 => 'Error 4'`. The handbook names Error 4 for line
-  numbers above 79, the ROM shows none in that state. It is not yet known
-  if that is the simulator or the test.
+  in the simulator, where the handbook prints no value. The row about line
+  numbers above 79 is `[GTO] 8 => 'Error 4'`: the handbook names Error 4 for
+  them, and the calculator shows it right after the 8, because a number from
+  80 up cannot be a line; the next key only clears it.
 - `hp11c-handbook-tests.txt`, `hp12c-handbook-tests.txt`,
   `hp15c-handbook-tests.txt`, `hp16c-handbook-tests.txt`: the examples of the
-  Owner's Handbook of each calculator (407, 654, 547 and 253 checks). The
+  Owner's Handbook of each calculator (1556, 1275, 688 and 447 checks; the 15C file has 247 lines switched
+  off: the matrix examples of pages 141 to 154 and what depends on them). The
   expected values are the handbook's, read from the scanned pages by a model;
   no person has proofread them. Each file runs on its own calculator. Lines
   starting with `##` are switched off: their check fails in the simulator,
   and the reason is below each. They are findings, the cause is not known
-  yet. The examples that run a program from the handbook's listings are only
-  partly in: the listings are not keyed in yet.
+  yet. The handbook's program listings are keyed in as blocks between
+  `# listing begin` and `# listing end` lines: each row's keycodes are checked
+  against the handbook, the spacing in the quotes is the simulator's. The
+  examples that follow a listing and still fail are in the same state as the
+  other switched-off lines.
 - `16c-chs-stack-lift-test-sheet.txt`: four lines for the HP-16C and the CHS
   stack-lift fix (`16c-chs-stack-lift.patch`, see PATCHING.md). On the
   original ROM the two lines marked BUG fail; apply the patch (ROM > Apply a

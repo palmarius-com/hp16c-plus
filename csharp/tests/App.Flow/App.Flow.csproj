@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Nut.Core\Nut.Core.csproj" />
+    <ProjectReference Include="..\..\src\Nut.Dap\Nut.Dap.csproj" />
   </ItemGroup>
 
   <ItemGroup>

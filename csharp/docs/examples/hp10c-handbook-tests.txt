@@ -82,7 +82,7 @@ reset
 6 [STO] 3 [SCI] 2 [RAD]
 # Handbook: hold -, press ON. A test line plays ON, then -.
 [ON]  =>  (blank)
-chord [-]  =>  'Pr Error'
+chord { [ON] [-] }  =>  'Pr Error'
 [CLx]  =>  '0.0000'
 [RCL] 3  =>  '0.0000'
 1 0 0 0 [ENTER] 3 [/]  =>  '333.3333'
@@ -93,15 +93,15 @@ chord [-]  =>  'Pr Error'
 1 2 3 4 5 6 7 8 . 9 1 [ENTER]  =>  '12,345,678.91'
 # Handbook: hold ., press ON. A test line plays ON, then ..
 [ON]  =>  (blank)
-chord .  =>  '12.345.678,91'
+chord { [ON] [.] }  =>  '12.345.678,91'
 # Handbook: hold ., press ON. A test line plays ON, then ..
 [ON]  =>  (blank)
-chord .  =>  '12,345,678.91'
+chord { [ON] [.] }  =>  '12,345,678.91'
 
 # Self-test ON/x and ON/+ (page 108)
 [CLx]  =>  '0.0000'
 [ON]  =>  (blank)
-chord [*]  =>  '-8,8,8,8,8,8,8,8,8,8,'
+chord { [ON] [*] }  =>  '-8,8,8,8,8,8,8,8,8,8,'
 [CLx]  =>  '0.0000'
 reset
 [CLx]  =>  '0.0000'
@@ -467,11 +467,11 @@ reset
 hold [MEM]  =>  'P-79  r-00'
 1  =>  'Error 4'
 [CLx]
-# OPEN: handbook p. 103 gives Error 4 for line numbers above 79.
-# The original ROM in the simulator ignores GTO 80 to 99 (nothing stored,
-# display unchanged, in Run and Program mode, with or without the point)
-# and gives Error 4 for unoccupied lines 10 to 79. This row fails.
-[GTO] 8 5  =>  'Error 4'
+# Handbook p. 103: Error 4 for line numbers above 79. The ROM shows it right after the 8 (a number from 80
+# up cannot be a line); the next key, here the 5, only clears the error, so GTO 8 5 looks as if nothing happened.
+# Amphitryon described this (forum thread 25610, #9) and the ROM in the simulator agrees. The first version of this
+# row expected the error after the 5, which is not where the calculator shows it.
+[GTO] 8  =>  'Error 4'
 [CLx]
 [PRGM] [P/R]
 [RCL] 9  =>  '0.0000'

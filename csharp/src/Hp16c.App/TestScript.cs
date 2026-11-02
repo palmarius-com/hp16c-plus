@@ -52,6 +52,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
     const int On = 41, FirstKey = 35;
     const long ChordHold = 20000;
     bool _held, _unsettled;
+    bool? _speedBefore;     // RealSpeed as the run found it; put back when the run ends
 
     void Settle(CancellationToken stop)
     {
@@ -82,6 +83,18 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
 
     public IEnumerable<Result> Run(IEnumerable<string> lines, CancellationToken stop)
     {
+        try
+        {
+            foreach (var r in RunLines(lines, stop)) yield return r;
+        }
+        finally
+        {
+            if (_speedBefore is { } before) run.RealSpeed = before;
+        }
+    }
+
+    IEnumerable<Result> RunLines(IEnumerable<string> lines, CancellationToken stop)
+    {
         int no = 0;
         foreach (var raw in lines)
         {
@@ -100,27 +113,25 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         Release(stop);
     }
 
-    /// <summary>Carry out the left side of a line; returns a problem or null.</summary>
+    /// <summary>
+    /// Carry out the left side of a line, left to right; returns a problem or null. Actions: key names; `wait SECONDS`
+    /// (calculator time, counted in words at the real Voyager speed, the CPU still runs flat out: keys before it are
+    /// pressed and the check comes after the wait instead of after the calculator went idle); `chord { K K }`
+    /// (the keys go down in the order written, each for a while; a key marked `hold` stays down, the others are
+    /// released; the CPU has one key buffer, so the last key written is the one the ROM sees); and, as the first
+    /// word, `hold`, which keeps the last key of the line down for the check. `speed real|full` and `reset` are
+    /// lines of their own.
+    /// </summary>
     string? Act(string left, CancellationToken stop)
     {
-        // Trailing `wait SECONDS`: calculator time, counted in words at the real Voyager speed
-        // (the CPU still runs flat out). Keys are pressed, then the check comes after the wait
-        // instead of after the calculator went idle.
-        long wait = 0;
         var words = left.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length >= 2 && words[^2].Equals("wait", StringComparison.OrdinalIgnoreCase))
+        if (words.Length == 2 && words[0].Equals("speed", StringComparison.OrdinalIgnoreCase) && words[1] is "real" or "full")
         {
-            if (!double.TryParse(words[^1], System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture, out var secs) || secs < 0)
-                return $"bad wait time '{words[^1]}'";
-            wait = (long)(secs * MachineRunner.RealWordsPerSecond);
-            left = string.Join(' ', words[..^2]);
-            if (left.Length == 0) { run.WaitCycles(wait, stop); _unsettled = true; return null; }
+            _speedBefore ??= run.RealSpeed;
+            run.RealSpeed = words[1] == "real";
+            return null;
         }
-        var parts = left.Split((char[]?)null, 2, StringSplitOptions.RemoveEmptyEntries);
-        var first = parts[0].ToLowerInvariant();
-        var rest = parts.Length > 1 ? parts[1] : "";
-        if (first == "reset" && rest.Length == 0)
+        if (words.Length == 1 && words[0].Equals("reset", StringComparison.OrdinalIgnoreCase))
         {
             if (run.Read(v => v.DisplayEnable)) Tap(On, stop);
             run.Chord(On, names.Resolve("-")![0], ChordHold, stop);
@@ -128,36 +139,80 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
             Tap(FirstKey, stop);
             return null;
         }
-        if (first == "chord")
-        {
-            if (names.Resolve(rest) is not { } chord) return $"unknown key '{rest}'";
-            run.Chord(On, chord[^1], ChordHold, stop);
-            run.WaitCycles(3_000_000, stop);
-            return null;
-        }
-        bool hold = first == "hold";
+        bool holdLine = words[0].Equals("hold", StringComparison.OrdinalIgnoreCase);
         var codes = new List<int>();
-        foreach (var word in (hold ? rest : left).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+        for (int i = holdLine ? 1 : 0; i < words.Length; i++)
         {
-            if (names.Resolve(word) is not { } c) return $"unknown key '{word}'";
-            codes.AddRange(c);
+            if (_held) return "a held key must be the last thing on the line";
+            var word = words[i];
+            if (word.Equals("wait", StringComparison.OrdinalIgnoreCase))
+            {
+                if (i + 1 >= words.Length || !double.TryParse(words[i + 1], System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out var secs) || secs < 0)
+                    return $"bad wait time '{(i + 1 < words.Length ? words[i + 1] : "")}'";
+                if (codes.Count > 0)
+                {
+                    // the keys before the wait: the last one is not settled, the wait comes right after it
+                    foreach (var c in codes[..^1]) Tap(c, stop);
+                    if (holdLine) { run.Press(codes[^1]); _held = true; }
+                    else run.Tap(codes[^1]);
+                    codes.Clear();
+                }
+                run.WaitCycles((long)(secs * MachineRunner.RealWordsPerSecond), stop);
+                _unsettled = true;
+                i++;
+                continue;
+            }
+            if (word.Equals("chord", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var c in codes) Tap(c, stop);
+                codes.Clear();
+                if (i + 1 >= words.Length || words[i + 1] != "{") return "chord needs braces: chord { [ON] [-] }";
+                int close = Array.IndexOf(words, "}", i + 2);
+                if (close < 0) return "chord: the closing } is missing";
+                var down = new List<(int Code, bool Hold)>();
+                for (int k = i + 2; k < close; k++)
+                {
+                    bool h = words[k].Equals("hold", StringComparison.OrdinalIgnoreCase);
+                    if (h) k++;
+                    if (k >= close) return "chord: hold needs a key after it";
+                    if (names.Resolve(words[k]) is not { Count: 1 } one) return $"chord: '{words[k]}' is not a single key";
+                    down.Add((one[0], h));
+                }
+                if (down.Count == 0) return "chord: no keys";
+                foreach (var (code, _) in down)
+                {
+                    run.Press(code);
+                    run.WaitCycles(ChordHold, stop);
+                }
+                if (down.Any(d => d.Hold))
+                {
+                    _held = true;
+                    run.WaitCycles(30000, stop);
+                }
+                else
+                {
+                    run.Release();
+                    run.WaitCycles(3_000_000, stop);
+                }
+                i = close;
+                continue;
+            }
+            if (names.Resolve(word) is not { } more) return $"unknown key '{word}'";
+            codes.AddRange(more);
         }
-        if (codes.Count == 0) return "no keys";
-        bool timed = wait > 0;
-        foreach (var c in hold || timed ? codes[..^1] : codes) Tap(c, stop);
-        if (hold)
+        if (codes.Count > 0)
         {
-            run.Press(codes[^1]);
-            run.WaitCycles(timed ? wait : 30000, stop);
-            _held = true;
-            _unsettled = timed;
+            if (holdLine)
+            {
+                foreach (var c in codes[..^1]) Tap(c, stop);
+                run.Press(codes[^1]);
+                run.WaitCycles(30000, stop);
+                _held = true;
+            }
+            else foreach (var c in codes) Tap(c, stop);
         }
-        else if (timed)
-        {
-            run.Tap(codes[^1]);
-            run.WaitCycles(wait, stop);
-            _unsettled = true;
-        }
+        else if (holdLine && words.Length == 1) return "no keys";
         return null;
     }
 

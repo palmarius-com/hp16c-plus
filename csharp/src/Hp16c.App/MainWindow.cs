@@ -22,6 +22,7 @@ sealed partial class MainWindow : Window
     };
     readonly Border _statusPanel;
     DapServer? _debugServer;                       // only with --debug-port
+    KeyRecorder? _record;                          // only with --record FILE
     TraceLog? _trace;                              // only with --trace / --trace-file
     readonly ContentControl _main = new();
     readonly TextBlock _message = new() { Margin = new Thickness(10, 4), TextWrapping = TextWrapping.Wrap };
@@ -102,7 +103,7 @@ sealed partial class MainWindow : Window
             calcMenu.Add(Item(m.Name, async () => { if (await ConfirmLeave()) StartOriginal(m); }));
         _myInsertAt = calcMenu.Count;
         foreach (var tail in new object[] { new Separator(), Item("Save as my calculator...", async () => await SaveMyCalc()),
-                                             new Separator(), Item("Batteries out and in (reset)", () => _runner?.PowerOn()),
+                                             new Separator(), Item("Battery replacement (memory lost, Pr Error)", () => _runner?.PowerOn()),
                                              Item("Reset the cycle counter", () => _runner?.ResetCycles()), _realSpeed })
             calcMenu.Add(tail);
         RefreshMyMenu();
@@ -152,6 +153,7 @@ sealed partial class MainWindow : Window
                         Item("How to write a patch", () => ShowDoc("How to write a patch", "PATCHING.md")),
                         Item("Test window...", ShowTests),
                         Item("How to write a test", () => ShowDoc("How to write a test", "TESTS.md")),
+                        Item("Debugging the ROM from VS Code", () => ShowDoc("Debugging the ROM from VS Code", "DEBUGGER.md")),
                         Item("Keyboard shortcuts", () => ShowText("Keyboard shortcuts", Shortcuts)),
                         Item("About", () => ShowText("About", About)),
                     },
@@ -171,7 +173,7 @@ sealed partial class MainWindow : Window
         AddHandler(KeyDownEvent, OnKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         AddHandler(TextInputEvent, OnTextInput, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         KeyUp += (_, _) => _calc.ReleaseFromKeyboard();
-        Closed += (_, _) => { _runner?.Dispose(); _trace?.Close(); };
+        Closed += (_, _) => { _runner?.Dispose(); _trace?.Close(); _record?.Dispose(); };
         Closing += (_, e) =>
         {
             if (_closeNow || (_session?.Changes().Count ?? 0) == 0) return;
@@ -186,6 +188,7 @@ sealed partial class MainWindow : Window
         DispatcherTimer.Run(() => { Tick(); return true; }, TimeSpan.FromMilliseconds(40));
         ShowStart();
         var args = Environment.GetCommandLineArgs();
+        _record = RecordFromCommandLine(args);
         _trace = TraceFromCommandLine(args);           // before --model: the first calculator is traced from its power-on
         int i = Array.IndexOf(args, "--model");
         if (i > 0 && i + 1 < args.Length && !StartByName(args[i + 1]))
@@ -279,6 +282,24 @@ sealed partial class MainWindow : Window
         var m = new MenuItem { Header = header };
         m.Click += async (_, _) => await action();
         return m;
+    }
+
+    /// <summary>--record FILE: every key press with the display after it, as test lines (docs/TESTS.md).</summary>
+    KeyRecorder? RecordFromCommandLine(string[] args)
+    {
+        int i = Array.IndexOf(args, "--record");
+        if (i <= 0 || i + 1 >= args.Length) return null;
+        try
+        {
+            var rec = new KeyRecorder(args[i + 1]);
+            Say($"Recording key presses and displays to {args[i + 1]}.");
+            return rec;
+        }
+        catch (Exception e)
+        {
+            Say($"--record {args[i + 1]}: {e.Message}");
+            return null;
+        }
     }
 
     /// <summary>--trace N (keep the last N instructions), --trace-file FILE, --trace-max N, --trace-regs: docs/DEBUGGER.md.</summary>
@@ -612,6 +633,7 @@ sealed partial class MainWindow : Window
         _runner.View = (PanelView)Math.Max(0, _view.SelectedIndex);
         _calc.Runner = _runner;
         ApplySkin();
+        _record?.Attach(_runner, _calc.Skin, title);
         _main.Content = _calc;
         _statusPanel.IsVisible = _showStatus.IsChecked;
         _calc.Focus();
