@@ -23,8 +23,10 @@ and rotates, bit functions, registers and I, indirect addressing,
 conditionals, DSZ/ISZ, SQRT, FLOAT, MEM, and the self-test. At word
 sizes up to 64 the original code runs unchanged.
 
-Tested in the emulator in this repository so far, not yet on other
-emulators or on a real HP-15C Collector's Edition.
+Tested in the Python emulator and the C# simulator in this repository.
+Amphitryon (MoHPC forum) ran the 76 sequences of the test sheet on his NutEm/PC (a
+second, independent interpreter of the firmware); every display
+matched. Not yet tested on a real HP-15C Collector's Edition.
 
 ## How it works
 
@@ -85,13 +87,19 @@ print(c.run("WINDOW 2"))    # ' FFFFFFFd .h', then '        2 h.'
 
 ## Desktop simulator (C#, Avalonia)
 
-The Palmarius Voyager simulator. The faceplates carry the Palmarius
-mark (three bars and the blue square) where the maker's logo would be.
+The Palmarius Voyager simulator, version 0.4.0. The faceplates carry the
+Palmarius mark (three bars and the blue square) where the maker's logo
+would be.
 
 `csharp/` holds a C# port of the emulator (`Nut.Core`, checked against
-the same stored test cases) and a desktop app for Windows, macOS and
-Linux (.NET 10). It runs the **HP-10C, 11C, 12C, 15C and 16C** and the
-16C+, with a faceplate for each model.
+the same stored test cases) and a desktop app (.NET 10). It runs the
+**HP-10C, 11C, 12C, 15C and 16C** and the 16C+, with a faceplate for each
+model, and your own calculators (a ROM plus patches, saved under a name).
+
+A ready-to-run Windows build (needs the .NET 10 Runtime) is on the
+[releases page](https://github.com/palmarius-com/hp16c-plus/releases/latest):
+`VoyagerSim.exe` and an `examples` folder. The source builds on macOS and
+Linux too, but only Windows is released and tested.
 
 ```sh
 dotnet run --project csharp/src/Hp16c.App                 # the simulator
@@ -100,8 +108,6 @@ dotnet run --project csharp/tests/Nut.Replay -c Release   # 1559 cases, about 1 
 dotnet run --project csharp/tests/App.Flow -c Release -- --sheet FILE --patch FILE
 ```
 
-A ready-to-run Windows build (needs the .NET 10 Runtime) is on the
-[releases page](https://github.com/palmarius-com/hp16c-plus/releases/latest).
 `App.Flow` runs the app's ROM store, session and key queue without the
 window: download, a test sheet of key sequences, patch, sheet again.
 
@@ -109,6 +115,9 @@ window: download, a test sheet of key sequences, patch, sheet again.
   click from Eric Smith's Nonpareil repository, or from a file you
   have. The app checks that it is an original ROM (by fingerprint) and
   keeps a copy in the `data/roms` folder next to the exe.
+- **Real speed:** the Nut CPU at its own pace (215 kHz, 56 clocks per
+  word, about 3,800 instruction words a second) or unleashed. Pauses
+  (PSE) and long calculations take the real time at Real speed.
 - **Patches:** ROM > Apply a patch puts your words on top of the
   original ROM; ROM > Export full ROM writes the patched ROM (Nonpareil
   `.rom` or NutEm/PC `.MClst`), ROM > Load full ROM runs one. Code
@@ -118,22 +127,37 @@ window: download, a test sheet of key sequences, patch, sheet again.
   hand-made one), or your own as a JSON file (Skin > Save current skin
   as a template, edit, Skin > Load skin file).
 - **Status panel:** Nut CPU registers, flags, return stack, the 16C
-  stack and the last program counters.
-- **Debugger and trace** (work in progress for the next version, not in a
-  release yet; tested on Windows with VS Code only): started with
-  `--debug-port N`, VS Code attaches to the running simulator over the
-  Debug Adapter Protocol: pause, breakpoints on ROM addresses, step
-  into / over / out, registers, RAM in the Hex Editor.
-  `--trace N` keeps the last N executed instructions, `--trace-file`
-  writes them as CSV. See [csharp/docs/DEBUGGER.md](csharp/docs/DEBUGGER.md).
+  stack, the last program counters and the cycle count (instruction
+  cycles since reset; the key wait loop is left out and counted
+  separately).
+- **Resets:** Calculator > Battery replacement clears the memory and
+  starts the ROM cold (Pr Error); the chord ON + - is the calculator's
+  own reset.
+- **Debugger:** started with `--debug-port N`; VS Code attaches to the
+  running simulator over the Debug Adapter Protocol (a small extension in
+  `csharp/tools/vscode-nut`): pause, breakpoints on ROM addresses, step
+  into / over / out, registers, RAM in the Hex Editor and a Debug Console
+  (`keys`, `display`, `trace`). Tested on Windows with VS Code only. See
+  [csharp/docs/DEBUGGER.md](csharp/docs/DEBUGGER.md).
+- **Trace and key log:** `--trace N` keeps the last N executed
+  instructions, `--trace-file` writes them as CSV (cycle, address, words,
+  mnemonic, loop count, optionally the registers). `--record FILE` writes
+  every key you press with the display after it, as test lines.
+- **Tests:** the Test window runs test files (key sequences with the
+  expected display, plus `wait`, `speed`, `reset`, `chord { ... }`).
+  `csharp/docs/examples/` has the examples of the Owner's Handbook of the
+  10C, 11C, 12C, 15C and 16C as test files, with the handbook programs
+  keyed in from the listings. They run clean on their own calculator
+  (10C 536, 11C 1556, 12C 1275, 15C 770 and 16C 447 checks); the 15C file
+  has 165 lines switched off (`##`, the reason below each).
 - **Guides** (also under Help in the app):
   [user guide](csharp/docs/USER-GUIDE.md),
   [how to write a patch](csharp/docs/PATCHING.md),
-  [how to write a test](csharp/docs/TESTS.md): the simulator's Test window
-  runs test files; `csharp/docs/examples/` has the examples of the Owner's
-  Handbook of the 10C, 11C, 12C, 15C and 16C as test files.
-  `tools/make_patch.py` assembles a Nut source file into a patch and
-  can fix the chip checksums.
+  [how to write a test](csharp/docs/TESTS.md),
+  [debugger](csharp/docs/DEBUGGER.md),
+  [automation interface](csharp/docs/API.md).
+  `tools/make_patch.py` assembles a Nut source file into a patch and can
+  fix the chip checksums.
 - The 16C+ needs its patch: `python tools/build_plus.py` writes
   `build/16cplus.obj`. Start the 16C, ROM > Apply a patch, then Calculator >
   Save as my calculator: it is your first own calculator, with its own
@@ -203,12 +227,14 @@ this reason.
   (GPLv3): the emulator's instruction set and display behaviour follow
   its source (`proc_nut.c`, `digit_ops.c`, `voyager_lcd.c`), and the
   chip map, keyboard and LCD layout are read from its `.ncd` files.
-- J-F Garnier for the challenge.
+- J-F Garnier for the challenge, and for what he knows about the real
+  Voyagers (the ON + y^x gesture, the timing).
 - Amphitryon (MoHPC forum), author of the NutEm/PC firmware
   interpreter: he pointed us to the challenge, added a "16C+" model to
   NutEm/PC so the patch can be checked on a second, independent
   interpreter, and pointed to the words 0x13FD-0x13FF in the 16C ROM
-  (0x13FF is now the 16C+ checksum word in that chip).
+  (0x13FF is now the 16C+ checksum word in that chip). He has also
+  tested the simulator since 0.3.0 and found many of the fixes in it.
 - Written with AI help (Claude, Anthropic).
 
 HP-16C and HP-15C are products of HP; their firmware is not part of
