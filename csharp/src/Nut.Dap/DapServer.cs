@@ -591,7 +591,7 @@ public sealed class DapServer(int port)
                 break;
             default:
                 result = "commands: keys NAME... (tap keys as the window does, e.g. keys 2 ENTER 3 +; names are the " +
-                         "printed legends), display, reset, trace [N] (the last N instructions, needs --trace), " +
+                         "printed legends, and + - * / . for the arithmetic keys), display, reset, trace [N] (the last N instructions, needs --trace), " +
                          "trace save FILE. The calculator window works as usual.";
                 break;
         }
@@ -604,13 +604,26 @@ public sealed class DapServer(int port)
     static int ParseAddress(string s) =>
         s.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? Convert.ToInt32(s[2..], 16) : int.Parse(s);
 
-    /// <summary>Printed legend (first one on the key) to HP key code; the first key wins.</summary>
+    /// <summary>Chip-file spelling of the arithmetic keys ("add") to the characters on the keyboard and the faceplate.</summary>
+    static readonly Dictionary<string, string[]> OperatorSpellings = new()
+    {
+        ["ADD"] = ["+"], ["PLUS"] = ["+"], ["SUBTRACT"] = ["-", "−"], ["MINUS"] = ["-", "−"],
+        ["MULTIPLY"] = ["*", "×"], ["DIVIDE"] = ["/", "÷"], ["DECIMAL"] = [".", "·"], ["DOT"] = [".", "·"],
+    };
+
+    /// <summary>Printed legend (first one on the key) to HP key code, plus the operator characters
+    /// (+ - * / .); the first key wins.</summary>
     static Dictionary<string, int> BuildKeyNames(Voyager v)
     {
         var names = new Dictionary<string, int>();
         foreach (var (code, legends) in v.Legends.OrderBy(kv => kv.Key))
-            if (legends.Length > 0 && !string.IsNullOrEmpty(legends[0]))
-                names.TryAdd(legends[0].ToUpperInvariant(), code);
+        {
+            if (legends.Length == 0 || string.IsNullOrEmpty(legends[0])) continue;
+            var legend = legends[0].ToUpperInvariant();
+            names.TryAdd(legend, code);
+            if (OperatorSpellings.TryGetValue(legend, out var chars))
+                foreach (var c in chars) names.TryAdd(c, code);
+        }
         names.TryAdd("ON", 41);
         return names;
     }

@@ -43,7 +43,7 @@ nothing: the calculator keeps running and you keep using its window.
 - **Memory**: the icon next to a RAM entry (View Binary Data) opens the Hex Editor extension on the bytes. RAM
   `0x00000000`: register r at r x 8, bytes 0 to 6 are its 14 digits, most significant first, byte 7 is 0 (0xFF when the
   register does not exist). ROM from `0x00010000`, word w at 0x10000 + 2w, two bytes big endian, 10 bits used.
-- **Debug Console**: `keys 2 ENTER 3 +` taps keys as the window does, `display` prints the LCD text, `reset` is
+- **Debug Console**: `keys 2 ENTER 3 +` taps keys as the window does (names are the printed legends; `+ - * / .` also work, since 2026-11-03), `display` prints the LCD text, `reset` is
   batteries out and in, `help` lists them.
 - **Disconnect** removes all breakpoints and lets the calculator run free.
 
