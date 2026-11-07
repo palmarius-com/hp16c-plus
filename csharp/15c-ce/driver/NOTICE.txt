@@ -1,0 +1,10 @@
+atm6124_cdc.inf and atm6124_cdc.cat
+
+Copied unchanged from Microchip's SAM-BA 3.9.2 for Windows (the folder "driver" of
+sam-ba_v3.9.2-win_x86_64). Nothing else of SAM-BA is part of this kit and the kit does not use
+SAM-BA. SAM-BA is free software under the GNU General Public License version 2; its license text
+is in LICENSE-SAM-BA-GPLv2.txt. The two files are a Windows driver package that binds the
+HP-15C Collector's Edition in programming mode (USB 03EB:6124, "Bossa Program Port") to
+Windows' own usbser.sys; the .cat is the signature that lets Windows install the .inf.
+The source of the driver is the .inf itself. Do not edit the files: a changed .inf no longer
+matches the signature and Windows refuses it.

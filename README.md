@@ -26,15 +26,25 @@ sizes up to 64 the original code runs unchanged.
 Tested in the Python emulator and the C# simulator in this repository.
 Amphitryon (MoHPC forum) ran the 76 sequences of the test sheet on his NutEm/PC (a
 second, independent interpreter of the firmware); every display
-matched. Not yet tested on a real HP-15C Collector's Edition.
+matched. He also reported two bugs (FLOAT n above 64 bits, BSP in float
+mode), fixed in 0.5.0.
+
+**On a real HP-15C Collector's Edition:** the 16C+ runs there, 128-bit
+values included (tested on one calculator, 2026-11-07). The CE firmware
+runs the Nut code in an ARM emulation with two differences from
+Nonpareil (`c=stk`, `goto c`); the patch avoids both. `csharp/15c-ce/`
+holds the upload kit (PowerShell, no HP code in it: the image is built
+from your own flash dump) with `Upload_to_15c_CE.md` and the undo.
+Use it at your own risk.
 
 ## How it works
 
 - `WSIZE` 65-128 switches "plus mode" on; 1-64 is the original 16C.
 - The new code lives at 0x2000-0x37FF (the 15C's second ROM chip, about
-  5700 of 6144 words used). The 16C ROM gets 10 hooks (a few words
-  each) and two checksum words, so each chip still sums to 1 mod 1023
-  and the self-test passes.
+  5700 of 6144 words used). The 16C ROM gets 22 changed words
+  (hooks and checksum words), so each chip still sums to 1 mod 1023
+  and the self-test passes in the simulator. The patch avoids `c=stk`
+  and `goto c` (they differ on the 15C CE).
 - The upper bits of X, Y, Z, T, LSTx and I live in RAM 0x10-0x17 (the
   15C's extra RAM). Storage registers hold ceil(W/4) nibbles in the
   original register pool layout.

@@ -1,0 +1,10 @@
+# Units the kit knows: SHA-256 of regions of the flash dump (0x00000-0x1FFFF) of a HP-15C Collector's Edition.
+# build_image.ps1 refuses a dump whose regions do not match: it has only been tried on one unit.
+# Format: start length sha256  name   (start and length in hex)
+unit: HP-15C CE, bootloader v1.1 Oct 16 2012 17:15:20 (the unit of the first tests, 2026-11-06)
+00000 04000 3a6dde0aed89b86abc6b898b2b7daaf61b52625465fe5197c857e43e8428d786  bootloader, descriptors and blank area
+04000 00180 b88f3f4bc565d2adc1764acecf333f48ab0befd8db4f61903847c7c416f01207  firmware vector table
+12180 03000 e579271a50f91fbb77b96c8bd7dc32e9c3c4bd79e8f8487b5d11c4fa027dcb98  16C ROM (chip 0000-17FF, 16-bit halfwords)
+0B180 07000 0eabc405af2577af649341c8e3c55b5aacbee71ee2158579bff6d8f5d6a63f33  15C ROM copy 2 = mode 15.2 (the slot the image replaces)
+1CD10 00010 3c990af564aedd0dd938532491d81fa840878e95dd7bd9d70342d85e9fab7a2d  ROM pointer literals (16 / 15.2 / 15 mode)
+15180 095CA a12aef36ef1750502b2605b8364c01b3a215f8d2ed5b73a32c78329da9b20ee0  firmware code and tables

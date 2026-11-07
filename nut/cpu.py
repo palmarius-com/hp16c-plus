@@ -50,6 +50,8 @@ _ADDSUB = _digit_table()
 
 
 class NutCPU:
+    CE_CSTK_BUG = None       # int: ROM base of the CE mode, reproduces its broken c=stk
+    GOTO_C_IN_PAGE = False   # True: behave like the 15C CE firmware (see goto c)
     def __init__(self):
         self.rom = [0] * 0x10000
         self.rom_exists = [False] * 0x10000
@@ -456,7 +458,12 @@ class NutCPU:
         elif k == 0x6:  # clr abc
             self.a, self.b, self.c = [0] * W, [0] * W, [0] * W
         elif k == 0x7:  # goto c
-            self.pc = self._c_addr()
+            if self.GOTO_C_IN_PAGE:
+                # 15C CE firmware (found 2026-11-07 in its ARM code at 0x17272): the page of this
+                # instruction plus C[4:3] only. Nonpareil (default) takes all of C[6:3].
+                self.pc = (((self.pc - 1) & 0xFF00) | (self.c[4] << 4) | self.c[3])
+            else:
+                self.pc = self._c_addr()
         elif k == 0x8:  # c=keys
             self.c[4], self.c[3] = self.key_buf >> 4, self.key_buf & 0xF
         elif k == 0x9:
@@ -488,6 +495,11 @@ class NutCPU:
             self._push(self._c_addr())
         elif k == 0x6:  # c=stk
             a = self._pop()
+            if self.CE_CSTK_BUG is not None:
+                # 15C CE firmware (ARM code at 0x17190, found 2026-11-07): the pushed value is base + 2 * address,
+                # the pop returns (pointer >> 1) - base, i.e. address - base / 2 (mod 2^16). base = ROM pointer
+                # of the active mode (0xB180 for the 15C copy 2). Nonpareil (default, None) returns the address.
+                a = (a - self.CE_CSTK_BUG // 2) & 0xFFFF
             self.c[6], self.c[5], self.c[4], self.c[3] = (
                 a >> 12, (a >> 8) & 0xF, (a >> 4) & 0xF, a & 0xF)
         elif k == 0x8:  # goto keys

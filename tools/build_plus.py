@@ -26,7 +26,8 @@ HOOKS = {
     0x0372: [0x130, 0x004],     # ldi $004        (memory reset)
     0x11ED: [0x2C4, 0x260],     # s=0 13 ; set hex (integer display formatter)
     0x0C84: [0x34C, 0x19D],     # ? s=1 12 ; ?nc golong 0b67 (word 1) (digit)
-    0x1400: [0x28C, 0x101],     # ? s=1 7 ; ?nc golong 0c40 (word 1)  (BSP)
+    0x1400: [0x28C],            # ? s=1 7  (BSP; the golong $0c40 behind it stays, float code jumps to it)
+    0x13FD: [0x000, 0x000],     # padding: the 2-word golong P_BSP of the BSP hook
     0x08FA: [0x251, 0x00C],     # ?nc gosub 0394 CLR_ENTRY (RCL n)
     0x0914: [0x0A1, 0x044],     # ?nc gosub 1128 REG_WRITE (STO n)
     0x097F: [0x161, 0x05E],     # ?nc golong 1758 (FLOAT n, integer -> float)
@@ -35,7 +36,7 @@ HOOKS = {
 # one free word per chip makes its sum 1 mod 1023 again (the 16C's own
 # self-test checks chip 1; NutEm/PC's 16C+ model checks the second chip)
 CHECKSUM = {0x13FF: (0x0000, 0x17FF), 0x37FF: (0x2000, 0x37FF)}
-FIXED = {"P_WSIZE": 0x2100, "P_FN": 0x2080}     # addresses used by lc
+FIXED = {"P_WSIZE": 0x2100, "P_FN": 0x2080, "FT_TABLE": 0x2923}     # addresses used by lc
 
 
 def build():

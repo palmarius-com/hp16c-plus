@@ -46,7 +46,10 @@ public static class ModelCatalog
     /// a build by what it is, whatever its file was called.</summary>
     public static readonly Dictionary<string, string> KnownBuilds = new()
     {
+        // 0.4.0 patch (before the FLOAT n and BSP fixes)
         ["4f408e65f64a7ba27a66237116187474c3c26517ac99324f5fa36cdd8feb37cd"] = "16C+",
+        // 0.5.0 patch (FLOAT n above 64 bits, BSP in float mode, CE-safe FT_TAB)
+        ["eee7576ff6af9834d202ecda379d062c9e8cdf7b172127235a0b64cd2b8f1a01"] = "16C+",
     };
 
     /// <summary>Label of a known patched ROM, or null.</summary>

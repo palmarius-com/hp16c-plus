@@ -29,6 +29,8 @@ TESTS = [  # (script, cases at scale 1)
     ("test_plus_funcs.py", 40),
     ("test_plus_regs.py", 30),
     ("test_plus_float.py", 150),
+    ("test_plus_float_bsp.py", None),   # Amphitryon: FLOAT n above 64 bits, BSP in float mode
+    ("test_plus_floatmode.py", 150),    # float mode, 16C+ against the stock 16C key by key (edge cases + random)
     ("replay_cases.py --plus ../build/16cplus.obj --shuffle", None),
 ]
 

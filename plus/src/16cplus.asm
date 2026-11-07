@@ -75,8 +75,15 @@ W1_WSIZE    equ $282        ; dispatch table word 1 of WSIZE (0x0E82)
         org $0c84
         ?nc golong P_DIGIT          ; was: ? s=1 12 ; ?nc golong $0b67 (word 1)
 
-        org $1400
+        ; BSP: the original float code jumps back to 0x1401 (the golong $0c40 behind
+        ; the test at 0x1400), so 0x1401-0x1402 must stay as they are. The hook is one
+        ; word, a goto into the dead padding words 0x13FD-0x13FE (nothing jumps there,
+        ; they follow an rtn), where the 2-word golong sits.
+        org $13fd
+BSP_TRAMP:
         ?nc golong P_BSP
+        org $1400
+        ?nc go  BSP_TRAMP           ; was: ? s=1 7 (done in PB_ORIG)
 
         org $08fa
         ?nc golong P_RCL            ; was: ?nc gosub CLR_ENTRY (RCL n)
@@ -2281,8 +2288,19 @@ PB_ORIG_G:
         pt= 0
         g=c
 PB_ORIG:
+        ; Back to the original with the state the dispatcher gave it (the same in every
+        ; mode, seen 2026-11-07 at 0x1400): RAM register 7 selected, C = $...177000
+        ; (C[5:3] = $177), P = 12. The float mode's clear path (0x0c40) needs it;
+        ; the first version set C = 0, P = 2, RAM 0 (garbage after BSP in float mode).
         c=0     w
+        ldi     $007
         sel ram
+        c=0     w
+        pt= 5
+        lc 1
+        lc 7
+        lc 7
+        pt= 12
         ? s=1   7                   ; displaced: ? s=1 7 ; ?nc golong $0c40
         ?nc golong BSP_CLX
         ?nc golong BSP_ENTRY
@@ -2320,7 +2338,18 @@ P_FUNC:
         c=reg 0
         rcr 3
         a=c     x                   ; A.x = word 1
-        ?nc gosub FT_TAB            ; return address = the table
+        ; C[6:3] = FT_TABLE, built from constants: the 15C CE firmware's c=stk returns
+        ; (pointer >> 1) - ROM base instead of the address (found 2026-11-07 with the
+        ; firmware's own handler in an ARM emulator), so the inline-table idiom
+        ; gosub / c=stk cannot be used. FT_TABLE is pinned in tools/build_plus.py (FIXED).
+        pt= 6
+        lc 2
+        lc 9
+        lc 2
+        lc 3
+        pt= 2                       ; P as the dispatcher epilogue leaves it
+        ?nc golong FT_L
+FT_TABLE:
 ; Function table: word 1, then a golong to the handler; 0 ends it (RUP,
 ; word 1 = 0, never comes here: STACK_KEY takes it).
         dw $182
@@ -2428,8 +2457,6 @@ P_FUNC:
         dw $155
         ?nc golong F_SQRT
         dw $000
-FT_TAB:
-        c=stk                       ; C[6:3] = the table
 FT_L:
         cxisa                       ; C.x = word 1 of the entry
         ? c#0   x
@@ -2442,7 +2469,11 @@ FT_L:
         ?nc go  FT_L
 FT_HIT:
         c=c+1   m
-        goto c                      ; the golong of the entry
+        stk=c                       ; the golong of the entry: jump there with
+        rtn                         ; stk=c / rtn, NOT goto c (the 15C CE firmware
+                                    ; does goto c within the current 256-word page
+                                    ; only: C[4:3], found 2026-11-07; Nonpareil
+                                    ; takes all of C[6:3]); same net stack depth
 FN_ERR2:                            ; not implemented yet: Error 2
         c=0     w
         sel ram
@@ -5771,6 +5802,16 @@ P_FLOAT:
         sel ram
         ?nc golong FLOAT_INT
 PF_1:
+        ; G holds the digit n of FLOAT n here (the original reads it after the conversion,
+        ; found 2026-11-07: Amphitryon, FLOAT 5 at word size 85 gave FLOAT 0). The plus path
+        ; uses G as scratch: keep it in CTRL digits 11-10 and put it back at PF_9.
+        ?nc gosub SEL10
+        c=reg 0
+        rcr 10
+        pt= 0
+        c=g
+        rcr 4
+        reg=c 0
         s=0     3
         ? s=1   8
         ?c go   PF_2
@@ -5852,7 +5893,15 @@ PF_8:
         ?nc go  PF_9
         ?nc gosub NEGX              ; -2^60
 PF_9:
-        ?nc gosub EXT_CLEAR         ; plus mode off
+        ?nc gosub SEL10             ; A.x = n (G saved at PF_1), EXT_CLEAR wipes CTRL
+        c=reg 0
+        rcr 10
+        a=c     x
+        ?nc gosub EXT_CLEAR         ; plus mode off (uses C only)
+        ac ex   x
+        pt= 0
+        g=c                         ; G = n again
+        pt= 2                       ; P as at the hook (P = 2, Q = 3)
         s=0     6                   ; as 0x0581 left them (s6: the sign of
         s=0     13                  ;  the exponent in 0x1758)
         c=0     w
