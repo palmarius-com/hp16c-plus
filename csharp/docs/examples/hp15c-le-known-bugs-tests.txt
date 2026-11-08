@@ -1,0 +1,124 @@
+# HP-15C: the known bugs of the HP-15C Limited Edition, as tests on the original 15C ROM.
+# calculator: 15c
+#
+# Source: "HP-15C LE (Limted Edition) Bug Reports", HP Articles Forum, posted by Katie Wasserman on
+# 16 Sept 2011, edited 26 Dec 2011 (https://www.hpmuseum.org/cgi-bin/articles.cgi?read=1089),
+# firmware dated 2011-04-15. The list compares the LE with the 15C Classic and the 12C+.
+#
+# What these tests are: the LE bugs are in the LE's own firmware (a re-implementation), which this
+# simulator does not run. It runs the original 15C ROM, which is the reference the bug list compares
+# against. So each line states what the Classic does; a calculator with the LE bug would fail it.
+# They show that the described sequence works on the Classic ROM, not that the LE bug can be
+# reproduced here. The expected values come from the bug report and from arithmetic, not from the
+# simulator.
+#
+# Not testable here (hardware, not keys and display):
+#   4) current draw over 20 mA with a key held
+#   5) low battery indicator, memory lost without a graceful shutdown
+# Not testable on this ROM:
+#   6) the ON+g+ENTER self test menu of the LE / 12C+ (the Classic has a different self test)
+#
+# Start the HP-15C, then Run. Tests build on the line before them.
+
+reset
+[FIX] 4
+
+# ---------------------------------------------------------------------------------------------
+# 1) PSE run more than once in a program blanks the display; run just once, SF 9 flashes oddly.
+#    LBL A, PSE, SF 9, RTN
+# ---------------------------------------------------------------------------------------------
+[P/R]
+[PRGM]
+[LBL] [A]
+[PSE]
+[SF] 9
+[RTN]
+[P/R]
+5 [A] wait 3  =>  '5.0000'
+[A] wait 3  =>  '5.0000'
+[A] wait 3  =>  '5.0000'
+
+# ---------------------------------------------------------------------------------------------
+# 2) Cy,x / Px,y run in a program multiple times with certain values (8, 3) cause display
+#    flashing issues. LBL A, STO 0, LBL 9, 8, ENTER, 3, Cy,x, DSE 0, GTO 9, RTN
+#    C(8,3) = 56 and P(8,3) = 336.
+# ---------------------------------------------------------------------------------------------
+reset
+[FIX] 4
+[P/R]
+[PRGM]
+[LBL] [A]
+[STO] 0
+[LBL] 9
+8
+[ENTER]
+3
+[Cy,x]
+[DSE] 0
+[GTO] 9
+[RTN]
+[P/R]
+5 [A]  =>  '56.0000'
+[RCL] 0  =>  '0.0000'
+3 0 [A]  =>  '56.0000'
+[RCL] 0  =>  '0.0000'
+
+# ---------------------------------------------------------------------------------------------
+# 3) Executing the self tests documented in the manual can corrupt program memory.
+#    Handbook Appendix F: with the calculator off, hold ON and press x; after about 25 s the
+#    display shows -8,8,8,8,8,8,8,8,8,8, Afterwards the program of 2) must still be there.
+#    Switched off: on the 15C ROM of this simulator the test answers Error 9 at once (0.2 s); on
+#    the 11C, 12C and 16C it passes. Not understood yet.
+# ---------------------------------------------------------------------------------------------
+## [ON]  =>  (blank)
+## chord { [ON] [×] } wait 40  =>  '-8,8,8,8,8,8,8,8,8,8,'
+#     not run: the simulator shows 'Error  9' after 0.2 s, 3 s, 10 s and 20 s
+## [ON]  =>  (blank)
+## [ON]
+## 2 [A]  =>  '56.0000'
+
+# ---------------------------------------------------------------------------------------------
+# 7) Complex mode: f (i) (on the minus key) shows the imaginary part while the key is held. A digit
+#    key pressed while it is held must be ignored on the Classic ("On my 15C Classic, key presses
+#    during the temporary display are simply ignored", Jeff O.); on the LE the digit is displayed
+#    afterwards, flashing. The chord presses f, then minus, then 5 with minus still down, then all up;
+#    the check comes 0.5 s later, when the temporary display is over.
+# ---------------------------------------------------------------------------------------------
+reset
+[FIX] 4
+2 [ENTER] 3 [I]  =>  '2.0000'
+hold [(i)]  =>  '3.0000'
+=>  '2.0000'
+## [f] chord { [−] 5 } wait 0.5  =>  '2.0000'
+#     not run: the simulator shows '3.0000' (the imaginary part) 0.5 s, 2 s and 5 s later; the same with
+#     [f] chord { [−] } alone, so the chord does not let go of the key as the lines for 8 and 9 do (not understood)
+
+# ---------------------------------------------------------------------------------------------
+# 8) Any mode: f PREFIX (on the back-arrow key) shows the full mantissa while the key is held.
+#    Same behaviour with a digit key pressed meanwhile.
+# ---------------------------------------------------------------------------------------------
+reset
+[FIX] 4
+1 2 3 4 . 5 6 7 [ENTER]  =>  '1,234.5670'
+hold [PREFIX]  =>  '1234567000'
+=>  '1,234.5670'
+[f] chord { [←] 5 } wait 0.5  =>  '1,234.5670'
+
+# ---------------------------------------------------------------------------------------------
+# 9) Any mode: g MEM (on the RCL key) shows the memory allocation while the key is held.
+#    Same behaviour with a digit key pressed meanwhile.
+# ---------------------------------------------------------------------------------------------
+[g] chord { [RCL] 5 } wait 0.5  =>  '1,234.5670'
+
+# ---------------------------------------------------------------------------------------------
+# 10) PSE executed from the keyboard is a temporary mode too. On the Classic, keyboard input during
+#     the pause is ignored; on the LE it is accepted and displayed after the pause ends, without
+#     flashing. 7 ENTER, PSE, then 5 pressed 0.3 s into the pause (the pause lasts about 1 s).
+# ---------------------------------------------------------------------------------------------
+reset
+[FIX] 4
+7 [ENTER]  =>  '7.0000'
+## [PSE] wait 0.3 5 wait 3  =>  '7.0000'
+#     not run: the simulator shows '5': the key pressed 0.3 s into the PSE pause is accepted (and 'wait 0.1' after it
+#     already shows '5'). The bug report says the Classic ignores it; the cause is not known yet (ROM, or how the test
+#     window presses a key while the calculator is busy)
