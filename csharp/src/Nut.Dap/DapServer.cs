@@ -63,6 +63,32 @@ public sealed class DapServer(int port)
     // ---------------------------------------------------------------- connection
     public void Start() => new Thread(Serve) { IsBackground = true, Name = "DAP" }.Start();
 
+    TcpClient? _client;
+    volatile string? _refusal;                      // while set, no editor may attach: the reason is the answer to its first request
+
+    /// <summary>
+    /// The app is about to do something that leaves the calculator no debugger: disconnect the editor in an orderly way (a console
+    /// line, the "terminated" event, breakpoints removed, a halted calculator resumed, then the socket closed) and refuse new
+    /// attaches with <paramref name="reason"/> until <see cref="Allow"/>. Call it before the calculator is disposed.
+    /// </summary>
+    public void Disconnect(string reason)
+    {
+        _refusal = reason;
+        if (_stream is null) return;
+        try
+        {
+            Output(reason);
+            Event("terminated");
+        }
+        catch (IOException) { /* the editor is gone already */ }
+        Detach();
+        Say("client disconnected by the app: " + reason);
+        try { _client?.Close(); } catch (IOException) { }
+    }
+
+    /// <summary>Editors may attach again.</summary>
+    public void Allow() => _refusal = null;
+
     void Serve()
     {
         var listener = new TcpListener(IPAddress.Loopback, port);
@@ -70,12 +96,29 @@ public sealed class DapServer(int port)
         while (true)
         {
             using var client = listener.AcceptTcpClient();
+            _client = client;
             Say($"client connected from {client.Client.RemoteEndPoint}");
-            try { Session(client.GetStream()); }
+            try
+            {
+                if (_refusal is { } why) Refuse(client.GetStream(), why); else Session(client.GetStream());
+            }
             catch (IOException e) { Say($"connection error: {e.Message}"); }
             Detach();
             Say("client gone: breakpoints removed, calculator runs free");
         }
+    }
+
+    /// <summary>An editor attaches while the app does not allow it: answer its first request with the reason and hang up.</summary>
+    void Refuse(Stream stream, string why)
+    {
+        _stream = new BufferedStream(stream, 8192);
+        if (ReadMessage(stream) is { } first && first["type"]?.GetValue<string>() == "request")
+        {
+            Respond(first, null, false, why);
+            Output(why);
+        }
+        _stream = null;
+        Say("client refused: " + why);
     }
 
     void Session(Stream stream)

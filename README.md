@@ -34,7 +34,8 @@ values included (tested on one calculator, 2026-11-07). The CE firmware
 runs the Nut code in an ARM emulation with two differences from
 Nonpareil (`c=stk`, `goto c`); the patch avoids both. `csharp/15c-ce/`
 holds the upload kit (PowerShell, no HP code in it: the image is built
-from your own flash dump) with `Upload_to_15c_CE.md` and the undo.
+from your own flash dump) with `Upload_to_15c_CE.md` and the undo; since 0.5.5 the
+simulator does the same itself, in under a minute (see below).
 Use it at your own risk.
 
 ## How it works
@@ -102,7 +103,9 @@ print(c.run("WINDOW 2"))    # ' FFFFFFFd .h', then '        2 h.'
 
 The Palmarius Voyager simulator, version 0.5.5. It can also put one of your 16C-based
 calculators (the 16C+, your own patch) on a HP-15C Collector's Edition: Calculator > Update a HP-15C CE...
-(dump, upload, restore, see its user guide, section 9). The faceplates carry the
+(dump, identify the calculator by its serial number, upload, restore; it reads everything back, saves what it
+overwrites, and a dump brings the calculator back; see the user guide, section 9). While that screen is open the
+calculator simulation is stopped and a VS Code debugger is disconnected. The faceplates carry the
 Palmarius mark (three bars and the blue square) where the maker's logo
 would be.
 
@@ -113,7 +116,7 @@ model, and your own calculators (a ROM plus patches, saved under a name).
 
 A ready-to-run Windows build (needs the .NET 10 Runtime) is on the
 [releases page](https://github.com/palmarius-com/hp16c-plus/releases/latest):
-`VoyagerSim.exe` and an `examples` folder. The source builds on macOS and
+`VoyagerSim.exe`, an `examples` folder and a `15c-ce` folder (the upload kit and the SAM-BA driver for Windows). The source builds on macOS and
 Linux too, but only Windows is released and tested.
 
 ```sh

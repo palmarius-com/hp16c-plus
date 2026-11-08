@@ -192,11 +192,12 @@ bool IsErased(byte[] b) => b.All(x => x == 0xFF);
               Throws<ArgumentException>(() => unit.BuildSlot(new Dictionary<int, int> { [0x100] = 1 }), out _));
 
         // a calculator with an image on it (the dump of 2026-11-07, after the first upload) and the change-set of a My Calculator
-        var v3Path = FindUp("hardware/dump/kit-test-20261107/my-15c-ce-dump.bin") ?? FindUp("hardware/dump/kit-test-20261107/my-15c-ce-dump.bin");
+        // (built from the factory dump: the slot written and the pointer moved, which is all an upload changes)
         var ericPath = FindUp("nonpareil/16c.rom") ?? FindUp("nonpareil/16c.rom");
-        if (v3Path is not null)
         {
-            var v3 = File.ReadAllBytes(v3Path);
+            var v3 = (byte[])dump.Clone();
+            Array.Copy(img.Slot, 0, v3, CeUnit.SlotAt, img.Slot.Length);
+            Array.Copy(new byte[] { 0x80, 0xB1, 0x00, 0x00 }, 0, v3, CeUnit.PointerAt, 4);
             Check("a dump with an image installed is refused as 'not the factory unit'", Throws<UnknownUnitException>(() => CeUnit.FromDump(v3, known), out _));
             var withImage = CeUnit.FromDump(v3, known, allowImage: true);
             Check($"...and accepted as the known calculator with an image installed ({withImage.ImageRegionsChanged.Count} changed regions: slot and pointer)",

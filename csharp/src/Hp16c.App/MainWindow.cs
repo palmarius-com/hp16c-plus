@@ -393,10 +393,13 @@ sealed partial class MainWindow : Window
     /// --api channel answers "busy"), and the screen has the port to itself.</summary>
     void ShowProgrammer()
     {
+        _debugServer?.Disconnect("The HP-15C CE programmer is open: the debugger is disconnected and cannot attach until you leave that screen.");
         StopMachine();
+        _debugServer?.Follow(null);
         _session = null;
-        _programmer = new ProgrammerView(Path.Combine(AppContext.BaseDirectory, "data", "ce"), () => { _programmer = null; _menu.IsEnabled = true; ShowStart(); });
+        _programmer = new ProgrammerView(Path.Combine(AppContext.BaseDirectory, "data", "ce"), () => { _programmer = null; _menu.IsEnabled = true; _debugServer?.Allow(); ShowStart(); });
         _programmer.BusyChanged += busy => _menu.IsEnabled = !busy;
+        _programmer.CalculatorsChanged += RefreshMyMenu;
         _main.Content = _programmer;
         Say("HP-15C CE programmer: the calculators are stopped, nothing else runs while this screen is open.");
     }

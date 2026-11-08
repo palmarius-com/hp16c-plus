@@ -85,6 +85,10 @@ options there is no cost.
 - **Keys go to the calculator you debug**: click them in the window, or use the Debug Console.
 - **Breakpoints are checked before each instruction**, but only while a debugger is attached and has set some; with
   none, the CPU runs as fast as before.
+- **The CE programmer screen** (Calculator > Update a HP-15C CE...) stops the calculator, so there is nothing to debug: the
+  debugger gets a console line and the `terminated` event, its breakpoints are removed (a halted calculator is resumed),
+  and the connection is closed. An attach while that screen is open is refused with the reason. Leave the screen and
+  attach again.
 - **No HP firmware is shipped.** The listing comes from the ROM you loaded, at run time.
 
 ## Not there yet

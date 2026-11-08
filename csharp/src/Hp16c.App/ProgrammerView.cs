@@ -28,11 +28,20 @@ sealed class ProgrammerView : UserControl
     readonly ComboBox _ports = new() { MinWidth = 150 };
     readonly Button _refresh = new() { Content = "Refresh" };
     readonly Button _dump = new() { Content = "1. Dump the connected calculator (reads only)", Padding = new Thickness(14, 8) };
+    readonly Button _identify = new() { Content = "Identify the connected calculator (1 s)", Padding = new Thickness(14, 8), IsVisible = false };
+    readonly TextBlock _why = new() { TextWrapping = TextWrapping.Wrap, Opacity = 0.85 };
     readonly Button _saveBackup = new() { Content = "Save this dump as my calculator...", Padding = new Thickness(14, 8), IsEnabled = false };
     readonly Button _savePatch = new() { Content = "Save what was written as a patch", Padding = new Thickness(14, 8), IsEnabled = false };
     readonly ComboBox _mine = new() { MinWidth = 320 };
     readonly TextBlock _mineInfo = new() { TextWrapping = TextWrapping.Wrap, Opacity = 0.85 };
     readonly CheckBox _confirm = new() { Content = "I understand that this writes to the flash of the calculator (never to its boot loader). What it overwrites is saved, and a dump brings it back." };
+    readonly CheckBox _confirmRestore = new() { Content = "I understand that this writes the slot and the pointer of the calculator back as the saved dump has them (never the boot loader)." };
+    readonly Expander _secKnow = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
+    readonly Expander _secUpload = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
+    readonly Expander _secRestore = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
+    readonly StackPanel _knowBody = new() { Spacing = 8 };
+    readonly StackPanel _upBody = new() { Spacing = 8 };
+    readonly StackPanel _reBody = new() { Spacing = 8 };
     readonly Button _upload = new() { Content = "2. Upload the selected calculator", Padding = new Thickness(14, 8), IsEnabled = false };
     readonly ComboBox _dumps = new() { MinWidth = 420 };
     readonly Button _restore = new() { Content = "3. Restore the calculator from this dump", Padding = new Thickness(14, 8), IsEnabled = false };
@@ -56,10 +65,14 @@ sealed class ProgrammerView : UserControl
     CancellationTokenSource? _cts;
     Task? _task;
     bool _busy;
+    bool _anyId;                                           // a saved dump has an identifier: only then Identify is offered
 
     /// <summary>True from the moment a job starts until it has ended: closing is refused and the menus are off.</summary>
     public bool Busy => _busy;
     public event Action<bool>? BusyChanged;
+
+    /// <summary>A calculator of yours was saved or changed here: the menu and the start page list it.</summary>
+    public event Action? CalculatorsChanged;
 
     public ProgrammerView(string dataDir, Action leave)
     {
@@ -79,6 +92,15 @@ sealed class ProgrammerView : UserControl
         var portRow = Row(new TextBlock { Text = "Port:", VerticalAlignment = VerticalAlignment.Center }, _ports, _refresh);
         var uploadRow = Row(new TextBlock { Text = "Calculator:", VerticalAlignment = VerticalAlignment.Center }, _mine);
         var restoreRow = Row(new TextBlock { Text = "Dump:", VerticalAlignment = VerticalAlignment.Center }, _dumps);
+        _knowBody.Children.Add(Row(_dump, _identify, _saveBackup));
+        _secKnow.Content = _knowBody;
+        _upBody.Children.Add(new TextBlock { Text = "Upload one of your calculators (the 16 and the 15.2 mode of the CE then run it):" });
+        _upBody.Children.Add(uploadRow); _upBody.Children.Add(_mineInfo); _upBody.Children.Add(_confirm);
+        _upBody.Children.Add(Row(_upload, _savePatch)); _upBody.Children.Add(_why);
+        _secUpload.Content = _upBody;
+        _reBody.Children.Add(new TextBlock { Text = "Put the slot and the pointer back as a saved dump has them:" });
+        _reBody.Children.Add(restoreRow); _reBody.Children.Add(_confirmRestore); _reBody.Children.Add(_restore);
+        _secRestore.Content = _reBody;
         Content = new ScrollViewer
         {
             Content = new StackPanel
@@ -88,17 +110,16 @@ sealed class ProgrammerView : UserControl
                 {
                     new TextBlock { Text = "Update a HP-15C Collector's Edition", FontSize = 22, FontWeight = FontWeight.SemiBold },
                     new TextBlock { Text = "The calculator simulation is stopped while this screen is open.", Opacity = 0.7 },
-                    steps, portRow, Row(_dump, _saveBackup),
-                    new TextBlock { Text = "Upload one of your calculators (the 16 and the 15.2 mode of the CE then run it):", Margin = new Thickness(0, 8, 0, 0) },
-                    uploadRow, _mineInfo, _confirm, Row(_upload, _savePatch),
-                    new TextBlock { Text = "Restore: put the slot and the pointer back as a saved dump has them:", Margin = new Thickness(0, 8, 0, 0) },
-                    restoreRow, _restore,
+                    new Expander { Header = "Connect the calculator", IsExpanded = true, HorizontalAlignment = HorizontalAlignment.Stretch,
+                                   Content = new StackPanel { Spacing = 8, Children = { steps, portRow } } },
+                    _secKnow, _secUpload, _secRestore,
                     Row(_cancel, _back), _bar, _state, _log,
                 },
             },
         };
         _refresh.Click += (_, _) => RefreshPorts();
         _dump.Click += (_, _) => StartDump();
+        _identify.Click += (_, _) => StartIdentify();
         _upload.Click += (_, _) => StartUpload();
         _saveBackup.Click += async (_, _) => await SaveBackupAsCalculator();
         _savePatch.Click += (_, _) => SaveDifferencesAsPatch();
@@ -109,6 +130,7 @@ sealed class ProgrammerView : UserControl
         _dumps.SelectionChanged += (_, _) => UpdateButtons();
         _ports.SelectionChanged += (_, _) => UpdateButtons();
         _confirm.IsCheckedChanged += (_, _) => UpdateButtons();
+        _confirmRestore.IsCheckedChanged += (_, _) => UpdateButtons();
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => Poll();
         _timer.Start();
@@ -116,6 +138,7 @@ sealed class ProgrammerView : UserControl
         LoadMine();
         LoadDumps();
         Add("Ready. Nothing is sent to the calculator until you press a button.");
+        UpdateButtons();
     }
 
     static StackPanel Row(params Control[] items)
@@ -125,10 +148,17 @@ sealed class ProgrammerView : UserControl
         return row;
     }
 
+    // Test seam, explicit: with the environment variable VOYAGERSIM_FAKE_CE set to a 128 KB flash file, the port list also offers
+    // "FAKE-CE", an in-process SAM-BA monitor (FakeSam4l) on a copy of that file. Every job saves its flash back to the file, so
+    // a restart of the app finds the calculator as the last job left it. Without the variable nothing of this exists.
+    const string FakePort = "FAKE-CE";
+    static readonly string? FakeFlashFile = Environment.GetEnvironmentVariable("VOYAGERSIM_FAKE_CE") is { Length: > 0 } f ? f : null;
+
     void RefreshPorts()
     {
         string? keep = _ports.SelectedItem as string;
         var names = SerialSamBaTransport.PortNames();
+        if (FakeFlashFile is not null) names = [.. names, FakePort];
         _ports.ItemsSource = names;
         _ports.SelectedItem = names.Contains(keep ?? "") ? keep : names.Length == 1 ? names[0] : null;   // only a single candidate is chosen for you
         Add(names.Length == 0 ? "No serial ports. Is the calculator in programming mode?" : "Ports: " + string.Join(", ", names));
@@ -184,6 +214,7 @@ sealed class ProgrammerView : UserControl
             foreach (var f in new DirectoryInfo(_dir).GetFiles("*.bin").Where(f => f.Length == CeUnit.DumpSize).OrderByDescending(f => f.LastWriteTime))
                 items.Add(new DumpFile(f.FullName, $"{f.Name}   ({f.LastWriteTime:yyyy-MM-dd HH:mm})   {DescribeDump(File.ReadAllBytes(f.FullName))}"));
         _dumps.ItemsSource = items;
+        _anyId = items.Any(i => IdOf(i.Path) is not null);
         if (items.Count > 0 && _dumps.SelectedIndex < 0) _dumps.SelectedIndex = 0;
         UpdateButtons();
     }
@@ -206,10 +237,30 @@ sealed class ProgrammerView : UserControl
         bool port = _ports.SelectedItem is string;
         bool ok = _confirm.IsChecked == true && port && !_busy;
         _dump.IsEnabled = port && !_busy;
+        _identify.IsVisible = _anyId;
+        _identify.IsEnabled = port && !_busy;
         _saveBackup.IsEnabled = _sessionUnit is not null && !_busy;
         _savePatch.IsEnabled = _lastDiff is not null && !_busy;
         _upload.IsEnabled = ok && _sessionDump is not null && _sessionUnit is not null && _changes is not null;
-        _restore.IsEnabled = ok && _dumps.SelectedItem is DumpFile d && !d.Text.Contains("NOT a calculator");
+        _why.Text = _busy || _upload.IsEnabled ? "" :
+            _mine.SelectedIndex < 0 ? "Upload is off: choose one of your calculators above." :
+            _changes is null ? "Upload is off: the selected calculator cannot be uploaded (see above)." :
+            !port ? "Upload is off: choose the port." :
+            "Upload is off: tick the box above.";
+        bool okRestore = _confirmRestore.IsChecked == true && port && !_busy;
+        _restore.IsEnabled = okRestore && _dumps.SelectedItem is DumpFile d && !d.Text.Contains("NOT a calculator");
+        // sections: nothing is enabled that cannot be done
+        bool baseline = _sessionDump is not null && _sessionUnit is not null;
+        bool haveDump = _dumps.ItemsSource is List<DumpFile> dl && dl.Any(x => !x.Text.Contains("NOT a calculator"));
+        bool readyKnow = port, readyUpload = port && baseline, readyRestore = port && haveDump;
+        _knowBody.IsEnabled = readyKnow;
+        _upBody.IsEnabled = readyUpload;
+        _reBody.IsEnabled = readyRestore;
+        _secKnow.Header = !port ? "1. Know the calculator (choose the port first)" : "1. Know the calculator: dump it" + (_anyId ? " or identify it" : "");
+        _secUpload.Header = !port ? "2. Upload one of your calculators (choose the port first)" :
+            !baseline ? "2. Upload one of your calculators (first dump or identify the calculator)" : "2. Upload one of your calculators";
+        _secRestore.Header = !haveDump ? "3. Restore from a saved dump (no saved dump yet)" : !port ? "3. Restore from a saved dump (choose the port first)" : "3. Restore from a saved dump";
+        // the sections are never opened or closed by the program: the screen shows them closed, the user opens what he needs
         _cancel.IsEnabled = _busy && _cts is not null;
         _back.IsEnabled = !_busy;
         _refresh.IsEnabled = !_busy;
@@ -217,6 +268,7 @@ sealed class ProgrammerView : UserControl
         _mine.IsEnabled = !_busy;
         _dumps.IsEnabled = !_busy;
         _confirm.IsEnabled = !_busy;
+        _confirmRestore.IsEnabled = !_busy;
     }
 
     void SetBusy(bool busy)
@@ -249,6 +301,7 @@ sealed class ProgrammerView : UserControl
             _cts?.Dispose();
             _cts = null;
             _confirm.IsChecked = false;                    // every write asks again
+            _confirmRestore.IsChecked = false;
             SetBusy(false);
             LoadDumps();
             SelectMine();
@@ -269,8 +322,15 @@ sealed class ProgrammerView : UserControl
             try
             {
                 using var logFile = new StreamWriter(logPath, false, new UTF8Encoding(false));
-                using var rec = new RecordingTransport(new SerialSamBaTransport(port), logFile, $"VoyagerSim programmer: {what} {port}") { DetailLimit = writes ? 2000 : 600 };
-                run(new Sam4lFlash(new SamBaClient(rec)), rec);
+                FakeSam4l? fake = null;
+                if (port == FakePort && FakeFlashFile is not null)
+                {
+                    fake = new FakeSam4l();
+                    File.ReadAllBytes(FakeFlashFile).CopyTo(fake.Flash, 0);
+                }
+                using var rec = new RecordingTransport(fake is not null ? fake : new SerialSamBaTransport(port), logFile, $"VoyagerSim programmer: {what} {port}") { DetailLimit = writes ? 2000 : 600 };
+                try { run(new Sam4lFlash(new SamBaClient(rec)), rec); }
+                finally { if (fake is not null) File.WriteAllBytes(FakeFlashFile!, fake.Flash); }
                 Add($"Log of everything that crossed the port: {logPath}");
             }
             catch (JobCancelledException e) { Add(e.Message); _sessionDump = null; }
@@ -295,9 +355,11 @@ sealed class ProgrammerView : UserControl
         Add($"Dump from {port}: two full reads of the 128 KB flash, nothing is written.");
         Start("dump", port, false, (flash, rec) =>
         {
+            string? id = ReadId(flash);
             var bytes = CeDump.Read(flash, new ProgressSink(p => _latest = p));
             File.WriteAllBytes(dumpPath, bytes);
-            Add($"Saved {dumpPath}");
+            if (id is not null) File.WriteAllText(dumpPath + ".id", id);
+            Add($"Saved {dumpPath}" + (id is null ? " (the calculator's serial number could not be read: this dump cannot be found again by Identify)" : $", identifier {id} in {Path.GetFileName(dumpPath)}.id"));
             Add($"131072 bytes, two identical reads, SHA-256 {CeUnit.Sha256Hex(bytes).ToUpperInvariant()}. It contains the calculator's firmware: do not share it.");
             try
             {
@@ -312,6 +374,51 @@ sealed class ProgrammerView : UserControl
         });
     }
 
+    // ---------------------------------------------------------------- identify: which saved dump is this calculator?
+    /// <summary>Chip id and the 128-bit serial number of the chip (read only), or null when the serial number reads as all 0 or all F.</summary>
+    static string? ReadId(Sam4lFlash flash)
+    {
+        flash.Preflight();
+        var words = new uint[4];
+        for (uint k = 0; k < 4; k++) words[k] = flash.Client.ReadWord(0x0080020C + 4 * k);
+        if (words.All(w => w == 0) || words.All(w => w == 0xFFFFFFFF)) return null;
+        return $"{Sam4lFlash.CidrExpected:X8}-{string.Concat(words.Select(w => w.ToString("X8")))}";
+    }
+
+    static string? IdOf(string dumpPath)
+    {
+        try { return File.Exists(dumpPath + ".id") ? File.ReadAllText(dumpPath + ".id").Trim() : null; }
+        catch (IOException) { return null; }
+    }
+
+    void StartIdentify()
+    {
+        if (_busy || _ports.SelectedItem is not string port) return;
+        _sessionDump = null;
+        _sessionUnit = null;
+        Add($"Identify {port}: reads the chip id and the serial number (a few words), nothing is written.");
+        Start("identify", port, false, (flash, rec) =>
+        {
+            string? id = ReadId(flash);
+            if (id is null) { Add("The serial number of this chip reads as 0 or FFFFFFFF: it cannot be identified. Take a dump."); return; }
+            Add($"This calculator: {id}");
+            foreach (var f in new DirectoryInfo(_dir).GetFiles("*.bin").Where(f => f.Length == CeUnit.DumpSize).OrderByDescending(f => f.LastWriteTime))
+            {
+                if (IdOf(f.FullName) != id) continue;
+                var bytes = File.ReadAllBytes(f.FullName);
+                try
+                {
+                    _sessionUnit = CeUnit.FromDump(bytes, KnownRegions(), allowImage: true);
+                    _sessionDump = bytes;
+                    Add($"Found its dump {f.Name} ({f.LastWriteTime:yyyy-MM-dd HH:mm}), the newest with this serial number. The upload compares the whole calculator with it first and stops if they differ.");
+                    return;
+                }
+                catch (UnknownUnitException e) { Add($"{f.Name} has this serial number but is not usable: {e.Message}"); }
+            }
+            Add("No saved dump has this serial number (dumps from before this version have none). Take a dump.");
+        });
+    }
+
     // ---------------------------------------------------------------- 2. upload
     void StartUpload()
     {
@@ -319,7 +426,7 @@ sealed class ProgrammerView : UserControl
             || _original16c is null || _mine.SelectedIndex < 0 || _confirm.IsChecked != true) return;
         string name = _mineList[_mine.SelectedIndex].Name, stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss"), preDir = Path.Combine(_dir, $"preimages-{stamp}");
         bool keep = CeUnit.ChecksumWordIsFree(changes, _original16c.Words);
-        Add($"Upload \"{name}\" to {port}: baseline check against the dump of this session, then the slot pages, the pointer last.");
+        Add($"Upload \"{name}\" to {port}: baseline check against the dump, then the slot pages, the pointer last.");
         Start("upload", port, true, (flash, rec) =>
         {
             var img = unit.BuildSlot(changes, keep);
@@ -330,7 +437,19 @@ sealed class ProgrammerView : UserControl
                 Directory.CreateDirectory(preDir);
                 File.WriteAllBytes(Path.Combine(preDir, $"page-{page:D3}.bin"), pre);
             }).Run(true, new ProgressSink(p => _latest = p), _cts!.Token);
-            _sessionDump = null;                           // the calculator is not the dump any more: take a new one for the next job
+            // The calculator is now the dump with the planned pages laid over it (slot and pointer read back, nothing else was touched):
+            // keep that as a dump of its own, so the next upload, also after a restart, has its baseline.
+            var after = (byte[])dump.Clone();
+            foreach (var (page, data) in CePlan.ForUpload(dump, img)) Array.Copy(data, 0, after, page * CePlan.Page, CePlan.Page);
+            string afterPath = Path.Combine(_dir, $"dump-{DateTime.Now:yyyyMMdd-HHmmss}-after-upload.bin");
+            File.WriteAllBytes(afterPath, after);
+            string? id;
+            try { id = ReadId(flash); }                    // the upload is done and verified: a failing read here must not turn it into an error
+            catch (Exception e) when (e is IOException or SamBaException) { id = null; }
+            if (id is not null) File.WriteAllText(afterPath + ".id", id);
+            try { _sessionUnit = CeUnit.FromDump(after, KnownRegions(), allowImage: true); _sessionDump = after; }
+            catch (UnknownUnitException) { _sessionDump = null; }
+            Add($"The state of the calculator now is saved as {Path.GetFileName(afterPath)} (the dump you started from, with what was written): the next upload starts from it.");
             _lastDiff = unit.DifferencesFromOwnRom(img);   // kept for the button "Save what was written as a patch"
             _lastDiffName = name;
             Add("The differences from the backup's own 16C ROM can be kept as a patch: button \"Save what was written as a patch\".");
@@ -357,6 +476,7 @@ sealed class ProgrammerView : UserControl
         RomStore.SaveMyCalc(shortName, name, "16c", "16CE", $"from a dump of a HP-15C CE: {what}", img);
         Add($"Saved as your calculator \"{name}\" ({shortName}): {what}.");
         LoadMine();
+        CalculatorsChanged?.Invoke();                      // the Calculator menu lists your calculators: it has to know
     }
 
     void SaveDifferencesAsPatch()
@@ -393,7 +513,7 @@ sealed class ProgrammerView : UserControl
     // ---------------------------------------------------------------- 3. restore
     void StartRestore()
     {
-        if (_busy || _ports.SelectedItem is not string port || _dumps.SelectedItem is not DumpFile d || _confirm.IsChecked != true) return;
+        if (_busy || _ports.SelectedItem is not string port || _dumps.SelectedItem is not DumpFile d || _confirmRestore.IsChecked != true) return;
         var dump = File.ReadAllBytes(d.Path);
         try { CeUnit.FromDump(dump, KnownRegions(), allowImage: true); }
         catch (UnknownUnitException e) { Add(e.Message + " Not used."); return; }

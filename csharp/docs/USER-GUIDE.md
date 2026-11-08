@@ -275,22 +275,29 @@ processors or display chips and are not supported.
 ## 9. Putting your calculator on a HP-15C Collector's Edition
 
 Calculator > Update a HP-15C CE... is a screen of its own: the simulation is stopped while it is open and nothing else
-can touch the port. It works with the HP programming cable (USB; POGO connector in the battery compartment) on a
+can touch the port. A debugger (VS Code) that was attached is disconnected with a message when the screen opens, and
+cannot attach until you leave it. The screen has four sections that start closed (only "Connect the calculator" is
+open); you open what you need. A section whose step cannot be done yet is greyed and its title says what is missing
+(choose the port first, dump or identify the calculator first, no saved dump yet). It works with the HP programming cable (USB; POGO connector in the battery compartment) on a
 HP-15C Collector's Edition only, and at your own risk. HP's cable guide says the connection erases the user area
 (programs, data, matrices): save what you need first.
 
 1. Programming mode: cable on, ON, hold ERASE on the cable, tap RESET, release ERASE. Windows shows a port "Bossa
    Program Port (COMx)"; if not, install the driver once from the folder `15c-ce\driver` of the zip (right-click
    `atm6124_cdc.inf`, Install).
-2. **Dump** reads the whole flash twice (about a minute) and saves it in `data\ce`. It is your backup: keep it. The
-   file holds the calculator's firmware, so do not share it. **Save this dump as my calculator...** makes the ROM that
+2. **Dump** reads the whole flash twice (about a minute) and saves it in `data\ce`, with the chip's serial number next
+   to it (`dump-....bin.id`). It is your backup: keep it. The file holds the calculator's firmware, so do not share it.
+   Once a dump with a serial number exists, **Identify the connected calculator (1 s)** appears: it reads the serial
+   number and takes the newest saved dump of that calculator as the baseline, so you do not dump again at every visit. **Save this dump as my calculator...** makes the ROM that
    the calculator runs in its 16 mode a calculator of yours (a 16C+ already installed, or the factory 16C ROM).
 3. **Upload** puts one of your calculators in the 16 and the 15.2 mode of the CE (the factory 15 mode is never
    touched). Only calculators based on the HP-16C are offered: the 16C with a patch, the 16C+, your own modification.
    What is written is the words where your calculator differs from the original 16C, laid over the calculator's OWN 16C
    ROM (the CE's differs from Nonpareil's at six words). Tick the box that you understand it, press Upload; it takes
-   under a minute, reads everything back, saves every page it overwrites (`data\ce\preimages-...`) and puts back
-   what it wrote if anything fails. **Save what was written as a patch** keeps the differences from the backup as a patch file.
+   under a minute, compares the whole calculator with the baseline dump first (it stops if they differ), reads
+   everything back, saves every page it overwrites (`data\ce\preimages-...`) and puts back what it wrote if anything
+   fails. Afterwards it saves the new state of the calculator as `dump-...-after-upload.bin`: the next upload, also
+   after a restart, starts from that (Identify finds it). **Save what was written as a patch** keeps the differences from the backup as a patch file.
 4. **Restore** writes the slot and the pointer back as a saved dump has them, then compares the whole flash with it.
    It is offered only when a dump of a known calculator exists.
 5. Leave programming mode: RESET on the cable, then ON. Modes: `g` + `ENTER` + `ON`, then `4`, then `7` (the 16 mode)

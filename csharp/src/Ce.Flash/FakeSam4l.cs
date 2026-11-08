@@ -112,8 +112,12 @@ public sealed class FakeSam4l : ISamBaTransport
         catch (FormatException) { /* a monitor ignores what it cannot read */ }
     }
 
+    /// <summary>The 128-bit serial number of the chip (0x0080020C..0x0080021B), as the programmer reads it to identify a calculator.</summary>
+    public uint[] Uid { get; } = [0xFA4E0001, 0x00C0FFEE, 0x5A5A1234, 0x0BADF00D];
+
     uint ReadMemory(uint addr)
     {
+        if (addr >= 0x0080020C && addr < 0x0080020C + 16) return Uid[(addr - 0x0080020C) / 4];
         if (addr < Flash.Length) return BitConverter.ToUInt32(Flash, (int)addr);
         if (addr == Sam4lFlash.Fsr) { uint v = 1 | _fsrErrors; _fsrErrors = 0; return v; }   // FRDY; reading clears the error bits
         if (addr == Sam4lFlash.Cidr) return Sam4lFlash.CidrExpected;
