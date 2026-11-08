@@ -67,15 +67,14 @@ reset
 # 3) Executing the self tests documented in the manual can corrupt program memory.
 #    Handbook Appendix F: with the calculator off, hold ON and press x; after about 25 s the
 #    display shows -8,8,8,8,8,8,8,8,8,8, Afterwards the program of 2) must still be there.
-#    Switched off: on the 15C ROM of this simulator the test answers Error 9 at once (0.2 s); on
-#    the 11C, 12C and 16C it passes. Not understood yet.
+#    Until 0.6.0 the 15C of this simulator answered Error 9 at once here (the second chip returned its
+#    display registers 0x19 and 0x1A differently from what the self test expects); fixed.
 # ---------------------------------------------------------------------------------------------
-## [ON]  =>  (blank)
-## chord { [ON] [×] } wait 40  =>  '-8,8,8,8,8,8,8,8,8,8,'
-#     not run: the simulator shows 'Error  9' after 0.2 s, 3 s, 10 s and 20 s
-## [ON]  =>  (blank)
-## [ON]
-## 2 [A]  =>  '56.0000'
+[ON]  =>  (blank)
+chord { [ON] [×] } wait 40  =>  '-8,8,8,8,8,8,8,8,8,8,'
+[ON]  =>  (blank)
+[ON]
+2 [A]  =>  '56.0000'
 
 # ---------------------------------------------------------------------------------------------
 # 7) Complex mode: f (i) (on the minus key) shows the imaginary part while the key is held. A digit

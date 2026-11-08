@@ -180,7 +180,7 @@ dialog starts in that folder, and later in the folder of the last file you opene
 - `hp15c-le-known-bugs-tests.txt`: the known bugs of the HP-15C Limited Edition (HP Articles Forum, Katie
   Wasserman, 2011), as tests on the HP-15C. The LE bugs are in the LE's own firmware, which the simulator does not
   run: each line states what the original 15C ROM does, so the simulator passes, and a calculator with the LE bug
-  would fail. 16 checks pass; the self-test item and two key-timing items are switched off with the reason below
+  would fail. 20 checks pass; two key-timing items (the held (i) key and the key during PSE) are switched off with the reason below
   each. The current-draw and low-battery items are hardware and not in the file.
 - `16cplus-test-sheet.txt`: 77 tests for the 16C+. They need the 16C+; on an
   original HP-16C most of them fail, as they should.

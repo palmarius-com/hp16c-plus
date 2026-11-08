@@ -167,14 +167,35 @@ public class Voyager
                 Cpu.CreateRam(io, 3);
                 Cpu.RamReadFn[io] = _ => new byte[NutCpu.W];
                 Cpu.RamWriteFn[io] = (_, _) => { };
-                Cpu.RamReadFn[io + 1] = BitmapRead;
-                Cpu.RamReadFn[io + 2] = BitmapRead;
+                if (chip.Index == 0)
+                {
+                    Cpu.RamReadFn[io + 1] = BitmapRead;
+                    Cpu.RamReadFn[io + 2] = BitmapRead;
+                }
+                else
+                {
+                    // Second chip (15C: 0x19 and 0x1A): the self test (ON x) writes a pattern and reads it
+                    // back, and expects the low byte as the NutEm/PC emulator gives it: bit 0 set -> OR 0x3F,
+                    // clear -> AND 0xC0 (seen in a NutEm/PC trace of the 15C self test). What the
+                    // silicon does exactly is not known; this reproduces what the ROM checks.
+                    Cpu.RamWriteFn[io + 1] = Cpu.RamWriteFn[io + 2] = SecondChipDisplayWrite;
+                }
             }
         }
         Cpu.ExtraOps[0x030] = (_, _) => { SetDisplay(true); Blink = true; };
         Cpu.ExtraOps[0x2E0] = (_, _) => { SetDisplay(false); Blink = false; };
         Cpu.ExtraOps[0x320] = (_, _) => SetDisplay(!DisplayEnable);
         Cpu.OnSleep.Add(c => { if (!DisplayEnable) c.Carry = 1; }); // deep sleep
+    }
+
+    void SecondChipDisplayWrite(int addr, byte[] c)
+    {
+        var r = (byte[])c.Clone();
+        int low = (r[1] << 4) | r[0];
+        low = (low & 1) != 0 ? low | 0x3F : low & 0xC0;
+        r[0] = (byte)(low & 0xF);
+        r[1] = (byte)(low >> 4);
+        Cpu.Ram[addr] = r;
     }
 
     byte[] BitmapRead(int addr)
