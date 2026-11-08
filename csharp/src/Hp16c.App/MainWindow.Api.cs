@@ -13,6 +13,7 @@ sealed partial class MainWindow
         var parts = line.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0) return "error empty command";
         var arg = parts.Length > 1 ? parts[1].Trim() : "";
+        if (_programmer is not null) return "error busy: the HP-15C CE programmer is open";
         try
         {
             switch (parts[0].ToLowerInvariant())
@@ -89,6 +90,11 @@ sealed partial class MainWindow
                     return "ok";
                 case "battery-reset":
                     _runner?.PowerOn();
+                    return "ok";
+                case "fresh":
+                    return _runner is null ? "error no calculator running" : $"ok {(_runner.Fresh ? 1 : 0)}";
+                case "cpu-reset":
+                    _runner?.CpuReset();
                     return "ok";
                 case "reset-cycles":
                     _runner?.ResetCycles();

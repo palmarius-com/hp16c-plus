@@ -22,6 +22,7 @@ sealed partial class MainWindow : Window
     };
     readonly Border _statusPanel;
     DapServer? _debugServer;                       // only with --debug-port
+    ProgrammerView? _programmer;                   // the HP-15C CE programmer screen: while it is open nothing else runs
     KeyRecorder? _record;                          // only with --record FILE
     TraceLog? _trace;                              // only with --trace / --trace-file
     readonly ContentControl _main = new();
@@ -97,6 +98,7 @@ sealed partial class MainWindow : Window
         foreach (var head in new object[]
         {
             Item("Choose a calculator...", async () => { if (await ConfirmLeave()) ShowStart(); }),
+            Item("Update a HP-15C CE...", async () => { if (await ConfirmLeave()) ShowProgrammer(); }),
             new Separator(),
         }) calcMenu.Add(head);
         foreach (var m in ModelCatalog.Models)
@@ -104,6 +106,7 @@ sealed partial class MainWindow : Window
         _myInsertAt = calcMenu.Count;
         foreach (var tail in new object[] { new Separator(), Item("Save as my calculator...", async () => await SaveMyCalc()),
                                              new Separator(), Item("Battery replacement (memory lost, Pr Error)", () => _runner?.PowerOn()),
+                                             Item("CPU reset, memory kept (ON + yˣ; 12C: ON + PMT)", () => _runner?.CpuReset()),
                                              Item("Reset the cycle counter", () => _runner?.ResetCycles()), _realSpeed })
             calcMenu.Add(tail);
         RefreshMyMenu();
@@ -176,6 +179,12 @@ sealed partial class MainWindow : Window
         Closed += (_, _) => { _runner?.Dispose(); _trace?.Close(); _record?.Dispose(); };
         Closing += (_, e) =>
         {
+            if (_programmer is { Busy: true })             // never while a calculator is being written to
+            {
+                e.Cancel = true;
+                Say("The calculator is being written to: this window cannot be closed until it has finished.");
+                return;
+            }
             if (_closeNow || (_session?.Changes().Count ?? 0) == 0) return;
             e.Cancel = true;
             Dispatcher.UIThread.Post(async () =>
@@ -380,11 +389,24 @@ sealed partial class MainWindow : Window
         return true;
     }
 
+    /// <summary>The programmer screen: the calculator simulation is stopped and closed (the debugger then follows nothing, the
+    /// --api channel answers "busy"), and the screen has the port to itself.</summary>
+    void ShowProgrammer()
+    {
+        StopMachine();
+        _session = null;
+        _programmer = new ProgrammerView(Path.Combine(AppContext.BaseDirectory, "data", "ce"), () => { _programmer = null; _menu.IsEnabled = true; ShowStart(); });
+        _programmer.BusyChanged += busy => _menu.IsEnabled = !busy;
+        _main.Content = _programmer;
+        Say("HP-15C CE programmer: the calculators are stopped, nothing else runs while this screen is open.");
+    }
+
     // ------------------------------------------------------- start page
     void ShowStart()
     {
         StopMachine();
         _session = null;
+        _programmer = null;
         var list = new StackPanel { Spacing = 8 };
         foreach (var m in ModelCatalog.Models)
         {
@@ -699,9 +721,9 @@ sealed partial class MainWindow : Window
     {
         if (_session?.ChecksumFixFor(_session.Image()) is not { } fix) return;
         var nl = Environment.NewLine;
-        if (!await Confirm(fix.Why + nl + nl + "Update the checksum? The change is added as a patch called " +
-                           "'checksum update' (ROM > Remove all patches takes it away); the calculator " +
-                           "runs either way.")) return;
+        if (!await Confirm(fix.Why + nl + nl + "With Yes the change is added as a patch called 'checksum update' " +
+                           "(ROM > Remove all patches takes it away). The calculator runs either way." + nl + nl +
+                           "Update the checksum?")) return;
         _session.Patches.Add(("checksum update", fix.Patch));
         Run(_session);
     }

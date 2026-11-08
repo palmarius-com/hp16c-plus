@@ -5,6 +5,11 @@ the **15.2** mode) with the **16C+**: the HP-16C with word sizes up to 128 bits,
 16C's Nut code (J-F Garnier's "Challenge for AIs", MoHPC forum thread 25536). The factory 15 mode is
 not touched.
 
+**The easy way (VoyagerSim 0.5.5 and later): `Calculator > Update a HP-15C CE...`.** The simulator has the programmer
+built in: dump, upload one of your calculators, restore, with progress and checks on screen, in about a minute and a half
+(the scripts of this folder need about 25 minutes). The driver of section 1 below is the same. The scripts stay in this
+folder for those who prefer them, and as the reference of what the screen does.
+
 **Read this first**
 
 - You do this at your own risk. Nothing here comes from HP or Moravia, and the calculator is yours.

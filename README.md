@@ -41,10 +41,13 @@ Use it at your own risk.
 
 - `WSIZE` 65-128 switches "plus mode" on; 1-64 is the original 16C.
 - The new code lives at 0x2000-0x37FF (the 15C's second ROM chip, about
-  5700 of 6144 words used). The 16C ROM gets 22 changed words
-  (hooks and checksum words), so each chip still sums to 1 mod 1023
+  5700 of 6144 words used). The 16C ROM gets 31 changed words
+  (hooks, a checksum word and the nine words of the CHS stack-lift fix), so each chip still sums to 1 mod 1023
   and the self-test passes in the simulator. The patch avoids `c=stk`
   and `goto c` (they differ on the 15C CE).
+- The 16C+ includes the CHS stack-lift fix of the 16C (in float mode, after `CLx` or `BSP` with X = 0, `CHS 7` overwrote
+  X instead of lifting the stack): bug found and first patches by Thomas Klemm (MoHPC forum, thread 5321), the 16C
+  version checked and passed on by Amphitryon. The test sheet has the cases at word sizes 16, 65, 100 and 128.
 - The upper bits of X, Y, Z, T, LSTx and I live in RAM 0x10-0x17 (the
   15C's extra RAM). Storage registers hold ceil(W/4) nibbles in the
   original register pool layout.
@@ -97,7 +100,9 @@ print(c.run("WINDOW 2"))    # ' FFFFFFFd .h', then '        2 h.'
 
 ## Desktop simulator (C#, Avalonia)
 
-The Palmarius Voyager simulator, version 0.4.0. The faceplates carry the
+The Palmarius Voyager simulator, version 0.5.5. It can also put one of your 16C-based
+calculators (the 16C+, your own patch) on a HP-15C Collector's Edition: Calculator > Update a HP-15C CE...
+(dump, upload, restore, see its user guide, section 9). The faceplates carry the
 Palmarius mark (three bars and the blue square) where the maker's logo
 would be.
 

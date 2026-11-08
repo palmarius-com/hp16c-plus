@@ -32,6 +32,16 @@ HOOKS = {
     0x0914: [0x0A1, 0x044],     # ?nc gosub 1128 REG_WRITE (STO n)
     0x097F: [0x161, 0x05E],     # ?nc golong 1758 (FLOAT n, integer -> float)
     0x01F4: [0x04E, 0x270],     # c=0 w ; sel ram (MEM register count)
+    # the CHS stack-lift fix of the 16C (see the asm): nine words of the float-mode CHS, raw words, no hook
+    0x0C8C: [0x163],            # ?nc goto
+    0x0C96: [0x117],            # ?c goto
+    0x0CAF: [0x063],            # ?nc goto
+    0x0CB8: [0x251],            # ?nc golong
+    0x0CB9: [0x002],            # a=0 p
+    0x0CBA: [0x2BE],            # c=-c-1 s
+    0x0CBC: [0x0F0],            # c<>n
+    0x0CBD: [0x3DB],            # ?nc goto
+    0x0CE9: [0x293],            # ?nc goto
 }
 # one free word per chip makes its sum 1 mod 1023 again (the 16C's own
 # self-test checks chip 1; NutEm/PC's 16C+ model checks the second chip)

@@ -6,7 +6,7 @@
 # Lines starting with ## are not run: their check fails in the simulator, the
 # reason is below each. They are findings, the cause is not known yet.
 # calculator: 15c
-# 770 checks run, 165 lines are not run.
+# 797 checks run, 165 lines are not run.
 
 
 # PDF page 16
@@ -637,8 +637,8 @@ hold [(i)]  =>  '-35.1344'
 =>  '9.3982'
 # PDF page 141
 # Section 12
-# Matrices: Real speed, and the matrix keys are the bare keys [√x] [eˣ] [10ˣ] [yˣ] (Amphitryon, #11: at full speed STO stores nothing)
-speed real
+# Matrices: the matrix keys are the bare keys [√x] [eˣ] [10ˣ] [yˣ]. (Amphitryon, #11: at full speed STO stored nothing: a held key lasted
+# tens of seconds of calculator time and the ROM dropped it as "nULL"; a held key now runs at the real pace, 2026-11-07.)
 reset
 [CF] 8
 2 [ENTER] [DIM] [√x]  =>  '2.0000'
@@ -658,6 +658,7 @@ hold 3 . 8 [STO] [√x] wait 1  =>  'A  1,1'
 [÷]
 # PDF page 142
 hold [RCL] [10ˣ] wait 1  =>  'C  1,1'
+=>  '-11.2887'
 [RCL] [10ˣ]  =>  '8.2496'
 [USER]  =>  '8.2496'
 [MATRIX] 0  =>  '8.2496'
@@ -691,6 +692,7 @@ hold [RCL] [√x] wait 1  =>  'A  1,1'
 3 [STO] 1  =>  '3.0000'
 9  =>  '9'
 hold [STO] [√x] wait 1  =>  'A  2,3'
+=>  '9.0000'
 # PDF page 149
 [CLX]
 2 [ENTER] 1  =>  '1'
@@ -817,6 +819,37 @@ hold [RCL] [10ˣ] wait 1  =>  'C  1,1'
 [MATRIX] 0  =>  '0.1543'
 # PDF page 183
 speed full
+# PDF page 169
+# Silas' cabbage and broccoli (printed pages 157-158): A D = B solved by [÷]; the matrix keys are the bare keys
+reset
+[CF] 8
+2 [ENTER] [DIM] [√x]  =>  '2.0000'
+[MATRIX] 1  =>  '2.0000'
+[USER]  =>  '2.0000'
+hold 1 [STO] [√x] wait 1  =>  'A  1,1'
+[STO] [√x]  =>  '1.0000'
+. 2 4 [STO] [√x]  =>  '0.2400'
+. 8 6 [STO] [√x]  =>  '0.8600'
+2 [ENTER] 3 [DIM] [eˣ]  =>  '3.0000'
+2 7 4 [STO] [eˣ]  =>  '274.0000'
+2 3 3 [STO] [eˣ]  =>  '233.0000'
+3 3 1 [STO] [eˣ]  =>  '331.0000'
+1 2 0 . 3 2 [STO] [eˣ]  =>  '120.3200'
+1 1 2 . 9 6 [STO] [eˣ]  =>  '112.9600'
+1 5 1 . 3 6 [STO] [eˣ]  =>  '151.3600'
+[RESULT] [yˣ]  =>  '151.3600'
+# PDF page 170
+[RCL] [MATRIX] [eˣ]  =>  'b     2  3'
+[RCL] [MATRIX] [√x]  =>  'A     2  2'
+[÷]  =>  'd     2  3'
+[RCL] [yˣ]  =>  '186.0000'
+[RCL] [yˣ]  =>  '141.0000'
+[RCL] [yˣ]  =>  '215.0000'
+[RCL] [yˣ]  =>  '88.0000'
+[RCL] [yˣ]  =>  '92.0000'
+[RCL] [yˣ]  =>  '116.0000'
+[USER]  =>  '116.0000'
+
 # Section 13
 reset
 [P/R]  =>  '000-'

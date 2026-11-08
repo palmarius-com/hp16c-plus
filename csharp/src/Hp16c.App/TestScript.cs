@@ -56,6 +56,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
 
     void Settle(CancellationToken stop)
     {
+        run.Uncap();                                     // a wait leaves the CPU standing at its cycle: let it run on
         var limit = DateTime.UtcNow.AddSeconds(60);
         while (!run.Finished && DateTime.UtcNow < limit && !stop.IsCancellationRequested) Thread.Sleep(1);
     }
@@ -90,6 +91,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
         finally
         {
             if (_speedBefore is { } before) run.RealSpeed = before;
+            run.Uncap();
         }
     }
 
@@ -158,7 +160,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
                     else run.Tap(codes[^1]);
                     codes.Clear();
                 }
-                run.WaitCycles((long)(secs * MachineRunner.RealWordsPerSecond), stop);
+                run.RunFor((long)(secs * MachineRunner.RealWordsPerSecond), stop);
                 _unsettled = true;
                 i++;
                 continue;
@@ -183,17 +185,17 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
                 foreach (var (code, _) in down)
                 {
                     run.Press(code);
-                    run.WaitCycles(ChordHold, stop);
+                    run.RunFor(ChordHold, stop);
                 }
                 if (down.Any(d => d.Hold))
                 {
                     _held = true;
-                    run.WaitCycles(30000, stop);
+                    run.RunFor(30000, stop);
                 }
                 else
                 {
                     run.Release();
-                    run.WaitCycles(3_000_000, stop);
+                    run.RunFor(3_000_000, stop);
                 }
                 i = close;
                 continue;
@@ -207,7 +209,7 @@ sealed class TestScript(MachineRunner run, KeyNames names, Skin skin)
             {
                 foreach (var c in codes[..^1]) Tap(c, stop);
                 run.Press(codes[^1]);
-                run.WaitCycles(30000, stop);
+                run.RunFor(30000, stop);
                 _held = true;
             }
             else foreach (var c in codes) Tap(c, stop);

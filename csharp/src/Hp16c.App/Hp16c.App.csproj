@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>VoyagerSim</AssemblyName>
-    <Version>0.5.0</Version>
+    <Version>0.5.5</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -19,11 +19,13 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\docs\*.md" LogicalName="Docs.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Assets\app.ico" LogicalName="App.ico" />
+    <EmbeddedResource Include="..\..\15c-ce\known-units.txt" LogicalName="Ce.known-units.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nut.Core\Nut.Core.csproj" />
     <ProjectReference Include="..\Nut.Dap\Nut.Dap.csproj" />
+    <ProjectReference Include="..\Ce.Flash\Ce.Flash.csproj" />
   </ItemGroup>
 
 </Project>

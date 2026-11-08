@@ -47,7 +47,7 @@ def main():
     modes = [f"FLOAT {n}" for n in range(10)] + ["DEC", "HEX", "OCT", "BIN"]
     for m in modes:
         out = []
-        for mk in (lambda: HP16C().start(), plus):
+        for mk in (lambda: HP16C(chs_fix=True).start(), plus):
             c = mk()
             c.run(m + " 1 2 3")
             seq = [c.display().strip()]

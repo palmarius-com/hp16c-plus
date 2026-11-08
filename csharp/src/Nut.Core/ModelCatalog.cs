@@ -50,6 +50,8 @@ public static class ModelCatalog
         ["4f408e65f64a7ba27a66237116187474c3c26517ac99324f5fa36cdd8feb37cd"] = "16C+",
         // 0.5.0 patch (FLOAT n above 64 bits, BSP in float mode, CE-safe FT_TAB)
         ["eee7576ff6af9834d202ecda379d062c9e8cdf7b172127235a0b64cd2b8f1a01"] = "16C+",
+        // 0.5.5 patch (MEM at word sizes up to 64, the CHS stack-lift fix)
+        ["e9688f4583f22736b7aa11082ff50b4eec57639e7b3268f7f1c7851a237bf290"] = "16C+",
     };
 
     /// <summary>Label of a known patched ROM, or null.</summary>

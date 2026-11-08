@@ -28,7 +28,7 @@ OBJ = pathlib.Path(os.environ.get("PLUS_OBJ", ROOT / "build" / "16cplus.obj"))  
 
 
 def stock():
-    return HP16C().start()
+    return HP16C(chs_fix=True).start()        # the 16C+ ships the CHS stack-lift fix: the reference has it too
 
 
 def plus():
@@ -97,6 +97,9 @@ EDGE = [
     "FLOAT 4 1 . 5 HEX 1 2", "FLOAT 4 1 . 5 DEC BSP", "FLOAT 4 5 ENTER 3 / DEC", "FLOAT 4 5 ENTER 3 / OCT BSP", "FLOAT 4 BIN",
     "FLOAT 4 DEC 1 2 3 BSP BSP BSP BSP", "FLOAT 4 HEX F BSP BSP", "DEC 1 2 3 FLOAT 3 BSP",
     "DEC 5 ENTER 3 FLOAT 2", "DEC 5 ENTER 3 FLOAT 2 +", "DEC 1 6 WSIZE FLOAT 4", "DEC 1 EEX 5 FLOAT 3",
+    # the CHS stack-lift fix (Thomas Klemm, Amphitryon): the reference is the stock 16C with it
+    "FLOAT 6 3 ENTER 4 CLX CHS 7 +", "FLOAT 6 3 ENTER 4 BSP CHS 7 +", "FLOAT 6 3 ENTER 4 CLX CHS CHS 7 +", "FLOAT 6 3 ENTER 0 CHS 7 +",
+    "FLOAT 6 5 ENTER 6 CLX CHS 7 ENTER 8 RDN RDN", "FLOAT 2 3 ENTER 4 CLX CHS BSP 7 +", "FLOAT 9 3 ENTER 4 CLX CHS 7 + CHS",
 ]
 # keys of the random walk (float mode); WSIZE prefixes are plus-only
 KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "EEX", "CHS", "BSP", "ENTER", "+", "-", "*", "/", "CLX",

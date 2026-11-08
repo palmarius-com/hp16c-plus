@@ -97,6 +97,31 @@ BSP_TRAMP:
         org $01f4
         ?nc golong P_MEM            ; was: c=0 w ; sel ram (MEM)            ; was: ? s=1 7 ; ?nc golong $0c40 (word 1)
 
+; ------------------------------------------------ CHS stack-lift fix (nine words, no hook)
+; The bug of the HP-16C, -15C and -11C: when X is 0, CHS does not clear the "stack lift disabled"
+; flag, so after CLx (or BSP) "CHS 7" overwrites X instead of lifting the stack. It shows in float mode
+; (f FLOAT .  3 ENTER 4 CLx CHS 7 +: 10 on the original, 7 with the fix), which runs the original code
+; at every word size. Credit: Thomas Klemm found the bug and wrote the first patches (HP-15C 2015-12-12,
+; HP-11C and HP-16C 2015-12-14; MoHPC forum, thread 5321 "HP-15C: Fixing the CHS and Stack Lift Bug").
+; Amphitryon checked the 11C patch against a firmware trace, corrected its jumps and passed this 16C
+; version on to us; which word is whose we cannot tell. Words as in csharp/docs/examples/16c-chs-stack-lift.patch
+; (without its word 006f, which only keeps the stock checksum: ours is word 13ff).
+        org $0c8c
+        con $183                    ; was: ?nc goto
+        org $0c96
+        con $137                    ; was: ?c goto
+        org $0caf
+        con $05b                    ; was: ?nc goto
+        org $0cb8
+        con $01b                    ; was: ?nc golong
+        con $2be                    ; was: a=0 p
+        con $0f0                    ; was: c=-c-1 s
+        org $0cbc
+        con $251                    ; was: c<>n
+        con $002                    ; was: ?nc goto
+        org $0ce9
+        con $28b                    ; was: ?nc goto
+
 ; ------------------------------------------------------- second ROM
         org $2000
 
@@ -5923,6 +5948,7 @@ P_MEM:
         ac ex   w
         c=0     w
         sel ram
+        pt=     0                   ; P as the original has it at 0x01ed (the test above used pt= 2): c=-c-1 p works on digit 0
         ?nc golong MEM_K            ; original: k from RAM 6
 PM_1:
         ?nc gosub KW

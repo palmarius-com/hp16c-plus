@@ -192,7 +192,7 @@ if (windowExe is not null)
     File.WriteAllLines(noteFile, ["13ff:001	adds one, with a note"]);
     Check("patch line with a note is read", machine.Ask("patch " + noteFile).StartsWith("ok 1 patches") &&
           machine.Ask("rominfo").Contains("0000-17FF: checksum off (2, needs 1)"));
-    Check("checksum fix changes one word", machine.Ask("fix-checksum").Contains("Word 17FF would change from 3E0 to 3DF") &&
+    Check("checksum fix changes one word", machine.Ask("fix-checksum").Contains("Word 13FF would change from 001 to 000") &&
           machine.Ask("rominfo").Contains("0000-17FF: checksum ok") && machine.Ask("rominfo").Contains("checksum update (1 words)"));
     Check("nothing left to fix", machine.Ask("fix-checksum") == "ok nothing to fix");
     var labelState = Path.Combine(root, "build", "app-flow-label-state.json");

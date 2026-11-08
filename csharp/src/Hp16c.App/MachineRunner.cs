@@ -27,6 +27,13 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     public Voyager Calc { get; }
     public string Title { get; }
     public volatile bool RealSpeed;
+
+    /// <summary>
+    /// True from a start or a battery replacement until the calculator has been switched on once. Its memory is not valid
+    /// yet: the first ON runs the ROM's cold start and shows Pr Error, and a chord pressed first is lost to that (the ROM
+    /// checks its memory before it looks for ON + x). False after the display has come on, and after a state was loaded.
+    /// </summary>
+    public volatile bool Fresh = true;
     public volatile PanelView View = PanelView.WordSize;
 
     /// <summary>The instruction log, if the command line asked for one (--trace, --trace-file).</summary>
@@ -93,8 +100,20 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     // when the previous one is fully processed (scanner idle), and stays down
     // for at least MinHoldCycles, so fast typing loses nothing.
     const long MinHoldCycles = 200;
-    readonly System.Collections.Concurrent.ConcurrentQueue<int> _keys = new(); // code, or -1 = release
+    readonly System.Collections.Concurrent.ConcurrentQueue<int> _keys = new(); // code, -1 = release, below -1 = run for n cycles (RunFor)
+    // The CPU never runs past this cycle count: a test says "hold this key for n cycles" or "wait n cycles" and the CPU
+    // thread stops exactly there, whatever the speed, until the next key event (or Uncap). long.MaxValue = no limit.
+    long _cap = long.MaxValue;
     long _pressedAt = -1;
+    int _downKey = -1;                                  // user code of the key that is down (for chords)
+    const int OnKey = 41;
+
+    /// <summary>ON and the reset key (y^x; PMT on the 12C) together, in either order.</summary>
+    bool IsCpuResetChord(int down, int next)
+    {
+        int yx = Calc.CpuResetKey();
+        return yx >= 0 && ((down == OnKey && next == yx) || (down == yx && next == OnKey));
+    }
     // Instruction cycles from a key going down to the calculator sleeping again: what a key (or a patched
     // routine) costs, and with RealWordsPerSecond what it would take on the real calculator.
     long _runStart = -1;
@@ -116,6 +135,12 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         var cpu = Calc.Cpu;
         while (_keys.TryPeek(out var ev))
         {
+            if (ev < -1)
+            {
+                _keys.TryDequeue(out _);
+                _cap = cpu.Cycles + ((long)ev - int.MinValue);   // n cycles from here, counted by the CPU thread itself
+                continue;
+            }
             if (ev >= 0)
             {
                 // A press with a key still down is a chord (ON + key): only the
@@ -126,8 +151,24 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                 }
                 else if (cpu.KbState != NutCpu.Kb.Idle) return;
                 _keys.TryDequeue(out _);
+                _cap = long.MaxValue;
+                if (_pressedAt >= 0 && IsCpuResetChord(_downKey, ev))
+                {
+                    // ON + y^x: the CPU starts over, the memory stays; ON is still down, so it wakes again
+                    Calc.CpuReset();
+                    _spin = 0; _spinPrev = false;
+                    if (Calc.Keys.TryGetValue(OnKey, out var onHw) && cpu.Press(onHw))
+                    {
+                        _pressedAt = cpu.Cycles;
+                        _downKey = OnKey;
+                        _runStart = cpu.Cycles; _runSpin0 = _spin;
+                    }
+                    else _pressedAt = -1;
+                    continue;
+                }
                 if (Calc.Keys.TryGetValue(ev, out var hw) && cpu.Press(hw))
                 {
+                    _downKey = ev;
                     _pressedAt = cpu.Cycles;
                     if (_runStart < 0) { _runStart = cpu.Cycles; _runSpin0 = _spin; }
                 }
@@ -137,9 +178,11 @@ sealed class MachineRunner : IDisposable, IDebugTarget
             {
                 if (_pressedAt >= 0 && cpu.Awake && cpu.Cycles - _pressedAt < MinHoldCycles) return;
                 _keys.TryDequeue(out _);
+                _cap = long.MaxValue;
                 cpu.Release();
                 _releasedAt = cpu.Cycles;
                 _pressedAt = -1;
+                _downKey = -1;
             }
         }
     }
@@ -151,15 +194,23 @@ sealed class MachineRunner : IDisposable, IDebugTarget
         long last = clock.ElapsedTicks;
         while (!_stop)
         {
-            bool awake;
+            bool awake, paced;
             lock (_gate)
             {
                 if (!_halted)
                 {
                     if (!_keys.IsEmpty) Touch();
                     ApplyKeys();
+                    if (Fresh && Calc.DisplayEnable) Fresh = false;
+                    // a key event that is still queued at the cap is blocked (the scanner is not idle yet): the CPU has to
+                    // run on for it to go through, so the cap lifts
+                    if (!_keys.IsEmpty && Calc.Cpu.Cycles >= _cap) _cap = long.MaxValue;
                 }
                 awake = Calc.Cpu.Awake;
+                // A key held down (no release queued: a person's hold, not a test's tap) runs at the real pace even at
+                // full speed: the ROM measures how long a key is down in its own cycles, and 0.15 s of wall time at
+                // full speed is tens of seconds of calculator time, which the 15C answers with "nULL" and drops the key.
+                paced = RealSpeed || (_pressedAt >= 0 && _keys.IsEmpty && _cap == long.MaxValue);
                 if (!awake && _runStart >= 0 && _keys.IsEmpty && _pressedAt < 0)
                 {
                     // the spin of a held key is no work: leave it out
@@ -184,7 +235,16 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                 continue;
             }
             long budget = _keys.IsEmpty ? 20_000 : 50;
-            if (RealSpeed)
+            long room = Volatile.Read(ref _cap) - Calc.Cpu.Cycles;      // the CPU thread is the only one that moves Cycles
+            if (room <= 0)
+            {
+                _wake.WaitOne(1);                    // at the cap: stand still until the next key event or Uncap
+                last = clock.ElapsedTicks;
+                credit = 0;
+                continue;
+            }
+            budget = Math.Min(budget, room);
+            if (paced)
             {
                 long now = clock.ElapsedTicks;
                 credit = Math.Min(credit + (now - last) * RealWordsPerSecond / Stopwatch.Frequency, 2000);
@@ -192,6 +252,11 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                 budget = Math.Min(budget, (long)credit);
                 credit -= budget;
                 if (budget == 0) { Thread.Sleep(1); continue; }
+            }
+            else
+            {
+                last = clock.ElapsedTicks;           // no burst of credit when the pace starts
+                credit = 0;
             }
             bool hit;
             int hitPc = 0;
@@ -258,13 +323,38 @@ sealed class MachineRunner : IDisposable, IDebugTarget
                DateTime.UtcNow < limit && !stop.IsCancellationRequested) Thread.Sleep(1);
     }
 
+    /// <summary>
+    /// The CPU runs exactly n more cycles, counted by the CPU thread from the moment the keys queued before have been
+    /// applied, and then stands still; returns when it stands (or the calculator went to sleep). The next key event or
+    /// <see cref="Uncap"/> lets it run on. The same cycles at every speed and on every PC.
+    /// </summary>
+    public void RunFor(long n, CancellationToken stop = default)
+    {
+        _keys.Enqueue((int)Math.Min(int.MinValue + n, int.MaxValue));
+        _wake.Set();
+        var limit = DateTime.UtcNow.AddSeconds(60);
+        while (DateTime.UtcNow < limit && !stop.IsCancellationRequested)
+        {
+            lock (_gate)
+                if (_keys.IsEmpty && (Calc.Cpu.Cycles >= _cap || !Calc.Cpu.Awake)) return;
+            Thread.Sleep(1);
+        }
+    }
+
+    /// <summary>Let the CPU run on after <see cref="RunFor"/>.</summary>
+    public void Uncap()
+    {
+        lock (_gate) _cap = long.MaxValue;
+        _wake.Set();
+    }
+
     /// <summary>Two keys together: first down, second down, release.</summary>
     public void Chord(int first, int second, long hold, CancellationToken stop = default)
     {
         Press(first);
-        WaitCycles(hold, stop);
+        RunFor(hold, stop);
         Press(second);
-        WaitCycles(hold, stop);
+        RunFor(hold, stop);
         Release();
     }
 
@@ -310,7 +400,8 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     public void PowerOn()
     {
         _keys.Clear();
-        lock (_gate) { Calc.BatteriesOutAndIn(); _pressedAt = -1; _spin = 0; _spinPrev = false; }
+        _cap = long.MaxValue;
+        lock (_gate) { Calc.BatteriesOutAndIn(); _pressedAt = -1; _spin = 0; _spinPrev = false; Fresh = true; }
         Touch();
         _wake.Set();
     }
@@ -324,11 +415,24 @@ sealed class MachineRunner : IDisposable, IDebugTarget
     public void LoadState(MachineState state)
     {
         _keys.Clear();
+        _cap = long.MaxValue;
         lock (_gate)
         {
             state.Apply(Calc);
+            Fresh = false;
             _pressedAt = -1;
         }
+        Touch();
+        _wake.Set();
+    }
+
+    /// <summary>CPU reset, memory kept (ON + y^x); the calculator is woken with ON as the chord leaves it.</summary>
+    public void CpuReset()
+    {
+        _keys.Clear();
+        _cap = long.MaxValue;
+        lock (_gate) { Calc.CpuReset(); _pressedAt = -1; _downKey = -1; _spin = 0; _spinPrev = false; }
+        Tap(OnKey);
         Touch();
         _wake.Set();
     }

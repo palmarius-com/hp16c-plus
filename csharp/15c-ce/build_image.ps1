@@ -9,7 +9,7 @@
 #      table, the 16C ROM, the 15C ROM copy that will be replaced, the three ROM pointer literals and the firmware code
 #      must have the SHA-256 of the unit the kit was tried on. A dump that differs is refused: the kit has been
 #      tried on one unit only, and the addresses it writes are those of that unit's firmware;
-#   2. takes the unit's own 16C ROM (0x12180, 6144 words of 16 bits), puts the words of the patch over it (22 words in
+#   2. takes the unit's own 16C ROM (0x12180, 6144 words of 16 bits), puts the words of the patch over it (31 words in
 #      0x0000-0x17FF, the code for 0x2000-0x37FF) and sets the checksum word 0x13FF so that the ROM sums (mod 1023)
 #      to the same value as the unit's original 16C ROM;
 #   3. writes ce-16cplus.bin (28672 bytes: Nut words 0000-17FF, 1800-1FFF zero, 2000-37FF, as 16-bit LE halfwords) for

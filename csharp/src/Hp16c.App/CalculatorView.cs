@@ -441,6 +441,9 @@ sealed class CalculatorView : Panel
             item.Click += async (_, _) => await PlayChord(first, second);
             menu.Items.Add(item);
         }
+        int reset = _runner?.Read(v => v.CpuResetKey()) ?? -1;
+        if (code == OnKey && reset >= 0 && _skin.Keys.FirstOrDefault(k => k.Code == reset) is { } rk)
+            Add($"ON + {rk.Main}: CPU reset, memory kept (a frozen calculator)", OnKey, reset);
         if (code == OnKey)
             foreach (var (second, text) in OnChords)
                 if (_skin.Keys.FirstOrDefault(k => k.Main == second) is { } key)
@@ -448,8 +451,21 @@ sealed class CalculatorView : Panel
         var main = _skin.Keys.FirstOrDefault(k => k.Code == code)?.Main;
         foreach (var (first, text) in KeyChords)
             if (main == first) Add($"{first} + ON: {text}", OnKey, code);
-        if (main == "yˣ") Add("yˣ + ON, together: frozen calculator (10C handbook)", code, OnKey);
+        if (code == reset) Add($"{main} + ON, together: CPU reset, memory kept (handbook)", OnKey, code);
         if (menu.Items.Count == 0) return false;
+        // The chords start from a switched-off calculator, as on the real one (ON pressed on a running calculator switches
+        // it off before the second key arrives). Nothing is switched off for the user: say what to do instead.
+        if (_runner is { } run && run.Read(v => v.DisplayEnable))
+        {
+            menu.Items.Clear();
+            menu.Items.Add(new MenuItem { Header = "Chords: only while the calculator is off", IsEnabled = false });
+        }
+        else if (_runner is { Fresh: true })
+        {
+            // Fresh start: the first ON clears the memory (Pr Error) and a chord pressed first is lost to that.
+            menu.Items.Clear();
+            menu.Items.Add(new MenuItem { Header = "Fresh start: switch on once first (Pr Error)", IsEnabled = false });
+        }
         menu.Open(this);
         return true;
     }

@@ -101,8 +101,10 @@ sealed class Session
     public sealed record ChecksumFix(RomImage Patch, string Why);
 
     /// <summary>The one word per chip to change so that every chip with ROM adds up
-    /// to 1 (the self-test's rule), or null if they all do. The word is the last of
-    /// the chip: where Voyager ROMs keep their checksum, or an unused 0.</summary>
+    /// to 1 (the self-test's rule), or null if they all do. The word is the last word of the highest 1K page of the chip
+    /// that is either 000 in the ROM before any patch (HP leaves page ends free) or one that a patch has set (a patch
+    /// keeps its own checksum word there, as the 16C+ does at 13FF). Never "the last word of the chip": on the 16C that is
+    /// 3E0, a live return (changing it breaks ×). A chip with no such word gets no offer.</summary>
     public ChecksumFix? ChecksumFixFor(RomImage img)
     {
         var (chips, _) = ChipMap(img);
@@ -113,11 +115,16 @@ sealed class Session
             if (!img.Words.Keys.Any(a => a >= lo && a <= hi)) continue;
             int sum = img.ChipSum(lo, hi);
             if (sum == 1) continue;
-            int old = img.Words.GetValueOrDefault(hi);
+            int at = -1;
+            for (int a = hi; a >= lo; a--)
+                if ((a & 0x3FF) == 0x3FF && ((Base.Words.TryGetValue(a, out var free) && free == 0) || Patches.Any(p => p.Words.Words.ContainsKey(a))))
+                { at = a; break; }
+            if (at < 0) continue;
+            int old = img.Words.GetValueOrDefault(at);
             int word = ((old + 1 - sum) % 1023 + 1023) % 1023;
-            patch.Words[hi] = word;
+            patch.Words[at] = word;
             why.Add($"ROM chip {lo:X4}-{hi:X4} adds up to {sum}, the self-test wants 1. " +
-                    $"Word {hi:X4} would change from {old:X3} to {word:X3}.");
+                    $"Word {at:X4} would change from {old:X3} to {word:X3}.");
         }
         return patch.Words.Count == 0 ? null : new ChecksumFix(patch, string.Join(Environment.NewLine, why));
     }

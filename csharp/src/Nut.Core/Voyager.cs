@@ -252,6 +252,21 @@ public class Voyager
     }
 
     /// <summary>
+    /// ON + y^x (10C handbook: "a calculator that does not respond to keystrokes"): the CPU starts over and runs to
+    /// sleep, every memory register stays. This is <see cref="PowerOn"/> under the name of what the user does; a
+    /// running or hung program (-99.5 x! on the 11C) is gone, the stack and the registers are not touched by us.
+    /// What the real calculator shows afterwards is not known (J-F: "usually NNN in X"); here X shows 0 after ON.
+    /// </summary>
+    public long CpuReset(long maxCycles = 2_000_000) => PowerOn(maxCycles);
+
+    /// <summary>
+    /// The key that goes with ON for a calculator that does not respond: key 14 (row 1, column 4), which is y^x on the
+    /// 10C, 11C and 15C and PMT on the 12C (its handbook says ON + PMT). -1 on the 16C, which has no such chord.
+    /// </summary>
+    public int CpuResetKey() =>
+        Legends.TryGetValue(14, out var l) && l.Length > 0 && (l[0] == "y^x" || l[0] == "PMT") ? 14 : -1;
+
+    /// <summary>
     /// Batteries out and in: every memory register is lost (a real calculator comes back with garbage and the ROM
     /// clears it), the CPU starts cold and the ROM shows Pr Error. Unlike <see cref="PowerOn"/>, which only starts
     /// the CPU over and leaves the memory as it is.

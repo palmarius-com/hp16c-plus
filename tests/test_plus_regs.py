@@ -162,6 +162,26 @@ def mem(c, rng, n):
         check(f"MEM w={w} steps={steps}", got, mem_display(w, steps))
 
 
+def mem_small():
+    """MEM at word sizes up to 64 must show exactly what the stock 16C shows (found 2026-11-07: the hook left P at 2 and
+    the original's c=-c-1 p worked on the wrong digit: r-025 instead of r-101 at the default word size)."""
+    plus = T.HP16C(plus=[T.OBJ]).start()
+    stock = T.HP16C().start()
+    for w in (1, 4, 8, 16, 17, 32, 33, 63, 64):
+        for steps in (0, 1, 6, 20):
+            shown = []
+            for c in (stock, plus):
+                c.run("BSP P/R CLRPRGM " + " ".join(["1"] * steps) + " P/R")
+                c.run(f"HEX 0 WSIZE {hx(w)} WSIZE")
+                c.run("f")
+                c.cpu.press(c.keys[47])
+                c.cpu.run(20000)
+                shown.append(c.display())
+                c.cpu.release()
+                c.cpu.run(10 ** 6)
+            check(f"MEM w={w} steps={steps} (stock vs plus)", shown[1], shown[0])
+
+
 def clrreg_wsize(c, rng):
     for w in (65, 100, 128):
         setup(c, w, 2)
@@ -202,6 +222,9 @@ def main():
         before = len(FAILS)
         f(c, rng, k)
         print(f"{f.__name__}: {len(FAILS) - before} failed")
+    before = len(FAILS)
+    mem_small()
+    print(f"mem_small: {len(FAILS) - before} failed")
     clrreg_wsize(c, rng)
     print(f"plus regs: {'all passed' if not FAILS else f'{len(FAILS)} FAILED'}, "
           f"{time.time() - t0:.0f} s")

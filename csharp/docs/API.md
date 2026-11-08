@@ -28,6 +28,8 @@ through the same code as the mouse and keyboard.
 | `speed real` or `speed full` | Calculator > Real speed on or off (real = the Voyager's 215 kHz; keys held "a person long" need it, a 3 second timeout in the ROM runs out in milliseconds at full speed) | |
 | `trace [N]` or `trace save FILE` | the last N (default 20) executed instructions as CSV lines, or write the whole ring to a file; needs `--trace N` at start (docs/DEBUGGER.md) | the lines |
 | `battery-reset` | Calculator > Battery replacement: the memory is lost, the ROM starts cold (Pr Error) | |
+| `fresh` | 1 until the calculator has been switched on once since a start or a battery replacement (the right-click chord menus refuse chords then), else 0 | `0` or `1` |
+| `cpu-reset` | Calculator > CPU reset, memory kept (ON + yˣ; 12C: ON + PMT): the CPU starts over, the memory stays, ON wakes it | |
 | `reset-cycles` | set the cycle counter of the status panel back to 0 | |
 | `unpatch` | remove all patches | |
 | `testrun FILE` | run a test file (docs/TESTS.md) on a copy of the running calculator (ROM and patches, own memory); all failures go to `FILE.failures` | counts, first failures |

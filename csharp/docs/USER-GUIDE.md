@@ -36,11 +36,15 @@ per calculator. "ROM ready" in green means the calculator can start.
 - The calculator starts switched off. Press ON (or F3).
 - After a fresh start the display shows `Pr Error` (as a real one does
   after new batteries). Any key clears it.
-- Keys pressed together: right-click the key that goes first and choose.
+- Keys pressed together: switch the calculator off (ON), then right-click the key that goes first and choose.
+  While the calculator is on, the menu only says that chords need it off; nothing is switched off for you.
+  After a fresh start (or a battery replacement) it says the same until the calculator has been switched on once:
+  the first ON clears the memory and shows Pr Error, and a chord pressed first is lost to that, as on the real one.
   ON: self-test, continuous self-test, keyboard test. `−`: memory reset,
-  which clears everything. `·`: swap decimal point and comma. `yˣ`: yˣ + ON
-  for a frozen calculator, from the HP-10C handbook. The simulator switches
-  the calculator off first where needed. By hand it also works: calculator
+  which clears everything. `·`: swap decimal point and comma. `yˣ` (on the 12C `PMT`, the same key): ON + yˣ
+  for a frozen calculator, from the handbooks: the CPU starts over and a
+  running or hung program is gone, the memory stays (10C, 11C, 12C, 15C; the 16C has
+  no such chord). Calculator > CPU reset does the same, at any time. By hand a chord also works: calculator
   off, hold ON with the mouse, press the other key on the PC keyboard,
   release both.
 - Calculator > Real speed runs the calculator as slowly as the real
@@ -49,6 +53,9 @@ per calculator. "ROM ready" in green means the calculator can start.
 - Calculator > Battery replacement (memory lost): what taking the batteries out does. Every memory register is lost,
   the ROM starts cold and shows Pr Error. The chord ON + - (from a switched-off calculator) is the ROM's own reset and
   stays as it is.
+- Calculator > CPU reset, memory kept (ON + yˣ; 12C: ON + PMT): the CPU starts over and runs to sleep, then ON wakes it; stack and
+  registers stay as they were. X shows 0: what the real calculator shows afterwards is not known (it reportedly "usually
+  leaves NNN in X"), so this part may differ.
 
 ## 3. The status panel
 
@@ -127,7 +134,8 @@ extend or experiment with the original firmware; the 16C+ is one.
 - ROM > Remove all patches: back to the original.
 - Checksum: if a patch or a ROM file you load leaves a chip that does not add
   up to 1 (the self-test's rule), the app asks "Update the checksum?" and says
-  which word it would change (the last word of that chip). Yes adds the change
+  which word it would change (a word at the end of a 1K page of that chip that is unused: 000 in
+  the original ROM, or one a patch set as its checksum word). Yes adds the change
   as a patch called "checksum update"; No leaves everything as it is, and the
   calculator runs either way.
 - A ROM file is lines of `aaaa:www`; a note after the word is fine
@@ -263,3 +271,34 @@ item for them.
 Calculators with HP's Nut processor and the Voyager display: 10C,
 11C, 12C, 15C, 16C. Other Nonpareil models (HP-25, 41C, ...) use other
 processors or display chips and are not supported.
+
+## 9. Putting your calculator on a HP-15C Collector's Edition
+
+Calculator > Update a HP-15C CE... is a screen of its own: the simulation is stopped while it is open and nothing else
+can touch the port. It works with the HP programming cable (USB; POGO connector in the battery compartment) on a
+HP-15C Collector's Edition only, and at your own risk. HP's cable guide says the connection erases the user area
+(programs, data, matrices): save what you need first.
+
+1. Programming mode: cable on, ON, hold ERASE on the cable, tap RESET, release ERASE. Windows shows a port "Bossa
+   Program Port (COMx)"; if not, install the driver once from the folder `15c-ce\driver` of the zip (right-click
+   `atm6124_cdc.inf`, Install).
+2. **Dump** reads the whole flash twice (about a minute) and saves it in `data\ce`. It is your backup: keep it. The
+   file holds the calculator's firmware, so do not share it. **Save this dump as my calculator...** makes the ROM that
+   the calculator runs in its 16 mode a calculator of yours (a 16C+ already installed, or the factory 16C ROM).
+3. **Upload** puts one of your calculators in the 16 and the 15.2 mode of the CE (the factory 15 mode is never
+   touched). Only calculators based on the HP-16C are offered: the 16C with a patch, the 16C+, your own modification.
+   What is written is the words where your calculator differs from the original 16C, laid over the calculator's OWN 16C
+   ROM (the CE's differs from Nonpareil's at six words). Tick the box that you understand it, press Upload; it takes
+   under a minute, reads everything back, saves every page it overwrites (`data\ce\preimages-...`) and puts back
+   what it wrote if anything fails. **Save what was written as a patch** keeps the differences from the backup as a patch file.
+4. **Restore** writes the slot and the pointer back as a saved dump has them, then compares the whole flash with it.
+   It is offered only when a dump of a known calculator exists.
+5. Leave programming mode: RESET on the cable, then ON. Modes: `g` + `ENTER` + `ON`, then `4`, then `7` (the 16 mode)
+   or `y^x` (15.2).
+
+While a job runs the window cannot be closed, the menus are off and Windows is asked to wait with a shutdown. Nothing
+can stop Task Manager, a power cut or a pulled cable, but the boot loader is never written (the calculator can always be
+put into programming mode again) and Restore with your dump brings back what was there. A log of every byte that crossed
+the port is in `data\ce\ce-programmer-*.log`.
+
+The 16C+ on a real calculator: tried on one HP-15C CE; see the release notes for what is known and what is not.

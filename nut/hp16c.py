@@ -5,7 +5,13 @@ Script tokens (space separated):
   shifted names WSIZE, DBLX, SHOWDEC, ... (prefix inserted automatically)
   digit strings 1234, 7F, 0 (each character is one key)
 """
+import pathlib
+
 from .voyager import Voyager
+
+# the CHS stack-lift fix of the 16C (Thomas Klemm, Amphitryon): the reference the 16C+ is compared with is the stock
+# 16C with these words, since the 16C+ ships the fix (HP16C(chs_fix=True))
+CHS_FIX = pathlib.Path(__file__).resolve().parent.parent / "csharp" / "docs" / "examples" / "16c-chs-stack-lift.patch"
 
 # user keycode: (unshifted, f-shifted, g-shifted)
 KEYS = {
@@ -55,12 +61,14 @@ def tokens_to_keys(script):
 
 
 class HP16C(Voyager):
-    def __init__(self, plus=None, **kw):
+    def __init__(self, plus=None, chs_fix=False, **kw):
         """plus: None = stock 16C chip map; a list of object files (may be
         empty) = the 16C ROM on the 15C-192 chip map (2nd ROM 0x2000-0x37FF,
         RAM 0x10-0x17 and 0x40-0xFF) with those files loaded on top: the
         16C+ machine."""
         kw.setdefault("model", "16c")
+        if chs_fix and plus is None:
+            kw["patches"] = list(kw.get("patches", [])) + [CHS_FIX]
         if plus is not None:
             from .voyager import NONPAREIL
             kw["chip_ncd"] = NONPAREIL / "15c-192.ncd.tmpl"
